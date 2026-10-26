@@ -29,6 +29,8 @@ import { TipoVehiculoPage } from './admin/pages/vehiculos/TipoVehiculoPage';
 import { TipoVehiculoFormPage } from './admin/pages/vehiculos/TipoVehiculoFormPage';
 import { MarcaVehiculoPage } from './admin/pages/vehiculos/MarcaVehiculoPage';
 import { MarcaVehiculoFormPage } from './admin/pages/vehiculos/MarcaVehiculoFormPage';
+import { ModeloVehiculoPage } from './admin/pages/vehiculos/ModeloVehiculoPage';
+import { ModeloVehiculoFormPage } from './admin/pages/vehiculos/ModeloVehiculoFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -174,11 +176,11 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'modelos', // ruta: admin/vehiculos/modelos
-            //  element: <ModeloVehiculoPage />
+            element: <ModeloVehiculoPage />
           },
           {
             path: 'modelos/:id', // ruta: admin/vehiculos/modelos/:id
-            //  element: <ModeloVehiculoFormPage />
+            element: <ModeloVehiculoFormPage />
           },
           {
             path: 'tipos-vehiculos', // ruta: admin/vehiculos/tipos-vehiculos
