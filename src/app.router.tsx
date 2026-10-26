@@ -2,18 +2,19 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { lazy } from 'react';
 import { LoginPage } from './auth/pages/login/LoginPage';
 import { ForgotPasswordPage } from './auth/pages/forgot-password/ForgotPasswordPage';
-import { AdminLayout } from './admin/layouts/AdminLayout';
 import { AuthenticatedRoute, NotAuthenticatedRoute } from './components/routes/ProtectedRoutes';
 import { DashboardPage } from './admin/pages/dashboard/DashboardPage';
 import { VariablesPage } from './admin/pages/variables/VariablesPage';
 import { PersonalMenuPage } from './admin/pages/personal/PersonalMenuPage';
 import { PersonalTallerPage } from './admin/pages/personal/PersonalTallerPage';
 import { PersonalTallerFormPage } from './admin/pages/personal/PersonalTallerFormPage';
+import { AdministradoresPage } from './admin/pages/personal/AdministradoresPage';
+import { AdministradoresFormPage } from './admin/pages/personal/AdministradoresFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout'));
-// const AdminLayout = lazy(() => import('./admin/layouts/AdminLayout'));
+const AdminLayout = lazy(() => import('./admin/layouts/AdminLayout'));
 
 export const appRouter = createBrowserRouter([
   // Redirección de raíz hacia el panel de administración
@@ -92,11 +93,11 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'administradores', // ruta: admin/personal/administradores (Listado con tarjetas)
-            //  element: <AdministradoresPage />,
+            element: <AdministradoresPage />,
           },
           {
             path: 'administradores/:id', // ruta: admin/personal/administradores/:id (crear y editar estilo Fernando Herrera con :id = 'new' o id numérico)
-            //  element: <AdministradoresFormPage />,
+            element: <AdministradoresFormPage />,
           },
         ],
       },
