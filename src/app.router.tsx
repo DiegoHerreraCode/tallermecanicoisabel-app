@@ -10,6 +10,11 @@ import { PersonalTallerPage } from './admin/pages/personal/PersonalTallerPage';
 import { PersonalTallerFormPage } from './admin/pages/personal/PersonalTallerFormPage';
 import { AdministradoresPage } from './admin/pages/personal/AdministradoresPage';
 import { AdministradoresFormPage } from './admin/pages/personal/AdministradoresFormPage';
+import { ClienteMenuPage } from './admin/pages/clientes/ClienteMenuPage';
+import { ClientePage } from './admin/pages/clientes/ClientePage';
+import { ClienteFormPage } from './admin/pages/clientes/ClienteFormPage';
+// import { PagoClientePage } from './admin/pages/clientes/PagoClientePage';
+// import { PagoClienteFormPage } from './admin/pages/clientes/PagoClienteFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -65,8 +70,29 @@ export const appRouter = createBrowserRouter([
         element: <ModulePlaceholder title="Taller" description="Módulo de taller" />
       },
       {
-        path: 'clientes', // ruta: admin/clientes
-        element: <ModulePlaceholder title="Clientes" description="Módulo de clientes" />
+        path: 'clientes',
+        children: [
+          {
+            index: true, // ruta: admin/clientes (Menú de selección con los 2 cards: Clientes y Pagos)
+            element: <ClienteMenuPage />,
+          },
+          {
+            path: 'listado', // ruta: admin/clientes/listado (Listado de clientes)
+            element: <ClientePage />,
+          },
+          {
+            path: 'listado/:id', // ruta: admin/clientes/listado/:id (crear y editar estilo Fernando Herrera con :id = 'new' o id numérico)
+            element: <ClienteFormPage />,
+          },
+          {
+            path: 'pagos-clientes', // ruta: admin/clientes/pagos-clientes (Listado con tabla)
+            // element: <PagoClientePage />,
+          },
+          {
+            path: 'pagos-clientes/:id', // ruta: admin/clientes/pagos-clientes/:id (crear y editar estilo Fernando Herrera con :id = 'new' o id numérico)
+            // element: <PagoClienteFormPage />,
+          },
+        ],
       },
       {
         path: 'inventario-servicios', // ruta: admin/inventario-servicios
