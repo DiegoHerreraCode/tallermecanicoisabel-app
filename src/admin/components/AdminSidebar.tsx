@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   ClipboardList,
   UserCog,
-  CircleDollarSign,
   Wrench,
   Car,
   Settings,
@@ -51,12 +50,6 @@ export const AdminSidebar = ({ isOpen }: Props) => {
       to: '/admin/personal',
       icon: UserCog,
       description: 'Administradores y personal técnico',
-    },
-    {
-      label: 'Finanzas',
-      to: '/admin/finanzas',
-      icon: CircleDollarSign,
-      description: 'Supervisión integral de rentabilidad, desglose por línea de negocio, cálculo de IVA diferencial y productos más exitosos.',
     },
     {
       label: 'Variables',

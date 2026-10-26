@@ -4,6 +4,7 @@ import { LoginPage } from './auth/pages/login/LoginPage';
 import { ForgotPasswordPage } from './auth/pages/forgot-password/ForgotPasswordPage';
 import { AdminLayout } from './admin/layouts/AdminLayout';
 import { AuthenticatedRoute, NotAuthenticatedRoute } from './components/routes/ProtectedRoutes';
+import { DashboardPage } from './admin/pages/dashboard/DashboardPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -52,7 +53,7 @@ export const appRouter = createBrowserRouter([
     children: [
       {
         index: true, // ruta: admin
-        element: <ModulePlaceholder title="Dashboard" description="Módulo de dashboard" />
+        element: <DashboardPage />
       },
       {
         path: 'taller', // ruta: admin/taller
@@ -73,10 +74,6 @@ export const appRouter = createBrowserRouter([
       {
         path: 'personal', // ruta: admin/personal
         element: <ModulePlaceholder title="Personal" description="Módulo de personal" />
-      },
-      {
-        path: 'finanzas', // ruta: admin/finanzas
-        element: <ModulePlaceholder title="Finanzas" description="Módulo de finanzas" />
       },
       {
         path: 'variables', // ruta: admin/variables
