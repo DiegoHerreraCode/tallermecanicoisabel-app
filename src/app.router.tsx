@@ -19,7 +19,11 @@ import { InventarioServiciosMenuPage } from './admin/pages/inventario-servicios/
 import { RepuestoPage } from './admin/pages/inventario-servicios/RepuestoPage';
 import { RepuestoFormPage } from './admin/pages/inventario-servicios/RepuestoFormPage';
 import { MarcaRepuestoPage } from './admin/pages/inventario-servicios/MarcaRepuestoPage';
-import MarcaRepuestoFormPage from './admin/pages/inventario-servicios/MarcaRepuestoFormPage';
+import { MarcaRepuestoFormPage } from './admin/pages/inventario-servicios/MarcaRepuestoFormPage';
+// import { ServicioTallerPage } from './admin/pages/inventario-servicios/ServicioTallerPage';
+// import { ServicioTallerFormPage } from './admin/pages/inventario-servicios/ServicioTallerFormPage';
+import { TipoServicioTallerPage } from './admin/pages/inventario-servicios/TipoServicioTallerPage';
+import { TipoServicioTallerFormPage } from './admin/pages/inventario-servicios/TipoServicioTallerFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -124,7 +128,7 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'servicios', // ruta: admin/inventario-servicios/servicios
-            //element: <ServicioTallerPage />
+            // element: <ServicioTallerPage />
           },
           {
             path: 'servicios/:id', // ruta: admin/inventario-servicios/servicios/:id
@@ -132,11 +136,11 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'tipos-servicios', // ruta: admin/inventario-servicios/tipos-servicios
-            //element: <TipoServicioTallerPage />
+            element: <TipoServicioTallerPage />
           },
           {
             path: 'tipos-servicios/:id', // ruta: admin/inventario-servicios/tipos-servicios/:id
-            //element: <TipoServicioTallerFormPage />
+            element: <TipoServicioTallerFormPage />
           },
         ]
       },
