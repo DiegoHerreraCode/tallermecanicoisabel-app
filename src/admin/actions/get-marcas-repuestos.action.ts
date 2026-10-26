@@ -1,6 +1,6 @@
 import { apiClient } from '@/api/apiClient';
 import type { ApiResponse } from '../interfaces/api-response.interface';
-import type { MarcaRepuestoItem } from '../interfaces/repuesto.interface';
+import type { MarcaRepuestoItem } from '../interfaces/marca-repuesto.interface';
 
 export const getMarcasRepuestosAction = async (): Promise<MarcaRepuestoItem[]> => {
   try {

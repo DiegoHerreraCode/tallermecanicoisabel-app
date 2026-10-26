@@ -24,6 +24,9 @@ import { ServicioTallerPage } from './admin/pages/inventario-servicios/ServicioT
 import { ServicioTallerFormPage } from './admin/pages/inventario-servicios/ServicioTallerFormPage';
 import { TipoServicioTallerPage } from './admin/pages/inventario-servicios/TipoServicioTallerPage';
 import { TipoServicioTallerFormPage } from './admin/pages/inventario-servicios/TipoServicioTallerFormPage';
+import { VehiculoMenuPage } from './admin/pages/vehiculos/VehiculoMenuPage';
+import { TipoVehiculoPage } from './admin/pages/vehiculos/TipoVehiculoPage';
+import { TipoVehiculoFormPage } from './admin/pages/vehiculos/TipoVehiculoFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -146,7 +149,44 @@ export const appRouter = createBrowserRouter([
       },
       {
         path: 'vehiculos', // ruta: admin/vehiculos
-        element: <ModulePlaceholder title="Vehículos" description="Módulo de vehículos" />
+        children: [
+          {
+            index: true, // ruta: admin/vehiculos (Menú de selección con los 4 cards)
+            element: <VehiculoMenuPage />
+          },
+          {
+            path: 'listado', // ruta: admin/vehiculos/listado
+            //  element: <VehiculoPage />
+          },
+          {
+            path: 'listado/:id', // ruta: admin/vehiculos/listado/:id
+            //  element: <VehiculoFormPage />
+          },
+          {
+            path: 'marcas', // ruta: admin/vehiculos/marcas
+            //  element: <MarcaVehiculoPage />
+          },
+          {
+            path: 'marcas/:id', // ruta: admin/vehiculos/marcas/:id
+            //  element: <MarcaVehiculoFormPage />
+          },
+          {
+            path: 'modelos', // ruta: admin/vehiculos/modelos
+            //  element: <ModeloVehiculoPage />
+          },
+          {
+            path: 'modelos/:id', // ruta: admin/vehiculos/modelos/:id
+            //  element: <ModeloVehiculoFormPage />
+          },
+          {
+            path: 'tipos-vehiculos', // ruta: admin/vehiculos/tipos-vehiculos
+            element: <TipoVehiculoPage />
+          },
+          {
+            path: 'tipos-vehiculos/:id', // ruta: admin/vehiculos/tipos-vehiculos/:id
+            element: <TipoVehiculoFormPage />
+          },
+        ]
       },
       {
         path: 'personal',
