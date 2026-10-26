@@ -27,6 +27,8 @@ import { TipoServicioTallerFormPage } from './admin/pages/inventario-servicios/T
 import { VehiculoMenuPage } from './admin/pages/vehiculos/VehiculoMenuPage';
 import { TipoVehiculoPage } from './admin/pages/vehiculos/TipoVehiculoPage';
 import { TipoVehiculoFormPage } from './admin/pages/vehiculos/TipoVehiculoFormPage';
+import { MarcaVehiculoPage } from './admin/pages/vehiculos/MarcaVehiculoPage';
+import { MarcaVehiculoFormPage } from './admin/pages/vehiculos/MarcaVehiculoFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -164,11 +166,11 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'marcas', // ruta: admin/vehiculos/marcas
-            //  element: <MarcaVehiculoPage />
+            element: <MarcaVehiculoPage />
           },
           {
             path: 'marcas/:id', // ruta: admin/vehiculos/marcas/:id
-            //  element: <MarcaVehiculoFormPage />
+            element: <MarcaVehiculoFormPage />
           },
           {
             path: 'modelos', // ruta: admin/vehiculos/modelos
