@@ -26,6 +26,7 @@ export const usePersonalMutation = () => {
           : 'Personal de taller actualizado correctamente'
       );
       queryClient.invalidateQueries({ queryKey: ['personal-taller'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       if (variables.id && variables.id !== 'new') {
         queryClient.invalidateQueries({ queryKey: ['personal-item', variables.id] });
       }
