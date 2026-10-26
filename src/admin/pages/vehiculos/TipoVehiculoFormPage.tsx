@@ -81,7 +81,7 @@ export const TipoVehiculoFormPage = () => {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Users className="w-6 h-6 text-emerald-500" />
-              {isCreating ? 'Registrar Nuevo Tipo de Vehiculo' : 'Editar Nuevo Tipo de Vehiculo'}
+              {isCreating ? 'Registrar Nuevo Tipo de Vehiculo' : 'Editar Tipo de Vehiculo'}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               {isCreating
