@@ -6,6 +6,9 @@ import { AdminLayout } from './admin/layouts/AdminLayout';
 import { AuthenticatedRoute, NotAuthenticatedRoute } from './components/routes/ProtectedRoutes';
 import { DashboardPage } from './admin/pages/dashboard/DashboardPage';
 import { VariablesPage } from './admin/pages/variables/VariablesPage';
+import { PersonalMenuPage } from './admin/pages/personal/PersonalMenuPage';
+import { PersonalTallerPage } from './admin/pages/personal/PersonalTallerPage';
+import { PersonalTallerFormPage } from './admin/pages/personal/PersonalTallerFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -73,8 +76,29 @@ export const appRouter = createBrowserRouter([
         element: <ModulePlaceholder title="Vehículos" description="Módulo de vehículos" />
       },
       {
-        path: 'personal', // ruta: admin/personal
-        element: <ModulePlaceholder title="Personal" description="Módulo de personal" />
+        path: 'personal',
+        children: [
+          {
+            index: true, // ruta: admin/personal (Menú de selección con los 2 cards)
+            element: <PersonalMenuPage />,
+          },
+          {
+            path: 'taller', // ruta: admin/personal/taller (Listado con tarjetas)
+            element: <PersonalTallerPage />,
+          },
+          {
+            path: 'taller/:id', // ruta: admin/personal/taller/:id (crear y editar estilo Fernando Herrera con :id = 'new' o id numérico)
+            element: <PersonalTallerFormPage />,
+          },
+          {
+            path: 'administradores', // ruta: admin/personal/administradores (Listado con tarjetas)
+            //  element: <AdministradoresPage />,
+          },
+          {
+            path: 'administradores/:id', // ruta: admin/personal/administradores/:id (crear y editar estilo Fernando Herrera con :id = 'new' o id numérico)
+            //  element: <AdministradoresFormPage />,
+          },
+        ],
       },
       {
         path: 'variables', // ruta: admin/variables
