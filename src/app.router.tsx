@@ -18,6 +18,8 @@ import { PagoClienteFormPage } from './admin/pages/clientes/PagoClienteFormPage'
 import { InventarioServiciosMenuPage } from './admin/pages/inventario-servicios/InventarioServiciosMenuPage';
 import { RepuestoPage } from './admin/pages/inventario-servicios/RepuestoPage';
 import { RepuestoFormPage } from './admin/pages/inventario-servicios/RepuestoFormPage';
+import { MarcaRepuestoPage } from './admin/pages/inventario-servicios/MarcaRepuestoPage';
+import MarcaRepuestoFormPage from './admin/pages/inventario-servicios/MarcaRepuestoFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -114,11 +116,11 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'marcas', // ruta: admin/inventario-servicios/marcas
-            //element: <MarcaPage />
+            element: <MarcaRepuestoPage />
           },
           {
             path: 'marcas/:id', // ruta: admin/inventario-servicios/marcas/:id
-            //element: <MarcaFormPage />
+            element: <MarcaRepuestoFormPage />
           },
           {
             path: 'servicios', // ruta: admin/inventario-servicios/servicios

@@ -1,7 +1,4 @@
-export interface MarcaRepuestoItem {
-  id_marca_repuesto: number;
-  nombre: string;
-}
+import type { MarcaRepuestoItem } from './marca-repuesto.interface';
 
 export interface RepuestoItem {
   id_repuesto: number;
