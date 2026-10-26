@@ -5,6 +5,7 @@ import { ForgotPasswordPage } from './auth/pages/forgot-password/ForgotPasswordP
 import { AdminLayout } from './admin/layouts/AdminLayout';
 import { AuthenticatedRoute, NotAuthenticatedRoute } from './components/routes/ProtectedRoutes';
 import { DashboardPage } from './admin/pages/dashboard/DashboardPage';
+import { VariablesPage } from './admin/pages/variables/VariablesPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -77,7 +78,7 @@ export const appRouter = createBrowserRouter([
       },
       {
         path: 'variables', // ruta: admin/variables
-        element: <ModulePlaceholder title="Variables" description="Módulo de variables" />
+        element: <VariablesPage />
       },
     ],
   },
