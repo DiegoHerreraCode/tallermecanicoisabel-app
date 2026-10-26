@@ -225,12 +225,12 @@ export const PagoClientePage = () => {
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
-                <th className="py-3 px-4">id_orden</th>
-                <th className="py-3 px-4">nombre (del cliente)</th>
-                <th className="py-3 px-4">cedula (del cliente)</th>
-                <th className="py-3 px-4 text-right">monto ($)</th>
+                <th className="py-3 px-4 text-center">ID orden</th>
+                <th className="py-3 px-4 text-center">nombre (del cliente)</th>
+                <th className="py-3 px-4 text-center">cedula (del cliente)</th>
+                <th className="py-3 px-4 text-center">monto ($)</th>
                 <th className="py-3 px-4 text-center">metodo pago</th>
-                <th className="py-3 px-4">fecha pago</th>
+                <th className="py-3 px-4 text-center">fecha pago</th>
                 <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>
@@ -266,22 +266,22 @@ export const PagoClientePage = () => {
                         }`}
                     >
                       {/* id_orden */}
-                      <td className="py-3.5 px-4 font-bold text-foreground">
+                      <td className="py-3.5 px-4 font-bold text-foreground text-center">
                         #{pago.id_orden}
                       </td>
 
                       {/* nombre (del cliente) */}
-                      <td className="py-3.5 px-4 font-medium text-foreground">
+                      <td className="py-3.5 px-4 font-medium text-foreground text-center">
                         {nombreCliente}
                       </td>
 
                       {/* cedula (del cliente) */}
-                      <td className="py-3.5 px-4 text-muted-foreground">
+                      <td className="py-3.5 px-4 text-muted-foreground text-center">
                         {cedulaCliente}
                       </td>
 
                       {/* monto ($) */}
-                      <td className="py-3.5 px-4 text-right font-bold text-foreground">
+                      <td className="py-3.5 px-4 text-center font-bold text-foreground">
                         ${montoNum.toLocaleString('es-CL')}
                       </td>
 
@@ -293,7 +293,7 @@ export const PagoClientePage = () => {
                       </td>
 
                       {/* fecha pago */}
-                      <td className="py-3.5 px-4 text-muted-foreground">
+                      <td className="py-3.5 px-4 text-muted-foreground text-center">
                         {fechaStr}
                       </td>
 

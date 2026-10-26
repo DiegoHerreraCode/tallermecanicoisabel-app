@@ -15,6 +15,9 @@ import { ClientePage } from './admin/pages/clientes/ClientePage';
 import { ClienteFormPage } from './admin/pages/clientes/ClienteFormPage';
 import { PagoClientePage } from './admin/pages/clientes/PagoClientePage';
 import { PagoClienteFormPage } from './admin/pages/clientes/PagoClienteFormPage';
+import { InventarioServiciosMenuPage } from './admin/pages/inventario-servicios/InventarioServiciosMenuPage';
+import { RepuestoPage } from './admin/pages/inventario-servicios/RepuestoPage';
+import { RepuestoFormPage } from './admin/pages/inventario-servicios/RepuestoFormPage';
 import { ModulePlaceholder } from './ModulePlaceholder';
 
 // Lazy loading de layouts
@@ -96,7 +99,44 @@ export const appRouter = createBrowserRouter([
       },
       {
         path: 'inventario-servicios', // ruta: admin/inventario-servicios
-        element: <ModulePlaceholder title="Inventario y Servicios" description="Módulo de inventario y servicios" />
+        children: [
+          {
+            index: true, // ruta: admin/inventario-servicios (Menú de selección con los 4 cards)
+            element: <InventarioServiciosMenuPage />
+          },
+          {
+            path: 'repuestos', // ruta: admin/inventario-servicios/repuestos
+            element: <RepuestoPage />
+          },
+          {
+            path: 'repuestos/:id', // ruta: admin/inventario-servicios/repuestos/:id
+            element: <RepuestoFormPage />
+          },
+          {
+            path: 'marcas', // ruta: admin/inventario-servicios/marcas
+            //element: <MarcaPage />
+          },
+          {
+            path: 'marcas/:id', // ruta: admin/inventario-servicios/marcas/:id
+            //element: <MarcaFormPage />
+          },
+          {
+            path: 'servicios', // ruta: admin/inventario-servicios/servicios
+            //element: <ServicioTallerPage />
+          },
+          {
+            path: 'servicios/:id', // ruta: admin/inventario-servicios/servicios/:id
+            //element: <ServicioTallerFormPage />
+          },
+          {
+            path: 'tipos-servicios', // ruta: admin/inventario-servicios/tipos-servicios
+            //element: <TipoServicioTallerPage />
+          },
+          {
+            path: 'tipos-servicios/:id', // ruta: admin/inventario-servicios/tipos-servicios/:id
+            //element: <TipoServicioTallerFormPage />
+          },
+        ]
       },
       {
         path: 'vehiculos', // ruta: admin/vehiculos
