@@ -33,6 +33,49 @@ export interface PresupuestoItem {
   };
 }
 
+export interface PresupuestoRepuestoItem {
+  id_repuesto: number;
+  costo_unitario_base?: number;
+  precio_unitario: number;
+  porcentaje_ganancia?: number;
+  cantidad: number;
+  monto_total_linea_base?: number;
+  monto_total_linea: number;
+}
+
+export interface PresupuestoServicioTallerItem {
+  id_servicio_taller: number;
+  costo_unitario_base?: number;
+  precio_unitario: number;
+  porcentaje_ganancia?: number;
+  cantidad: number;
+  monto_total_linea_base?: number;
+  monto_total_linea: number;
+}
+
+export interface CreatePresupuestoInicialPayload {
+  id_ingreso: number;
+  monto_subtotal: number;
+  porcentaje_iva: number;
+  monto_iva: number;
+  monto_total: number;
+  repuestos?: PresupuestoRepuestoItem[];
+  servicios_taller?: PresupuestoServicioTallerItem[];
+}
+
+export interface CreatePresupuestoExtraPayload {
+  id_orden: number;
+  id_ingreso?: number;
+  monto_subtotal: number;
+  porcentaje_iva: number;
+  monto_iva: number;
+  monto_total: number;
+  repuestos?: PresupuestoRepuestoItem[];
+  servicios_taller?: PresupuestoServicioTallerItem[];
+}
+
+export type CreateUpdatePresupuestoPayload = CreatePresupuestoInicialPayload | CreatePresupuestoExtraPayload;
+
 export interface AceptarPresupuestoPayload {
   fecha_fin_tentativa?: string;
   id_cliente?: number;
@@ -41,3 +84,4 @@ export interface AceptarPresupuestoPayload {
 export interface AnularPresupuestoPayload {
   motivo_anulacion: string;
 }
+

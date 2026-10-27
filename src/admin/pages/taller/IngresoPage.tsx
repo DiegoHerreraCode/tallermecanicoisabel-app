@@ -684,9 +684,11 @@ export const IngresoPage = () => {
                           {isEsperandoOrden && (
                             <button
                               type="button"
-                              disabled
-                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-muted-foreground opacity-60 cursor-not-allowed shadow-2xs"
-                              title="Generar presupuesto (próximamente)"
+                              onClick={() => {
+                                navigate(`/admin/taller/presupuestos/new?tipo=inicial&id_ingreso=${ing.id_ingreso}`);
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-purple-500/30 text-purple-600 hover:bg-purple-500/10 transition-colors cursor-pointer shadow-2xs"
+                              title="Generar Presupuesto Inicial"
                             >
                               Generar Presupuesto
                             </button>

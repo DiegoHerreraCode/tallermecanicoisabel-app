@@ -314,7 +314,7 @@ export const PresupuestoPage = () => {
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/15 text-slate-600 dark:text-slate-400 border border-slate-500/20">
             <Ban className="w-3.5 h-3.5 text-slate-500" />
-            Anulada
+            Anulado
           </span>
         );
       default:
@@ -602,7 +602,7 @@ export const PresupuestoPage = () => {
                               <button
                                 type="button"
                                 onClick={() => setPresupuestoParaRechazar(item)}
-                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-rose-500/40 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer shadow-2xs"
+                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer shadow-2xs"
                                 title="Rechazar Presupuesto"
                               >
                                 Rechazar
