@@ -36,6 +36,8 @@ import { VehiculoFormPage } from './admin/pages/vehiculos/VehiculoFormPage';
 import { TallerMenuPage } from './admin/pages/taller/TallerMenuPage';
 import { IngresoPage } from './admin/pages/taller/IngresoPage';
 import { IngresoFormPage } from './admin/pages/taller/IngresoFormPage';
+import { TipoOrdenPage } from './admin/pages/taller/TipoOrdenPage';
+import { TipoOrdenFormPage } from './admin/pages/taller/TipoOrdenFormPage';
 
 // Lazy loading de layouts
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout'));
@@ -115,6 +117,14 @@ export const appRouter = createBrowserRouter([
           {
             path: 'presupuestos/:id', // ruta: admin/taller/presupuestos/:id
             //  element: <PresupuestoFormPage />
+          },
+          {
+            path: 'tipos-ordenes', // ruta: admin/taller/tipos-ordenes
+            element: <TipoOrdenPage />
+          },
+          {
+            path: 'tipos-ordenes/:id', // ruta: admin/taller/tipos-ordenes/:id
+            element: <TipoOrdenFormPage />
           }
         ]
       },
