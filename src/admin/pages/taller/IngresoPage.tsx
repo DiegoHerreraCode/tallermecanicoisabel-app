@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import {
   ArrowLeft,
   Plus,
@@ -30,6 +30,8 @@ export const IngresoPage = () => {
 
   const { anularIngreso, isAnulando, uploadPdfChecklist, isUploadingPdf } =
     useIngresoMutation();
+
+  const navigate = useNavigate();
 
   // Filtros según boceto: id_ingreso, tipo de orden, modelo/marca, placa, nombre/cedula, estado, fecha desde y fecha hasta
   const [idIngresoFilter, setIdIngresoFilter] = useState('');
@@ -668,9 +670,11 @@ export const IngresoPage = () => {
                           {isEsperandoOrden && (
                             <button
                               type="button"
-                              disabled
-                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-muted-foreground opacity-60 cursor-not-allowed shadow-2xs"
-                              title="Generar orden (próximamente)"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-primary/30 text-primary hover:bg-primary/10 transition-colors cursor-pointer shadow-2xs"
+                              title="Generar nueva orden"
+                              onClick={() => {
+                                navigate(`/admin/taller/ordenes/new?id_ingreso=${ing.id_ingreso}`);
+                              }}
                             >
                               Generar Orden
                             </button>
@@ -862,7 +866,7 @@ export const IngresoPage = () => {
                       <div className="flex items-center gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-xl hover:bg-blue-500/20 hover:border-blue-500/40 transition-colors cursor-pointer">
                         <FileText className="w-5 h-5 text-blue-500" />
                         <span className="text-sm font-semibold text-foreground">
-                          Checklist adjunto: {selectedIngresoDetalle.pdf_checklist}
+                          Visualizar pdf de la revisión
                         </span>
                       </div>
                     </a>

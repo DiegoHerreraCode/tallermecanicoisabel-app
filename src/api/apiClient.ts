@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const soloAireApi = axios.create({
+export const TallerMecanicoIsabelApi = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   headers: {
     'Accept': 'application/json',
@@ -8,7 +8,7 @@ export const soloAireApi = axios.create({
 });
 
 // Configurar interceptores para token Bearer
-soloAireApi.interceptors.request.use((config) => {
+TallerMecanicoIsabelApi.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -16,4 +16,4 @@ soloAireApi.interceptors.request.use((config) => {
   return config;
 });
 
-export { soloAireApi as apiClient };
+export { TallerMecanicoIsabelApi as apiClient };
