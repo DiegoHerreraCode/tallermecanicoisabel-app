@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router';
+import { useParams, useSearchParams, Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -64,6 +64,7 @@ interface ServicioLineState {
 export const OrdenFormPage = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Determinación de modo:
   // Si id === 'new', modo creación
@@ -1494,12 +1495,14 @@ export const OrdenFormPage = () => {
 
                 {mode === 'view' && ordenData.estado_operativo !== 'finalizada' && ordenData.estado_operativo !== 'anulada' && (
                   <>
-                    {/* Botón Generar Presupuesto Extra (deshabilitado como se solicitó) */}
+                    {/* Botón Generar Presupuesto Extra */}
                     <button
                       type="button"
-                      disabled
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-blue-500/70 text-white opacity-70 cursor-not-allowed shadow-xs"
-                      title="Próximamente"
+                      onClick={() => {
+                        navigate(`/admin/taller/presupuestos/new?tipo=extra&id_orden=${id}`);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-500/20 transition-all cursor-pointer"
+                      title="Generar Presupuesto Extra"
                     >
                       <FilePlus className="w-4 h-4" />
                       Generar Presupuesto Extra

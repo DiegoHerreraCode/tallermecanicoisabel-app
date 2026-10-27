@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams, useSearchParams, Link, useNavigate } from 'react-router';
+import { useSearchParams, Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import { getIngresoByIdAction } from '../../actions/get-ingreso-by-id.action';
+import { getOrdenByIdAction } from '../../actions/get-orden-by-id.action';
 import { getRepuestosAction } from '../../actions/get-repuestos.action';
 import { getServiciosTallerAction } from '../../actions/get-servicios-taller.action';
 import { getVariablesAction } from '../../actions/get-variables.action';
@@ -19,7 +20,10 @@ import { usePresupuestoMutation } from '../../hooks/usePresupuestoMutation';
 
 import type { RepuestoItem } from '../../interfaces/repuesto.interface';
 import type { ServicioTallerItem } from '../../interfaces/servicio-taller.interface';
-import type { CreatePresupuestoInicialPayload } from '../../interfaces/presupuesto.interface';
+import type {
+  CreatePresupuestoInicialPayload,
+  CreatePresupuestoExtraPayload,
+} from '../../interfaces/presupuesto.interface';
 
 // Interface para las líneas en la tabla de repuestos seleccionados
 interface RepuestoLineState {
@@ -31,6 +35,7 @@ interface RepuestoLineState {
   porcentaje_ganancia: number;
   costo_unitario_con_ganancia: number; // precio_unitario
   monto_total_linea_con_ganancia: number; // monto_total_linea
+  isFromOrden?: boolean; // Verdadero si el repuesto ya formaba parte de la orden
 }
 
 // Interface para las líneas en la tabla de servicios seleccionados
@@ -44,29 +49,91 @@ interface ServicioLineState {
   costo_unitario_con_ganancia: number; // precio_unitario
   monto_total_linea_con_ganancia: number; // monto_total_linea
   estado: string; // por defecto 'pendiente_asignacion'
+  isFromOrden?: boolean; // Verdadero si el servicio ya formaba parte de la orden
 }
 
 export const PresupuestoFormPage = () => {
-  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   // Parámetros de la URL:
-  // ruta: /admin/taller/presupuestos/new?tipo=inicial&id_ingreso=x
-  const isNew = id === 'new';
-  const tipoParam = searchParams.get('tipo') || 'inicial';
+  // Inicial: /admin/taller/presupuestos/new?tipo=inicial&id_ingreso=x
+  // Extra:   /admin/taller/presupuestos/new?tipo=extra&id_orden=x
+  const tipoParam = (searchParams.get('tipo') || 'inicial') as 'inicial' | 'extra';
   const queryIngresoId = searchParams.get('id_ingreso');
+  const queryOrdenId = searchParams.get('id_orden');
+
+  const isExtra = tipoParam === 'extra';
 
   const { createPresupuesto, isCreatingPresupuesto } = usePresupuestoMutation();
 
-  // 1. Consultar Ingreso asociado para obtener observaciones del cliente
-  const { data: ingresoData, isLoading: isLoadingIngreso } = useQuery({
-    queryKey: ['ingreso-item', queryIngresoId],
-    queryFn: () => getIngresoByIdAction(queryIngresoId!),
-    enabled: !!queryIngresoId,
+  // 1. Consultar Orden asociada si es presupuesto extra
+  const { data: ordenData, isLoading: isLoadingOrden } = useQuery({
+    queryKey: ['orden-item', queryOrdenId],
+    queryFn: () => getOrdenByIdAction(queryOrdenId!),
+    enabled: isExtra && !!queryOrdenId,
   });
 
-  // 2. Catálogos: Repuestos y Servicios
+  // Determinar el id_ingreso efectivo: si es extra, se extrae de ordenData.id_ingreso
+  const effectiveIngresoId = isExtra ? ordenData?.id_ingreso : queryIngresoId;
+
+  // 2. Consultar Ingreso asociado para obtener observaciones del cliente
+  const { data: ingresoData, isLoading: isLoadingIngreso } = useQuery({
+    queryKey: ['ingreso-item', effectiveIngresoId],
+    queryFn: () => getIngresoByIdAction(effectiveIngresoId!),
+    enabled: !!effectiveIngresoId,
+  });
+
+  // Mapas de repuestos y servicios preexistentes en la orden (para cuando es tipo extra)
+  const ordenRepuestosMap = useMemo(() => {
+    const map = new Map<
+      number,
+      {
+        costo_unitario_base: number;
+        precio_unitario: number;
+        porcentaje_ganancia: number;
+      }
+    >();
+    if (isExtra && ordenData?.repuestos) {
+      ordenData.repuestos.forEach((r) => {
+        const costo = Number(r.costo_unitario_base ?? 0);
+        const precio = Number(r.precio_unitario ?? 0);
+        const ganancia = Number(r.porcentaje_ganancia ?? 0);
+        map.set(r.id_repuesto, {
+          costo_unitario_base: costo,
+          precio_unitario: precio,
+          porcentaje_ganancia: ganancia,
+        });
+      });
+    }
+    return map;
+  }, [isExtra, ordenData]);
+
+  const ordenServiciosMap = useMemo(() => {
+    const map = new Map<
+      number,
+      {
+        costo_unitario_base: number;
+        precio_unitario: number;
+        porcentaje_ganancia: number;
+      }
+    >();
+    if (isExtra && ordenData?.servicios_taller) {
+      ordenData.servicios_taller.forEach((s) => {
+        const costo = Number(s.costo_unitario_base ?? 0);
+        const precio = Number(s.precio_unitario ?? 0);
+        const ganancia = Number(s.porcentaje_ganancia ?? 0);
+        map.set(s.id_servicio_taller, {
+          costo_unitario_base: costo,
+          precio_unitario: precio,
+          porcentaje_ganancia: ganancia,
+        });
+      });
+    }
+    return map;
+  }, [isExtra, ordenData]);
+
+  // 3. Catálogos: Repuestos y Servicios
   const { data: allRepuestos = [] } = useQuery({
     queryKey: ['repuestos-listado'],
     queryFn: getRepuestosAction,
@@ -77,7 +144,7 @@ export const PresupuestoFormPage = () => {
     queryFn: getServiciosTallerAction,
   });
 
-  // 3. Variables de cálculo y porcentaje de IVA
+  // 4. Variables de cálculo y porcentaje de IVA
   const { data: variables = [] } = useQuery({
     queryKey: ['variables-listado'],
     queryFn: getVariablesAction,
@@ -162,10 +229,24 @@ export const PresupuestoFormPage = () => {
 
   // Handlers para Repuestos
   const handleAddRepuesto = (r: RepuestoItem) => {
-    const costoUnit = Number(r.ultimo_costo_compra_unitario) || 0;
-    const pctGanancia = Number(r.porcentaje_ganancia) || 0;
-    const precioUnitConGanancia =
-      Number(r.monto_venta) || calcularPrecioConGanancia(costoUnit, pctGanancia);
+    const existingInOrden = ordenRepuestosMap.get(r.id_repuesto);
+    const isFromOrden = !!existingInOrden;
+
+    let costoUnit = 0;
+    let pctGanancia = 0;
+    let precioUnitConGanancia = 0;
+
+    if (existingInOrden) {
+      costoUnit = existingInOrden.costo_unitario_base;
+      pctGanancia = existingInOrden.porcentaje_ganancia;
+      precioUnitConGanancia = existingInOrden.precio_unitario;
+    } else {
+      costoUnit = Number(r.ultimo_costo_compra_unitario) || 0;
+      pctGanancia = Number(r.porcentaje_ganancia) || 0;
+      precioUnitConGanancia =
+        Number(r.monto_venta) || calcularPrecioConGanancia(costoUnit, pctGanancia);
+    }
+
     const cant = 1;
 
     const newLine: RepuestoLineState = {
@@ -177,6 +258,7 @@ export const PresupuestoFormPage = () => {
       porcentaje_ganancia: pctGanancia,
       costo_unitario_con_ganancia: Number(precioUnitConGanancia.toFixed(2)),
       monto_total_linea_con_ganancia: Number((precioUnitConGanancia * cant).toFixed(2)),
+      isFromOrden,
     };
 
     setSelectedRepuestos((prev) => [...prev, newLine]);
@@ -207,7 +289,7 @@ export const PresupuestoFormPage = () => {
     const pct = Math.max(0, porcentaje || 0);
     setSelectedRepuestos((prev) =>
       prev.map((r) => {
-        if (r.id_repuesto !== idRepuesto) return r;
+        if (r.id_repuesto !== idRepuesto || r.isFromOrden) return r;
         const unitConGanancia = calcularPrecioConGanancia(r.costo_unitario, pct);
         const totalConGanancia = Number((unitConGanancia * r.cantidad).toFixed(2));
         return {
@@ -224,7 +306,7 @@ export const PresupuestoFormPage = () => {
     const p = Math.max(0, precio || 0);
     setSelectedRepuestos((prev) =>
       prev.map((r) => {
-        if (r.id_repuesto !== idRepuesto) return r;
+        if (r.id_repuesto !== idRepuesto || r.isFromOrden) return r;
         const pct = calcularPorcentajeGanancia(r.costo_unitario, p);
         const totalConGanancia = Number((p * r.cantidad).toFixed(2));
         return {
@@ -239,10 +321,24 @@ export const PresupuestoFormPage = () => {
 
   // Handlers para Servicios
   const handleAddServicio = (s: ServicioTallerItem) => {
-    const costoUnit = Number(s.costo) || 0;
-    const pctGanancia = Number(s.porcentaje_ganancia) || 0;
-    const precioUnitConGanancia =
-      Number(s.monto_venta) || calcularPrecioConGanancia(costoUnit, pctGanancia);
+    const existingInOrden = ordenServiciosMap.get(s.id_servicio_taller);
+    const isFromOrden = !!existingInOrden;
+
+    let costoUnit = 0;
+    let pctGanancia = 0;
+    let precioUnitConGanancia = 0;
+
+    if (existingInOrden) {
+      costoUnit = existingInOrden.costo_unitario_base;
+      pctGanancia = existingInOrden.porcentaje_ganancia;
+      precioUnitConGanancia = existingInOrden.precio_unitario;
+    } else {
+      costoUnit = Number(s.costo) || 0;
+      pctGanancia = Number(s.porcentaje_ganancia) || 0;
+      precioUnitConGanancia =
+        Number(s.monto_venta) || calcularPrecioConGanancia(costoUnit, pctGanancia);
+    }
+
     const cant = 1;
 
     const newLine: ServicioLineState = {
@@ -255,6 +351,7 @@ export const PresupuestoFormPage = () => {
       porcentaje_ganancia: pctGanancia,
       costo_unitario_con_ganancia: Number(precioUnitConGanancia.toFixed(2)),
       monto_total_linea_con_ganancia: Number((precioUnitConGanancia * cant).toFixed(2)),
+      isFromOrden,
     };
 
     setSelectedServicios((prev) => [...prev, newLine]);
@@ -285,7 +382,7 @@ export const PresupuestoFormPage = () => {
     const pct = Math.max(0, porcentaje || 0);
     setSelectedServicios((prev) =>
       prev.map((s) => {
-        if (s.id_servicio_taller !== idServicio) return s;
+        if (s.id_servicio_taller !== idServicio || s.isFromOrden) return s;
         const unitConGanancia = calcularPrecioConGanancia(s.costo_unitario, pct);
         const totalConGanancia = Number((unitConGanancia * s.cantidad).toFixed(2));
         return {
@@ -302,7 +399,7 @@ export const PresupuestoFormPage = () => {
     const p = Math.max(0, precio || 0);
     setSelectedServicios((prev) =>
       prev.map((s) => {
-        if (s.id_servicio_taller !== idServicio) return s;
+        if (s.id_servicio_taller !== idServicio || s.isFromOrden) return s;
         const pct = calcularPorcentajeGanancia(s.costo_unitario, p);
         const totalConGanancia = Number((p * s.cantidad).toFixed(2));
         return {
@@ -339,17 +436,24 @@ export const PresupuestoFormPage = () => {
     };
   }, [selectedRepuestos, selectedServicios, ivaPercentage]);
 
-  // Submit Handler: Crear Presupuesto Inicial
+  // Submit Handler: Crear Presupuesto (Inicial o Extra)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!queryIngresoId) {
-      toast.error('No se ha especificado un ingreso vehicular asociado');
-      return;
+    if (isExtra) {
+      if (!queryOrdenId) {
+        toast.error('No se ha especificado la orden de trabajo asociada');
+        return;
+      }
+    } else {
+      if (!queryIngresoId) {
+        toast.error('No se ha especificado un ingreso vehicular asociado');
+        return;
+      }
     }
 
-    if (selectedServicios.length === 0) {
-      toast.warning('Debes agregar al menos un servicio del taller al presupuesto');
+    if (selectedRepuestos.length === 0 && selectedServicios.length === 0) {
+      toast.warning('Debes agregar al menos un repuesto o servicio del taller al presupuesto');
       return;
     }
 
@@ -373,32 +477,52 @@ export const PresupuestoFormPage = () => {
       monto_total_linea: s.monto_total_linea_con_ganancia,
     }));
 
-    const payload: CreatePresupuestoInicialPayload = {
-      id_ingreso: Number(queryIngresoId),
-      monto_subtotal: economicData.monto_subtotal,
-      porcentaje_iva: economicData.porcentaje_iva,
-      monto_iva: economicData.monto_iva,
-      monto_total: economicData.monto_total,
-      repuestos: payloadRepuestos,
-      servicios_taller: payloadServicios,
-    };
-
-    createPresupuesto(payload);
+    if (isExtra) {
+      const payload: CreatePresupuestoExtraPayload = {
+        id_orden: Number(queryOrdenId),
+        monto_subtotal: economicData.monto_subtotal,
+        porcentaje_iva: economicData.porcentaje_iva,
+        monto_iva: economicData.monto_iva,
+        monto_total: economicData.monto_total,
+        repuestos: payloadRepuestos,
+        servicios_taller: payloadServicios,
+      };
+      createPresupuesto(payload);
+    } else {
+      const payload: CreatePresupuestoInicialPayload = {
+        id_ingreso: Number(queryIngresoId),
+        monto_subtotal: economicData.monto_subtotal,
+        porcentaje_iva: economicData.porcentaje_iva,
+        monto_iva: economicData.monto_iva,
+        monto_total: economicData.monto_total,
+        repuestos: payloadRepuestos,
+        servicios_taller: payloadServicios,
+      };
+      createPresupuesto(payload);
+    }
   };
 
   const observacionesCliente =
     ingresoData?.observaciones_cliente || 'Sin observaciones registradas.';
 
-  if (isLoadingIngreso) {
+  if (isLoadingIngreso || (isExtra && isLoadingOrden)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 dark:border-blue-400" />
         <p className="text-sm text-muted-foreground animate-pulse">
-          Cargando datos del ingreso...
+          {isExtra ? 'Cargando datos de la orden e ingreso...' : 'Cargando datos del ingreso...'}
         </p>
       </div>
     );
   }
+
+  const tituloPagina = isExtra
+    ? `Registrar Nuevo Presupuesto Extra Asociado a la Orden #${queryOrdenId || 'x'}`
+    : `Registrar Nuevo Presupuesto Inicial Asociado al Ingreso #${queryIngresoId || 'x'}`;
+
+  const volverLink = isExtra && queryOrdenId
+    ? `/admin/taller/ordenes/${queryOrdenId}`
+    : '/admin/taller/presupuestos';
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-12">
@@ -406,13 +530,13 @@ export const PresupuestoFormPage = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-border/80">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Registrar Nuevo Presupuesto Inicial Asociado al Ingreso #{queryIngresoId || 'x'}
+            {tituloPagina}
           </h1>
         </div>
 
         <div className="flex items-center gap-2.5">
           <Link
-            to="/admin/taller/presupuestos"
+            to={volverLink}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -480,7 +604,7 @@ export const PresupuestoFormPage = () => {
                                 {r.nombre}
                               </td>
 
-                              {/* Cantidad editable */}
+                              {/* Cantidad editable siempre */}
                               <td className="py-2.5 px-2 text-center">
                                 <input
                                   type="number"
@@ -504,38 +628,50 @@ export const PresupuestoFormPage = () => {
                                 {r.monto_total_linea_costo.toFixed(2)}
                               </td>
 
-                              {/* Porcentaje de ganancia editable */}
+                              {/* Porcentaje de ganancia: editable sólo si NO es preexistente de la orden */}
                               <td className="py-2.5 px-2 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min={0}
-                                  value={r.porcentaje_ganancia}
-                                  onChange={(e) =>
-                                    handleUpdateRepuestoGanancia(
-                                      r.id_repuesto,
-                                      parseFloat(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
-                                />
+                                {r.isFromOrden ? (
+                                  <span className="font-semibold text-foreground">
+                                    {r.porcentaje_ganancia}%
+                                  </span>
+                                ) : (
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    min={0}
+                                    value={r.porcentaje_ganancia}
+                                    onChange={(e) =>
+                                      handleUpdateRepuestoGanancia(
+                                        r.id_repuesto,
+                                        parseFloat(e.target.value) || 0
+                                      )
+                                    }
+                                    className="w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
+                                  />
+                                )}
                               </td>
 
-                              {/* Costo unitario con ganancia (Precio unitario) editable */}
+                              {/* Costo unitario con ganancia (Precio unitario): editable sólo si NO es preexistente de la orden */}
                               <td className="py-2.5 px-2 text-center">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  min={0}
-                                  value={r.costo_unitario_con_ganancia}
-                                  onChange={(e) =>
-                                    handleUpdateRepuestoPrecio(
-                                      r.id_repuesto,
-                                      parseFloat(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-18 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
-                                />
+                                {r.isFromOrden ? (
+                                  <span className="font-semibold text-foreground">
+                                    {r.costo_unitario_con_ganancia.toFixed(2)}
+                                  </span>
+                                ) : (
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min={0}
+                                    value={r.costo_unitario_con_ganancia}
+                                    onChange={(e) =>
+                                      handleUpdateRepuestoPrecio(
+                                        r.id_repuesto,
+                                        parseFloat(e.target.value) || 0
+                                      )
+                                    }
+                                    className="w-18 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
+                                  />
+                                )}
                               </td>
 
                               <td className="py-2.5 px-3 text-center font-bold text-blue-600 dark:text-blue-400">
@@ -652,7 +788,7 @@ export const PresupuestoFormPage = () => {
                                 {s.nombre}
                               </td>
 
-                              {/* Cantidad editable */}
+                              {/* Cantidad editable siempre */}
                               <td className="py-2.5 px-2 text-center">
                                 <input
                                   type="number"
@@ -676,38 +812,50 @@ export const PresupuestoFormPage = () => {
                                 {s.monto_total_linea_costo.toFixed(2)}
                               </td>
 
-                              {/* Porcentaje de ganancia editable */}
+                              {/* Porcentaje de ganancia: editable sólo si NO es preexistente de la orden */}
                               <td className="py-2.5 px-2 text-center">
-                                <input
-                                  type="number"
-                                  step="0.1"
-                                  min={0}
-                                  value={s.porcentaje_ganancia}
-                                  onChange={(e) =>
-                                    handleUpdateServicioGanancia(
-                                      s.id_servicio_taller,
-                                      parseFloat(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
-                                />
+                                {s.isFromOrden ? (
+                                  <span className="font-semibold text-foreground">
+                                    {s.porcentaje_ganancia}%
+                                  </span>
+                                ) : (
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    min={0}
+                                    value={s.porcentaje_ganancia}
+                                    onChange={(e) =>
+                                      handleUpdateServicioGanancia(
+                                        s.id_servicio_taller,
+                                        parseFloat(e.target.value) || 0
+                                      )
+                                    }
+                                    className="w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
+                                  />
+                                )}
                               </td>
 
-                              {/* Costo unitario con ganancia (Precio unitario) editable */}
+                              {/* Costo unitario con ganancia (Precio unitario): editable sólo si NO es preexistente de la orden */}
                               <td className="py-2.5 px-2 text-center">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  min={0}
-                                  value={s.costo_unitario_con_ganancia}
-                                  onChange={(e) =>
-                                    handleUpdateServicioPrecio(
-                                      s.id_servicio_taller,
-                                      parseFloat(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-18 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
-                                />
+                                {s.isFromOrden ? (
+                                  <span className="font-semibold text-foreground">
+                                    {s.costo_unitario_con_ganancia.toFixed(2)}
+                                  </span>
+                                ) : (
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min={0}
+                                    value={s.costo_unitario_con_ganancia}
+                                    onChange={(e) =>
+                                      handleUpdateServicioPrecio(
+                                        s.id_servicio_taller,
+                                        parseFloat(e.target.value) || 0
+                                      )
+                                    }
+                                    className="w-18 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-semibold"
+                                  />
+                                )}
                               </td>
 
                               <td className="py-2.5 px-3 text-center font-bold text-blue-600 dark:text-blue-400">
@@ -824,7 +972,7 @@ export const PresupuestoFormPage = () => {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => navigate('/admin/taller/presupuestos')}
+                  onClick={() => navigate(volverLink)}
                   className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-all cursor-pointer shadow-xs"
                 >
                   Cancelar
