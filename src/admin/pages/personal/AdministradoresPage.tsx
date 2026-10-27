@@ -75,7 +75,7 @@ export const AdministradoresPage = () => {
           </Link>
           <Link
             to="/admin/personal/administradores/new"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-500/20 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             Nuevo

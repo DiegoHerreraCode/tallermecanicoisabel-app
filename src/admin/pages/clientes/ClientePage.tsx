@@ -74,7 +74,7 @@ export const ClientePage = () => {
           </Link>
           <Link
             to="/admin/clientes/listado/new"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             Nuevo
@@ -214,8 +214,8 @@ export const ClientePage = () => {
               key={pageNum}
               onClick={() => setCurrentPage(pageNum)}
               className={`w-8 h-8 text-xs font-semibold rounded-lg transition-all ${validCurrentPage === pageNum
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-card border border-border/80 text-foreground hover:bg-accent'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'bg-card border border-border/80 text-foreground hover:bg-accent'
                 }`}
             >
               {pageNum}

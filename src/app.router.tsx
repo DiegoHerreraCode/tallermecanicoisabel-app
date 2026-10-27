@@ -33,7 +33,9 @@ import { ModeloVehiculoPage } from './admin/pages/vehiculos/ModeloVehiculoPage';
 import { ModeloVehiculoFormPage } from './admin/pages/vehiculos/ModeloVehiculoFormPage';
 import { VehiculoPage } from './admin/pages/vehiculos/VehiculoPage';
 import { VehiculoFormPage } from './admin/pages/vehiculos/VehiculoFormPage';
-import { ModulePlaceholder } from './ModulePlaceholder';
+import { TallerMenuPage } from './admin/pages/taller/TallerMenuPage';
+import { IngresoPage } from './admin/pages/taller/IngresoPage';
+import { IngresoFormPage } from './admin/pages/taller/IngresoFormPage';
 
 // Lazy loading de layouts
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout'));
@@ -85,7 +87,36 @@ export const appRouter = createBrowserRouter([
       },
       {
         path: 'taller', // ruta: admin/taller
-        element: <ModulePlaceholder title="Taller" description="Módulo de taller" />
+        children: [
+          {
+            index: true, // ruta: admin/taller (Menú de selección con los 3 cards: Ordenes, Presupuestos e Ingresos)
+            element: <TallerMenuPage />,
+          },
+          {
+            path: 'ingresos', // ruta: admin/taller/ingresos
+            element: <IngresoPage />
+          },
+          {
+            path: 'ingresos/:id', // ruta: admin/taller/ingresos/:id
+            element: <IngresoFormPage />
+          },
+          {
+            path: 'ordenes', // ruta: admin/taller/ordenes
+            //  element: <OrdenPage />
+          },
+          {
+            path: 'ordenes/:id', // ruta: admin/taller/ordenes/:id
+            // element: <OrdenFormPage />
+          },
+          {
+            path: 'presupuestos', // ruta: admin/taller/presupuestos
+            //  element: <PresupuestoPage />
+          },
+          {
+            path: 'presupuestos/:id', // ruta: admin/taller/presupuestos/:id
+            //  element: <PresupuestoFormPage />
+          }
+        ]
       },
       {
         path: 'clientes',
