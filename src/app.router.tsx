@@ -38,6 +38,7 @@ import { IngresoPage } from './admin/pages/taller/IngresoPage';
 import { IngresoFormPage } from './admin/pages/taller/IngresoFormPage';
 import { TipoOrdenPage } from './admin/pages/taller/TipoOrdenPage';
 import { TipoOrdenFormPage } from './admin/pages/taller/TipoOrdenFormPage';
+import { OrdenPage } from './admin/pages/taller/OrdenPage';
 import { OrdenFormPage } from './admin/pages/taller/OrdenFormPage';
 
 // Lazy loading de layouts
@@ -105,7 +106,7 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'ordenes', // ruta: admin/taller/ordenes
-            //  element: <OrdenPage />
+            element: <OrdenPage />
           },
           {
             path: 'ordenes/:id', // ruta: admin/taller/ordenes/:id

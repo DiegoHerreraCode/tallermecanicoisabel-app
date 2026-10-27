@@ -110,7 +110,10 @@ export interface CreateOrdenPayload {
 }
 
 export interface UpdateOrdenPayload {
+  fecha_fin?: string | null;
   fecha_fin_tentativa?: string;
+  estado_operativo?: 'en_espera' | 'en_proceso' | 'finalizada' | 'anulada';
+  estado_administrativo?: 'pendiente_pago' | 'parcialmente_pagada' | 'pagada';
   monto_subtotal?: number;
   porcentaje_iva?: number;
   monto_iva?: number;
@@ -142,4 +145,8 @@ export interface CreateHallazgoTecnicoPayload {
   id_orden: number;
   hallazgo: string;
   detalle?: string;
+}
+
+export interface AnularOrdenPayload {
+  motivo_anulacion: string;
 }

@@ -10,7 +10,11 @@ import {
   updateOrdenServicioTallerAction,
   type UpdateOrdenServicioTallerPayload,
 } from '../actions/update-orden-servicio-taller.action';
-import type { CreateHallazgoTecnicoPayload } from '../interfaces/orden.interface';
+import { anularOrdenAction } from '../actions/anular-orden.action';
+import type {
+  CreateHallazgoTecnicoPayload,
+  AnularOrdenPayload,
+} from '../interfaces/orden.interface';
 
 export const useOrdenMutation = () => {
   const queryClient = useQueryClient();
@@ -95,6 +99,44 @@ export const useOrdenMutation = () => {
     },
   });
 
+  // Anular Orden de Trabajo
+  const anularMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: number | string; payload: AnularOrdenPayload }) =>
+      anularOrdenAction(id, payload),
+    onSuccess: (_, variables) => {
+      toast.success('Orden anulada correctamente');
+      queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
+      queryClient.invalidateQueries({
+        queryKey: ['orden-item', String(variables.id)],
+      });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        'Ocurrió un error al anular la orden';
+      toast.error(message);
+    },
+  });
+
+  // Finalizar Orden de Trabajo (cambia estado_operativo a 'finalizada')
+  const finalizarMutation = useMutation({
+    mutationFn: (id: number | string) =>
+      createUpdateOrdenAction({ estado_operativo: 'finalizada' }, id),
+    onSuccess: (_, id) => {
+      toast.success('Orden finalizada correctamente');
+      queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['orden-item', String(id)] });
+      queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        'Ocurrió un error al finalizar la orden';
+      toast.error(message);
+    },
+  });
+
   return {
     saveOrden: saveMutation.mutate,
     isPending: saveMutation.isPending,
@@ -112,5 +154,11 @@ export const useOrdenMutation = () => {
     updateServicio: updateServicioMutation.mutate,
     updateServicioAsync: updateServicioMutation.mutateAsync,
     isUpdatingServicio: updateServicioMutation.isPending,
+
+    anularOrden: anularMutation.mutate,
+    isAnulandoOrden: anularMutation.isPending,
+
+    finalizarOrden: finalizarMutation.mutate,
+    isFinalizandoOrden: finalizarMutation.isPending,
   };
 };

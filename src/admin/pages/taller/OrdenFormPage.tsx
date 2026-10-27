@@ -211,120 +211,132 @@ export const OrdenFormPage = () => {
   const [assignModalService, setAssignModalService] = useState<ServicioLineState | null>(null);
   const [selectedPersonalId, setSelectedPersonalId] = useState<string>('');
 
+  // Función para restablecer los datos originales de la orden
+  const resetOrdenData = () => {
+    if (!ordenData) return;
+
+    if (ordenData.fecha_fin_tentativa) {
+      const f = ordenData.fecha_fin_tentativa.substring(0, 10);
+      setFechaFinTentativa(f);
+    } else {
+      setFechaFinTentativa('');
+    }
+
+    // Repuestos de la orden
+    if (ordenData.repuestos) {
+      const loadedRep: RepuestoLineState[] = ordenData.repuestos.map((r) => {
+        const matched = allRepuestos.find((item) => item.id_repuesto === r.id_repuesto);
+        const costoUnit =
+          r.costo_unitario_base !== undefined && r.costo_unitario_base !== null
+            ? Number(r.costo_unitario_base)
+            : Number(matched?.ultimo_costo_compra_unitario || 0);
+
+        const precioUnitConGanancia = Number(r.precio_unitario || 0);
+        const cant = Number(r.cantidad || 1);
+
+        const pctGanancia =
+          r.porcentaje_ganancia !== undefined && r.porcentaje_ganancia !== null
+            ? Number(r.porcentaje_ganancia)
+            : costoUnit > 0
+              ? Number((((precioUnitConGanancia - costoUnit) / costoUnit) * 100).toFixed(1))
+              : Number(matched?.porcentaje_ganancia || 0);
+
+        const totalCostoBase =
+          r.monto_total_linea_base !== undefined && r.monto_total_linea_base !== null
+            ? Number(r.monto_total_linea_base)
+            : Number((costoUnit * cant).toFixed(2));
+
+        const totalLineaConGanancia =
+          r.monto_total_linea !== undefined && r.monto_total_linea !== null
+            ? Number(r.monto_total_linea)
+            : Number((precioUnitConGanancia * cant).toFixed(2));
+
+        return {
+          id_repuesto: r.id_repuesto,
+          nombre: matched?.nombre_modelo || `Repuesto #${r.id_repuesto}`,
+          cantidad: cant,
+          costo_unitario: Number(costoUnit.toFixed(2)),
+          monto_total_linea_costo: Number(totalCostoBase.toFixed(2)),
+          porcentaje_ganancia: pctGanancia,
+          costo_unitario_con_ganancia: Number(precioUnitConGanancia.toFixed(2)),
+          monto_total_linea_con_ganancia: Number(totalLineaConGanancia.toFixed(2)),
+        };
+      });
+      setSelectedRepuestos(loadedRep);
+    } else {
+      setSelectedRepuestos([]);
+    }
+
+    // Servicios de la orden
+    if (ordenData.servicios_taller) {
+      const loadedSrv: ServicioLineState[] = ordenData.servicios_taller.map((s) => {
+        const matched = allServicios.find((item) => item.id_servicio_taller === s.id_servicio_taller);
+        const costoUnit =
+          s.costo_unitario_base !== undefined && s.costo_unitario_base !== null
+            ? Number(s.costo_unitario_base)
+            : Number(matched?.costo || 0);
+
+        const precioUnitConGanancia = Number(s.precio_unitario || 0);
+        const cant = Number(s.cantidad || 1);
+
+        const pctGanancia =
+          s.porcentaje_ganancia !== undefined && s.porcentaje_ganancia !== null
+            ? Number(s.porcentaje_ganancia)
+            : costoUnit > 0
+              ? Number((((precioUnitConGanancia - costoUnit) / costoUnit) * 100).toFixed(1))
+              : Number(matched?.porcentaje_ganancia || 0);
+
+        const totalCostoBase =
+          s.monto_total_linea_base !== undefined && s.monto_total_linea_base !== null
+            ? Number(s.monto_total_linea_base)
+            : Number((costoUnit * cant).toFixed(2));
+
+        const totalLineaConGanancia =
+          s.monto_total_linea !== undefined && s.monto_total_linea !== null
+            ? Number(s.monto_total_linea)
+            : Number((precioUnitConGanancia * cant).toFixed(2));
+
+        let estadoFinal = s.estado || 'pendiente_asignacion';
+        if (!s.estado && s.id_personal) {
+          estadoFinal = 'en_espera';
+        }
+
+        const matchedPersonal = allPersonal.find((p) => p.id_personal === s.id_personal);
+        const personalNombre = s.personal?.nombre || matchedPersonal?.nombre || '';
+
+        return {
+          id_orden_servicio_taller: s.id_orden_servicio_taller,
+          id_servicio_taller: s.id_servicio_taller,
+          id_personal: s.id_personal || null,
+          personal_nombre: personalNombre,
+          estado: estadoFinal,
+          nombre: matched?.nombre || s.servicio_taller?.nombre || `Servicio #${s.id_servicio_taller}`,
+          cantidad: cant,
+          costo_unitario: Number(costoUnit.toFixed(2)),
+          monto_total_linea_costo: Number(totalCostoBase.toFixed(2)),
+          porcentaje_ganancia: pctGanancia,
+          costo_unitario_con_ganancia: Number(precioUnitConGanancia.toFixed(2)),
+          monto_total_linea_con_ganancia: Number(totalLineaConGanancia.toFixed(2)),
+        };
+      });
+      setSelectedServicios(loadedSrv);
+    } else {
+      setSelectedServicios([]);
+    }
+  };
+
   // Sincronizar datos al cargar la orden para view/edit
   useEffect(() => {
-    if (ordenData) {
-      if (ordenData.fecha_fin_tentativa) {
-        // Formatear a YYYY-MM-DD o YYYY-MM-DDTHH:mm
-        const f = ordenData.fecha_fin_tentativa.substring(0, 10);
-        setFechaFinTentativa(f);
-      }
-
-      // Repuestos de la orden
-      if (ordenData.repuestos) {
-        const loadedRep: RepuestoLineState[] = ordenData.repuestos.map((r) => {
-          const matched = allRepuestos.find((item) => item.id_repuesto === r.id_repuesto);
-          // Si el recurso ya formaba parte de la orden y tiene costo_unitario_base guardado, se utiliza; sino se toma del catálogo
-          const costoUnit =
-            r.costo_unitario_base !== undefined && r.costo_unitario_base !== null
-              ? Number(r.costo_unitario_base)
-              : Number(matched?.ultimo_costo_compra_unitario || 0);
-
-          const precioUnitConGanancia = Number(r.precio_unitario || 0);
-          const cant = Number(r.cantidad || 1);
-
-          // Si ya tiene porcentaje_ganancia guardado en la orden, se utiliza
-          const pctGanancia =
-            r.porcentaje_ganancia !== undefined && r.porcentaje_ganancia !== null
-              ? Number(r.porcentaje_ganancia)
-              : costoUnit > 0
-                ? Number((((precioUnitConGanancia - costoUnit) / costoUnit) * 100).toFixed(1))
-                : Number(matched?.porcentaje_ganancia || 0);
-
-          const totalCostoBase =
-            r.monto_total_linea_base !== undefined && r.monto_total_linea_base !== null
-              ? Number(r.monto_total_linea_base)
-              : Number((costoUnit * cant).toFixed(2));
-
-          const totalLineaConGanancia =
-            r.monto_total_linea !== undefined && r.monto_total_linea !== null
-              ? Number(r.monto_total_linea)
-              : Number((precioUnitConGanancia * cant).toFixed(2));
-
-          return {
-            id_repuesto: r.id_repuesto,
-            nombre: matched?.nombre_modelo || `Repuesto #${r.id_repuesto}`,
-            cantidad: cant,
-            costo_unitario: Number(costoUnit.toFixed(2)),
-            monto_total_linea_costo: Number(totalCostoBase.toFixed(2)),
-            porcentaje_ganancia: pctGanancia,
-            costo_unitario_con_ganancia: Number(precioUnitConGanancia.toFixed(2)),
-            monto_total_linea_con_ganancia: Number(totalLineaConGanancia.toFixed(2)),
-          };
-        });
-        setSelectedRepuestos(loadedRep);
-      }
-
-      // Servicios de la orden
-      if (ordenData.servicios_taller) {
-        const loadedSrv: ServicioLineState[] = ordenData.servicios_taller.map((s) => {
-          const matched = allServicios.find((item) => item.id_servicio_taller === s.id_servicio_taller);
-          // Si el recurso ya formaba parte de la orden y tiene costo_unitario_base guardado, se utiliza; sino se toma del catálogo
-          const costoUnit =
-            s.costo_unitario_base !== undefined && s.costo_unitario_base !== null
-              ? Number(s.costo_unitario_base)
-              : Number(matched?.costo || 0);
-
-          const precioUnitConGanancia = Number(s.precio_unitario || 0);
-          const cant = Number(s.cantidad || 1);
-
-          // Si ya tiene porcentaje_ganancia guardado en la orden, se utiliza
-          const pctGanancia =
-            s.porcentaje_ganancia !== undefined && s.porcentaje_ganancia !== null
-              ? Number(s.porcentaje_ganancia)
-              : costoUnit > 0
-                ? Number((((precioUnitConGanancia - costoUnit) / costoUnit) * 100).toFixed(1))
-                : Number(matched?.porcentaje_ganancia || 0);
-
-          const totalCostoBase =
-            s.monto_total_linea_base !== undefined && s.monto_total_linea_base !== null
-              ? Number(s.monto_total_linea_base)
-              : Number((costoUnit * cant).toFixed(2));
-
-          const totalLineaConGanancia =
-            s.monto_total_linea !== undefined && s.monto_total_linea !== null
-              ? Number(s.monto_total_linea)
-              : Number((precioUnitConGanancia * cant).toFixed(2));
-
-          // Determinar estado
-          let estadoFinal = s.estado || 'pendiente_asignacion';
-          if (!s.estado && s.id_personal) {
-            estadoFinal = 'en_espera';
-          }
-
-          // Nombre de personal
-          const matchedPersonal = allPersonal.find((p) => p.id_personal === s.id_personal);
-          const personalNombre = s.personal?.nombre || matchedPersonal?.nombre || '';
-
-          return {
-            id_orden_servicio_taller: s.id_orden_servicio_taller,
-            id_servicio_taller: s.id_servicio_taller,
-            id_personal: s.id_personal || null,
-            personal_nombre: personalNombre,
-            estado: estadoFinal,
-            nombre: matched?.nombre || s.servicio_taller?.nombre || `Servicio #${s.id_servicio_taller}`,
-            cantidad: cant,
-            costo_unitario: Number(costoUnit.toFixed(2)),
-            monto_total_linea_costo: Number(totalCostoBase.toFixed(2)),
-            porcentaje_ganancia: pctGanancia,
-            costo_unitario_con_ganancia: Number(precioUnitConGanancia.toFixed(2)),
-            monto_total_linea_con_ganancia: Number(totalLineaConGanancia.toFixed(2)),
-          };
-        });
-        setSelectedServicios(loadedSrv);
-      }
-    }
+    resetOrdenData();
   }, [ordenData, allRepuestos, allServicios, allPersonal]);
+
+  // Manejo de cancelación de la edición
+  const handleCancelEdit = () => {
+    resetOrdenData();
+    setSearchRepuesto('');
+    setSearchServicio('');
+    setMode('view');
+  };
 
   // Lista de repuestos disponibles filtrados por búsqueda y excluyendo los ya seleccionados
   const availableRepuestos = useMemo(() => {
@@ -818,7 +830,7 @@ export const OrdenFormPage = () => {
           )}
 
           {/* mostrar motivo de anulacion con su color de badge */}
-          {ordenData.estado_operativo === 'anulada' && (
+          {mode === 'view' && ordenData.estado_operativo === 'anulada' && (
             <div className="flex items-center gap-3">
               <label className="text-xs sm:text-sm font-bold text-foreground">
                 Motivo de Anulación:
@@ -1433,7 +1445,7 @@ export const OrdenFormPage = () => {
                   <>
                     <button
                       type="button"
-                      onClick={() => setMode('view')}
+                      onClick={handleCancelEdit}
                       className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
                     >
                       Cancelar
