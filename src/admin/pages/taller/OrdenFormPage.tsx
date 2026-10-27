@@ -57,6 +57,8 @@ interface ServicioLineState {
   porcentaje_ganancia: number;
   costo_unitario_con_ganancia: number; // precio_unitario
   monto_total_linea_con_ganancia: number; // monto_total_linea
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
 }
 
 export const OrdenFormPage = () => {
@@ -317,6 +319,8 @@ export const OrdenFormPage = () => {
           porcentaje_ganancia: pctGanancia,
           costo_unitario_con_ganancia: Number(precioUnitConGanancia.toFixed(2)),
           monto_total_linea_con_ganancia: Number(totalLineaConGanancia.toFixed(2)),
+          fecha_inicio: s.fecha_inicio || null,
+          fecha_fin: s.fecha_fin || null,
         };
       });
       setSelectedServicios(loadedSrv);
@@ -1121,7 +1125,13 @@ export const OrdenFormPage = () => {
                           <th className="py-2.5 px-3 text-center">costo unitario con ganancia</th>
                           <th className="py-2.5 px-3 text-center">monto total línea con ganancia</th>
                           <th className="py-2.5 px-3 text-center">estado</th>
-                          {mode === 'view' && <th className="py-2.5 px-3 text-center">acciones</th>}
+                          {mode === 'view' && (
+                            <>
+                              <th className="py-2.5 px-3 text-center">fecha inicio</th>
+                              <th className="py-2.5 px-3 text-center">fecha fin</th>
+                              <th className="py-2.5 px-3 text-center">acciones</th>
+                            </>
+                          )}
                           {!isReadOnly && <th className="py-2.5 px-2 text-center w-10"></th>}
                         </tr>
                       </thead>
@@ -1129,7 +1139,7 @@ export const OrdenFormPage = () => {
                         {selectedServicios.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={mode === 'view' ? 9 : isReadOnly ? 8 : 9}
+                              colSpan={mode === 'view' ? 11 : isReadOnly ? 8 : 9}
                               className="py-6 text-center text-muted-foreground text-xs"
                             >
                               No hay servicios del taller seleccionados (mínimo requerido 1).
@@ -1256,6 +1266,18 @@ export const OrdenFormPage = () => {
                                     {labelEstado}
                                   </span>
                                 </td>
+
+                                {/* Columnas de Fechas (Únicamente cuando se está viendo el detalle de la orden: mode === 'view') */}
+                                {mode === 'view' && (
+                                  <>
+                                    <td className="py-2.5 px-3 text-center text-muted-foreground whitespace-nowrap text-xs">
+                                      {s.fecha_inicio ? s.fecha_inicio.substring(0, 10) : '—'}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-center text-muted-foreground whitespace-nowrap text-xs">
+                                      {s.fecha_fin ? s.fecha_fin.substring(0, 10) : '—'}
+                                    </td>
+                                  </>
+                                )}
 
                                 {/* Columna Acciones (Únicamente cuando se está viendo el detalle de la orden: mode === 'view') */}
                                 {mode === 'view' && (

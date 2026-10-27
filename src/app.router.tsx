@@ -40,6 +40,7 @@ import { TipoOrdenPage } from './admin/pages/taller/TipoOrdenPage';
 import { TipoOrdenFormPage } from './admin/pages/taller/TipoOrdenFormPage';
 import { OrdenPage } from './admin/pages/taller/OrdenPage';
 import { OrdenFormPage } from './admin/pages/taller/OrdenFormPage';
+import { PresupuestoPage } from './admin/pages/taller/PresupuestoPage';
 
 // Lazy loading de layouts
 const AuthLayout = lazy(() => import('./auth/layouts/AuthLayout'));
@@ -114,7 +115,7 @@ export const appRouter = createBrowserRouter([
           },
           {
             path: 'presupuestos', // ruta: admin/taller/presupuestos
-            //  element: <PresupuestoPage />
+            element: <PresupuestoPage />
           },
           {
             path: 'presupuestos/:id', // ruta: admin/taller/presupuestos/:id
