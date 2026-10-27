@@ -8,11 +8,13 @@ import {
   Trash2,
   Search,
   FileText,
+  AlertCircle,
   Save,
 } from 'lucide-react';
 
 import { getIngresoByIdAction } from '../../actions/get-ingreso-by-id.action';
 import { getOrdenByIdAction } from '../../actions/get-orden-by-id.action';
+import { getHallazgosTecnicosAction } from '../../actions/get-hallazgos-tecnicos.action';
 import { getRepuestosAction } from '../../actions/get-repuestos.action';
 import { getServiciosTallerAction } from '../../actions/get-servicios-taller.action';
 import { getVariablesAction } from '../../actions/get-variables.action';
@@ -82,6 +84,13 @@ export const PresupuestoFormPage = () => {
     queryKey: ['ingreso-item', effectiveIngresoId],
     queryFn: () => getIngresoByIdAction(effectiveIngresoId!),
     enabled: !!effectiveIngresoId,
+  });
+
+  // 2.1 Consultar Hallazgos Técnicos de la orden cuando es presupuesto extra
+  const { data: hallazgos = [] } = useQuery({
+    queryKey: ['hallazgos-orden', queryOrdenId],
+    queryFn: () => getHallazgosTecnicosAction(queryOrdenId!),
+    enabled: isExtra && !!queryOrdenId,
   });
 
   // Mapas de repuestos y servicios preexistentes en la orden (para cuando es tipo extra)
@@ -452,7 +461,8 @@ export const PresupuestoFormPage = () => {
       }
     }
 
-    if (selectedRepuestos.length === 0 && selectedServicios.length === 0) {
+    // en caso de ser presupuesto inicial no puede estar vacio
+    if (selectedRepuestos.length === 0 && selectedServicios.length === 0 && !isExtra) {
       toast.warning('Debes agregar al menos un repuesto o servicio del taller al presupuesto');
       return;
     }
@@ -549,7 +559,7 @@ export const PresupuestoFormPage = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* LAYOUT CON 2 COLUMNAS (Lado izquierdo Observaciones del cliente, Lado derecho tablas y catálogos) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* COLUMNA IZQUIERDA: Observaciones del cliente */}
+          {/* COLUMNA IZQUIERDA: Observaciones del cliente y Hallazgos técnicos (solo lectura en tipo extra) */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-2">
               <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
@@ -560,6 +570,41 @@ export const PresupuestoFormPage = () => {
                 {observacionesCliente}
               </div>
             </div>
+
+            {/* Tarjeta: Hallazgos técnicos (visible a modo de solo lectura cuando es presupuesto de tipo extra) */}
+            {isExtra && (
+              <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-3">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-amber-500" />
+                  Hallazgos técnicos
+                </h3>
+
+                {/* Lista de hallazgos registrados a modo de solo lectura */}
+                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                  {hallazgos.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic text-center py-4">
+                      Sin hallazgos técnicos registrados.
+                    </p>
+                  ) : (
+                    hallazgos.map((h) => (
+                      <div
+                        key={h.id_hallazgo_tecnico}
+                        className="p-2.5 bg-background border border-border/80 rounded-xl text-xs space-y-1"
+                      >
+                        <span className="font-bold text-foreground block">
+                          {h.hallazgo}
+                        </span>
+                        {h.detalle && (
+                          <p className="text-muted-foreground text-[11px] whitespace-pre-wrap">
+                            {h.detalle}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* COLUMNA DERECHA: Listas de Repuestos y Servicios con Paneles Laterales de Selección */}
@@ -778,7 +823,7 @@ export const PresupuestoFormPage = () => {
                               colSpan={9}
                               className="py-6 text-center text-muted-foreground text-xs"
                             >
-                              No hay servicios del taller seleccionados (mínimo requerido 1).
+                              No hay servicios del taller seleccionados.
                             </td>
                           </tr>
                         ) : (

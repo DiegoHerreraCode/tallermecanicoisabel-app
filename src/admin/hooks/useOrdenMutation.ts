@@ -6,6 +6,7 @@ import {
   type CreateUpdateOrdenPayload,
 } from '../actions/create-update-orden.action';
 import { createHallazgoTecnicoAction } from '../actions/create-hallazgo-tecnico.action';
+import { deleteHallazgoTecnicoAction } from '../actions/delete-hallazgo-tecnico.action';
 import {
   updateOrdenServicioTallerAction,
   type UpdateOrdenServicioTallerPayload,
@@ -68,6 +69,30 @@ export const useOrdenMutation = () => {
       const message =
         error?.response?.data?.message ||
         'Ocurrió un error al registrar el hallazgo técnico';
+      toast.error(message);
+    },
+  });
+
+  // Eliminar Hallazgo Técnico
+  const deleteHallazgoMutation = useMutation({
+    mutationFn: ({ id, ordenId }: { id: number | string; ordenId?: number | string }) =>
+      deleteHallazgoTecnicoAction(id),
+    onSuccess: (_, variables) => {
+      toast.success('Hallazgo técnico eliminado correctamente');
+      if (variables.ordenId) {
+        queryClient.invalidateQueries({
+          queryKey: ['hallazgos-orden', String(variables.ordenId)],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['orden-item', String(variables.ordenId)],
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['hallazgos-orden'] });
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ||
+        'Ocurrió un error al eliminar el hallazgo técnico';
       toast.error(message);
     },
   });
@@ -150,6 +175,10 @@ export const useOrdenMutation = () => {
 
     createHallazgo: hallazgoMutation.mutate,
     isCreatingHallazgo: hallazgoMutation.isPending,
+
+    deleteHallazgo: deleteHallazgoMutation.mutate,
+    deleteHallazgoAsync: deleteHallazgoMutation.mutateAsync,
+    isDeletingHallazgo: deleteHallazgoMutation.isPending,
 
     updateServicio: updateServicioMutation.mutate,
     updateServicioAsync: updateServicioMutation.mutateAsync,

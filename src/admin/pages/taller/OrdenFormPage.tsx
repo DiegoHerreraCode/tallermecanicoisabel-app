@@ -92,6 +92,8 @@ export const OrdenFormPage = () => {
     isUpdating,
     createHallazgo,
     isCreatingHallazgo,
+    deleteHallazgo,
+    isDeletingHallazgo,
     updateServicio,
     isUpdatingServicio,
   } = useOrdenMutation();
@@ -894,11 +896,31 @@ export const OrdenFormPage = () => {
                     hallazgos.map((h) => (
                       <div
                         key={h.id_hallazgo_tecnico}
-                        className="p-2.5 bg-background border border-border/80 rounded-xl text-xs space-y-1"
+                        className="p-2.5 bg-background border border-border/80 rounded-xl text-xs space-y-1 relative group"
                       >
-                        <span className="font-bold text-foreground block">
-                          {h.hallazgo}
-                        </span>
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-bold text-foreground block">
+                            {h.hallazgo}
+                          </span>
+                          {mode === 'view' && ordenData.estado_operativo !== 'finalizada' && ordenData.estado_operativo !== 'anulada' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`¿Estás seguro de eliminar el hallazgo "${h.hallazgo}"?`)) {
+                                  deleteHallazgo({
+                                    id: h.id_hallazgo_tecnico,
+                                    ordenId: ordenData.id_orden
+                                  });
+                                }
+                              }}
+                              disabled={isDeletingHallazgo}
+                              className="text-rose-500 hover:text-rose-700 p-1 rounded-md hover:bg-rose-500/10 transition-colors cursor-pointer shrink-0"
+                              title="Eliminar hallazgo"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                         {h.detalle && (
                           <p className="text-muted-foreground text-[11px] whitespace-pre-wrap">
                             {h.detalle}
