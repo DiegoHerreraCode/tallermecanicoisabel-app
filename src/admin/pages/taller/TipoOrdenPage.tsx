@@ -35,6 +35,13 @@ export const TipoOrdenPage = () => {
     });
   }, [tiposOrden, nombreTipoServicioFilter]);
 
+  // Ordenar el arreglo FilteredTiposOrden por el campo id_tipo_orden de forma descendente
+  filteredTiposOrden.sort((a: TipoOrdenItem, b: TipoOrdenItem) => {
+    if (a.id_tipo_orden < b.id_tipo_orden) return 1;
+    if (a.id_tipo_orden > b.id_tipo_orden) return -1;
+    return 0;
+  });
+
   // Cálculo de paginación
   const totalPages = Math.ceil(filteredTiposOrden.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

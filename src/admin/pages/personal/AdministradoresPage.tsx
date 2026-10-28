@@ -43,6 +43,13 @@ export const AdministradoresPage = () => {
     });
   }, [admins, searchTerm]);
 
+  // Ordenar el arreglo FilteredAdmins por el campo id_admin de forma descendente
+  filteredAdmins.sort((a: AdminItem, b: AdminItem) => {
+    if (a.id_admin < b.id_admin) return 1;
+    if (a.id_admin > b.id_admin) return -1;
+    return 0;
+  });
+
   // Cálculo de páginas
   const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

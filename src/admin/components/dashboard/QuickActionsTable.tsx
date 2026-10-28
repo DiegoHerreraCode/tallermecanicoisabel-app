@@ -6,6 +6,7 @@ import {
   Users,
   Settings,
   ArrowUpRight,
+  Package,
 } from 'lucide-react';
 
 export const QuickActionsTable = () => {
@@ -13,15 +14,15 @@ export const QuickActionsTable = () => {
     {
       title: 'Nuevo Ingreso',
       subtitle: 'Recepción y checklist de vehículo',
-      to: '/admin/taller',
-      icon: Car,
+      to: '/admin/taller/ingresos/new',
+      icon: FileCheck2,
       color: 'text-blue-500 bg-blue-500/10',
     },
     {
-      title: 'Nuevo Presupuesto',
-      subtitle: 'Presupuesto inicial o extra',
-      to: '/admin/taller',
-      icon: FileCheck2,
+      title: 'Registrar Vehículo',
+      subtitle: 'Registrar nuevo vehículo',
+      to: '/admin/vehiculos/listado/new',
+      icon: Car,
       color: 'text-amber-500 bg-amber-500/10',
     },
     {
@@ -37,6 +38,13 @@ export const QuickActionsTable = () => {
       to: '/admin/personal',
       icon: Users,
       color: 'text-rose-500 bg-rose-500/10',
+    },
+    {
+      title: 'Registrar Repuesto',
+      subtitle: 'Registrar nuevo repuesto',
+      to: '/admin/inventario-servicios/repuestos/new',
+      icon: Package,
+      color: 'text-purple-500 bg-purple-500/10',
     },
     {
       title: 'Configuración / Variables',

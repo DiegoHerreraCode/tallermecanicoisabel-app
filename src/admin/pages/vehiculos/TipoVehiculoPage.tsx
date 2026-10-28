@@ -33,6 +33,13 @@ export const TipoVehiculoPage = () => {
     });
   }, [tipoVehiculo, nombreFilter]);
 
+  // Ordenar el arreglo FilteredTiposVehiculos por el campo id_tipo_vehiculo de forma descendente
+  filteredTiposVehiculos.sort((a: TipoVehiculoItem, b: TipoVehiculoItem) => {
+    if (a.id_tipo_vehiculo < b.id_tipo_vehiculo) return 1;
+    if (a.id_tipo_vehiculo > b.id_tipo_vehiculo) return -1;
+    return 0;
+  });
+
   // Cálculo de paginación
   const totalPages = Math.ceil(filteredTiposVehiculos.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

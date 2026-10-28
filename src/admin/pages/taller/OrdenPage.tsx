@@ -192,6 +192,13 @@ export const OrdenPage = () => {
     tiposOrdenesMap,
   ]);
 
+  // Ordenar el arreglo FilteredOrdenes por el campo last_update de forma descendente
+  filteredOrdenes.sort((a: OrdenItem, b: OrdenItem) => {
+    if (a.last_update < b.last_update) return 1;
+    if (a.last_update > b.last_update) return -1;
+    return 0;
+  });
+
   // Paginación reactiva
   const totalPages = Math.ceil(filteredOrdenes.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

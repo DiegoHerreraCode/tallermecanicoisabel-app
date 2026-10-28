@@ -49,6 +49,13 @@ export const ModeloVehiculoPage = () => {
     });
   }, [modelosVehiculos, marcasMap, nombreModeloFilter, nombreMarcaFilter]);
 
+  // Ordenar el arreglo FilteredModelos por el campo id_modelo_vehiculo de forma descendente
+  filteredModelos.sort((a: ModeloVehiculoItem, b: ModeloVehiculoItem) => {
+    if (a.id_modelo_vehiculo < b.id_modelo_vehiculo) return 1;
+    if (a.id_modelo_vehiculo > b.id_modelo_vehiculo) return -1;
+    return 0;
+  });
+
   // Cálculo de paginación
   const totalPages = Math.ceil(filteredModelos.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);
@@ -217,11 +224,10 @@ export const ModeloVehiculoPage = () => {
             <button
               key={pageNum}
               onClick={() => setCurrentPage(pageNum)}
-              className={`w-8 h-8 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                validCurrentPage === pageNum
+              className={`w-8 h-8 text-xs font-semibold rounded-lg transition-all cursor-pointer ${validCurrentPage === pageNum
                   ? 'bg-blue-600 text-white shadow-sm font-bold'
                   : 'bg-card border border-border/80 text-foreground hover:bg-accent'
-              }`}
+                }`}
             >
               {pageNum}
             </button>

@@ -263,6 +263,13 @@ export const IngresoPage = () => {
     tiposOrdenesMap,
   ]);
 
+  // Ordenar el arreglo FilteredIngresos por el campo last_update de forma descendente
+  filteredIngresos.sort((a: IngresoItem, b: IngresoItem) => {
+    if (a.last_update < b.last_update) return 1;
+    if (a.last_update > b.last_update) return -1;
+    return 0;
+  });
+
   // Paginación
   const totalPages = Math.ceil(filteredIngresos.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

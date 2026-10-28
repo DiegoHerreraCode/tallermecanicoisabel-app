@@ -49,6 +49,13 @@ export const RepuestoPage = () => {
     });
   }, [repuestos, marcasMap, nombreModeloFilter, nombreMarcaFilter]);
 
+  // Ordenar el arreglo FilteredRepuestos por el campo id_repuesto de forma descendente
+  filteredRepuestos.sort((a: RepuestoItem, b: RepuestoItem) => {
+    if (a.id_repuesto < b.id_repuesto) return 1;
+    if (a.id_repuesto > b.id_repuesto) return -1;
+    return 0;
+  });
+
   // Cálculo de paginación
   const totalPages = Math.ceil(filteredRepuestos.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

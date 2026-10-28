@@ -33,6 +33,13 @@ export const MarcaVehiculoPage = () => {
     });
   }, [marcasVehiculos, nombreMarcaFilter]);
 
+  // Ordenar el arreglo FilteredMarcas por el campo id_marca_vehiculo de forma descendente
+  filteredMarcas.sort((a: MarcaVehiculoItem, b: MarcaVehiculoItem) => {
+    if (a.id_marca_vehiculo < b.id_marca_vehiculo) return 1;
+    if (a.id_marca_vehiculo > b.id_marca_vehiculo) return -1;
+    return 0;
+  });
+
   // Cálculo de paginación
   const totalPages = Math.ceil(filteredMarcas.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

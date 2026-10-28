@@ -194,6 +194,13 @@ export const PresupuestoPage = () => {
     tiposOrdenesMap,
   ]);
 
+  // Ordenar el arreglo FilteredPresupuestos por el campo id_presupuesto de forma descendente
+  filteredPresupuestos.sort((a: PresupuestoItem, b: PresupuestoItem) => {
+    if (a.id_presupuesto < b.id_presupuesto) return 1;
+    if (a.id_presupuesto > b.id_presupuesto) return -1;
+    return 0;
+  });
+
   // Paginación (Máximo 7 filas por página)
   const totalPages = Math.ceil(filteredPresupuestos.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);

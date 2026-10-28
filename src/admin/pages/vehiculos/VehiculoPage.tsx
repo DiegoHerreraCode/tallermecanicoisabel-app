@@ -130,6 +130,13 @@ export const VehiculoPage = () => {
     modeloMarcaFilter,
   ]);
 
+  // Ordenar el arreglo FilteredVehiculos por el campo id_vehiculo de forma descendente
+  filteredVehiculos.sort((a: VehiculoItem, b: VehiculoItem) => {
+    if (a.id_vehiculo < b.id_vehiculo) return 1;
+    if (a.id_vehiculo > b.id_vehiculo) return -1;
+    return 0;
+  });
+
   // Paginación
   const totalPages = Math.ceil(filteredVehiculos.length / itemsPerPage) || 1;
   const validCurrentPage = Math.min(currentPage, totalPages);
@@ -234,7 +241,7 @@ export const VehiculoPage = () => {
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
                 <th scope="col" className="py-3 px-4 text-center">
-                  ID
+                  ID Vehículo
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
                   Placa
@@ -381,11 +388,10 @@ export const VehiculoPage = () => {
             <button
               key={pageNum}
               onClick={() => setCurrentPage(pageNum)}
-              className={`w-8 h-8 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                validCurrentPage === pageNum
-                  ? 'bg-blue-600 text-white shadow-sm font-bold'
-                  : 'bg-card border border-border/80 text-foreground hover:bg-accent'
-              }`}
+              className={`w-8 h-8 text-xs font-semibold rounded-lg transition-all cursor-pointer ${validCurrentPage === pageNum
+                ? 'bg-blue-600 text-white shadow-sm font-bold'
+                : 'bg-card border border-border/80 text-foreground hover:bg-accent'
+                }`}
             >
               {pageNum}
             </button>
