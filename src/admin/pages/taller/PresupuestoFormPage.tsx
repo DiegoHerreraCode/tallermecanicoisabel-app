@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router';
+import { useParams, useSearchParams, Link, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -14,6 +14,7 @@ import {
 
 import { getIngresoByIdAction } from '../../actions/get-ingreso-by-id.action';
 import { getOrdenByIdAction } from '../../actions/get-orden-by-id.action';
+import { getPresupuestoByIdAction } from '../../actions/get-presupuesto-by-id.action';
 import { getHallazgosTecnicosAction } from '../../actions/get-hallazgos-tecnicos.action';
 import { getRepuestosAction } from '../../actions/get-repuestos.action';
 import { getServiciosTallerAction } from '../../actions/get-servicios-taller.action';
@@ -55,8 +56,11 @@ interface ServicioLineState {
 }
 
 export const PresupuestoFormPage = () => {
+  const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const isNew = id === 'new';
 
   // Parámetros de la URL:
   // Inicial: /admin/taller/presupuestos/new?tipo=inicial&id_ingreso=x
@@ -68,6 +72,13 @@ export const PresupuestoFormPage = () => {
   const isExtra = tipoParam === 'extra';
 
   const { createPresupuesto, isCreatingPresupuesto } = usePresupuestoMutation();
+
+  // Consultar Presupuesto si ya existe (id !== 'new')
+  const { data: presupuestoData } = useQuery({
+    queryKey: ['presupuesto-item', id],
+    queryFn: () => getPresupuestoByIdAction(id!),
+    enabled: !isNew && !!id,
+  });
 
   // 1. Consultar Orden asociada si es presupuesto extra
   const { data: ordenData, isLoading: isLoadingOrden } = useQuery({
@@ -164,7 +175,17 @@ export const PresupuestoFormPage = () => {
     return v?.valor === 'sobre_costo' ? 'sobre_costo' : 'sobre_venta';
   }, [variables]);
 
+  // Obtener porcentaje de IVA:
+  // Si el presupuesto ya existe (id !== 'new'), se toma el porcentaje_iva del presupuesto.
+  // Si es un presupuesto nuevo (id === 'new'), se obtiene de la tabla variables (por defecto 19 si no está definido).
   const ivaPercentage = useMemo(() => {
+    if (!isNew && presupuestoData?.porcentaje_iva !== undefined && presupuestoData?.porcentaje_iva !== null) {
+      const parsedPresupuestoIva = Number(presupuestoData.porcentaje_iva);
+      if (!isNaN(parsedPresupuestoIva)) {
+        return parsedPresupuestoIva;
+      }
+    }
+
     const varIva = variables.find((v) =>
       v.nombre.toLowerCase().includes('iva')
     );
@@ -172,7 +193,7 @@ export const PresupuestoFormPage = () => {
       return Number(varIva.valor);
     }
     return 19;
-  }, [variables]);
+  }, [isNew, presupuestoData?.porcentaje_iva, variables]);
 
   // Funciones de cálculo económico
   const calcularPrecioConGanancia = (costo: number, porcentajeGanancia: number): number => {

@@ -144,8 +144,17 @@ export const OrdenFormPage = () => {
     return v?.valor === 'sobre_costo' ? 'sobre_costo' : 'sobre_venta';
   }, [variables]);
 
-  // Obtener porcentaje de IVA de las variables (default 16 o 19)
+  // Obtener porcentaje de IVA:
+  // Si la orden ya existe (modo view o edit), se toma el porcentaje_iva de la orden.
+  // Si es una orden nueva, se obtiene de la tabla variables (por defecto 19 si no está definido).
   const ivaPercentage = useMemo(() => {
+    if (!isNew && ordenData?.porcentaje_iva !== undefined && ordenData?.porcentaje_iva !== null) {
+      const parsedOrdenIva = Number(ordenData.porcentaje_iva);
+      if (!isNaN(parsedOrdenIva)) {
+        return parsedOrdenIva;
+      }
+    }
+
     const varIva = variables.find((v) =>
       v.nombre.toLowerCase().includes('iva')
     );
@@ -153,7 +162,7 @@ export const OrdenFormPage = () => {
       return Number(varIva.valor);
     }
     return 19;
-  }, [variables]);
+  }, [isNew, ordenData?.porcentaje_iva, variables]);
 
   // Función utilitaria para calcular precio unitario con ganancia según modoCalculo
   const calcularPrecioConGanancia = (costo: number, porcentajeGanancia: number): number => {
