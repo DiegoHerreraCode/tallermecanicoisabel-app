@@ -159,12 +159,15 @@ export const VehiculoFormPage = () => {
       return;
     }
 
-    if (!formData.placa.trim()) {
+    const placaVal = formData.placa?.trim() ?? '';
+    const annioVal = formData.annio?.trim() ?? '';
+
+    if (!placaVal) {
       toast.warning('Por favor ingresa la placa del vehículo');
       return;
     }
 
-    if (!formData.annio.trim()) {
+    if (!annioVal) {
       toast.warning('Por favor ingresa el año del vehículo');
       return;
     }
@@ -175,8 +178,8 @@ export const VehiculoFormPage = () => {
           id_cliente: Number(formData.id_cliente),
           id_tipo_vehiculo: Number(formData.id_tipo_vehiculo),
           id_modelo_vehiculo: Number(formData.id_modelo_vehiculo),
-          placa: formData.placa.trim().toUpperCase(),
-          annio: formData.annio.trim(),
+          placa: placaVal.toUpperCase(),
+          annio: annioVal,
         },
       });
     } else {
@@ -185,8 +188,8 @@ export const VehiculoFormPage = () => {
         payload: {
           id_tipo_vehiculo: Number(formData.id_tipo_vehiculo),
           id_modelo_vehiculo: Number(formData.id_modelo_vehiculo),
-          placa: formData.placa.trim().toUpperCase(),
-          annio: formData.annio.trim(),
+          placa: placaVal.toUpperCase(),
+          annio: annioVal,
         },
         id,
       });

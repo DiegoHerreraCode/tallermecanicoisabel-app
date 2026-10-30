@@ -1,5 +1,5 @@
 import type { VehiculoItem } from './vehiculo.interface';
-import type { TipoOrden } from './orden.interface';
+import type { TipoOrdenItem } from './tipo-orden.interface';
 
 export type IngresoEstadoType =
   | 'checklist_pendiente'
@@ -24,7 +24,7 @@ export interface IngresoItem {
 
   // Relaciones
   vehiculo?: VehiculoItem;
-  tipo_orden?: TipoOrden;
+  tipo_orden?: TipoOrdenItem;
 }
 
 export interface CreateIngresoPayload {

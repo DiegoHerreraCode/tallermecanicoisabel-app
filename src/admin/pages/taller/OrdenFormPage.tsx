@@ -846,15 +846,15 @@ export const OrdenFormPage = () => {
           )}
 
           {/* mostrar motivo de anulacion con su color de badge */}
-          {mode === 'view' && ordenData.estado_operativo === 'anulada' && (
+          {mode === 'view' && ordenData?.estado_operativo === 'anulada' && (
             <div className="flex items-center gap-3">
               <label className="text-xs sm:text-sm font-bold text-foreground">
                 Motivo de Anulación:
               </label>
               <span className={`text-xs sm:text-sm font-bold ${getEstadoBadgeClass(
-                ordenData.estado_operativo
+                ordenData?.estado_operativo
               )} p-2 rounded-xl border border-border/80`}>
-                {ordenData.motivo_anulacion}
+                {ordenData?.motivo_anulacion}
               </span>
             </div>
           )}
@@ -883,7 +883,7 @@ export const OrdenFormPage = () => {
                     <AlertCircle className="w-4 h-4 text-amber-500" />
                     Hallazgos técnicos
                   </h3>
-                  {(mode === 'view' && ordenData.estado_operativo !== 'finalizada' && ordenData.estado_operativo !== 'anulada') && (
+                  {(mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada') && (
                     <button
                       type="button"
                       onClick={() => setShowHallazgoModal(true)}
@@ -911,14 +911,14 @@ export const OrdenFormPage = () => {
                           <span className="font-bold text-foreground block">
                             {h.hallazgo}
                           </span>
-                          {mode === 'view' && ordenData.estado_operativo !== 'finalizada' && ordenData.estado_operativo !== 'anulada' && (
+                          {mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada' && (
                             <button
                               type="button"
                               onClick={() => {
                                 if (window.confirm(`¿Estás seguro de eliminar el hallazgo "${h.hallazgo}"?`)) {
                                   deleteHallazgo({
                                     id: h.id_hallazgo_tecnico,
-                                    ordenId: ordenData.id_orden
+                                    ordenId: ordenData?.id_orden
                                   });
                                 }
                               }}
@@ -1524,7 +1524,7 @@ export const OrdenFormPage = () => {
                   </>
                 )}
 
-                {mode === 'view' && ordenData.estado_operativo !== 'finalizada' && ordenData.estado_operativo !== 'anulada' && (
+                {mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada' && (
                   <>
                     {/* Botón Generar Presupuesto Extra */}
                     <button

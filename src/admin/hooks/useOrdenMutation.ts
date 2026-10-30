@@ -75,8 +75,8 @@ export const useOrdenMutation = () => {
 
   // Eliminar Hallazgo Técnico
   const deleteHallazgoMutation = useMutation({
-    mutationFn: ({ id, ordenId }: { id: number | string; ordenId?: number | string }) =>
-      deleteHallazgoTecnicoAction(id),
+    mutationFn: (variables: { id: number | string; ordenId?: number | string }) =>
+      deleteHallazgoTecnicoAction(variables.id),
     onSuccess: (_, variables) => {
       toast.success('Hallazgo técnico eliminado correctamente');
       if (variables.ordenId) {

@@ -194,8 +194,10 @@ export const OrdenPage = () => {
 
   // Ordenar el arreglo FilteredOrdenes por el campo last_update de forma descendente
   filteredOrdenes.sort((a: OrdenItem, b: OrdenItem) => {
-    if (a.last_update < b.last_update) return 1;
-    if (a.last_update > b.last_update) return -1;
+    const timeA = a.last_update ?? '';
+    const timeB = b.last_update ?? '';
+    if (timeA < timeB) return 1;
+    if (timeA > timeB) return -1;
     return 0;
   });
 
