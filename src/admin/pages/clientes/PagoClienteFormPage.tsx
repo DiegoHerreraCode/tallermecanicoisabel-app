@@ -63,6 +63,45 @@ export const PagoClienteFormPage = () => {
     }
   };
 
+  // Manejar cambio de orden para cargar automáticamente el monto total o pendiente
+  const handleOrdenChange = (selectedId: string) => {
+    setIdOrden(selectedId);
+    if (!selectedId) {
+      setMonto('');
+      return;
+    }
+
+    const selectedOrder = ordenes.find((o) => String(o.id_orden) === selectedId);
+    if (selectedOrder) {
+      // Si la orden tiene monto_pendiente, usarlo (que debe coincidir con la validación de pago)
+      // de lo contrario usar monto_total
+      const valorMonto =
+        selectedOrder.monto_pendiente !== undefined && selectedOrder.monto_pendiente !== null
+          ? selectedOrder.monto_pendiente
+          : selectedOrder.monto_total;
+
+      setMonto(valorMonto !== undefined && valorMonto !== null ? String(valorMonto) : '');
+
+      // Si aún no se seleccionó cliente, asociar el cliente de la orden
+      if (selectedOrder.id_cliente && !idCliente) {
+        setIdCliente(String(selectedOrder.id_cliente));
+      }
+    }
+  };
+
+  // Manejar cambio de cliente
+  const handleClienteChange = (selectedClientId: string) => {
+    setIdCliente(selectedClientId);
+    // Si la orden actualmente seleccionada no pertenece al nuevo cliente, resetearla
+    if (idOrden) {
+      const selectedOrder = ordenes.find((o) => String(o.id_orden) === idOrden);
+      if (selectedOrder && selectedClientId && Number(selectedOrder.id_cliente) !== Number(selectedClientId)) {
+        setIdOrden('');
+        setMonto('');
+      }
+    }
+  };
+
   // Enviar creación de nuevo pago
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,7 +204,7 @@ export const PagoClienteFormPage = () => {
               </label>
               <select
                 value={idCliente}
-                onChange={(e) => setIdCliente(e.target.value)}
+                onChange={(e) => handleClienteChange(e.target.value)}
                 required
                 className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
               >
@@ -185,7 +224,7 @@ export const PagoClienteFormPage = () => {
               </label>
               <select
                 value={idOrden}
-                onChange={(e) => setIdOrden(e.target.value)}
+                onChange={(e) => handleOrdenChange(e.target.value)}
                 required
                 className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
               >
