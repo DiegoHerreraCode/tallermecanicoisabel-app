@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Wrench, Layers, AlignLeft, Tag } from 'lucide-react';
+import { ArrowLeft, Save, Wrench, Layers, AlignLeft, Tag, Plus } from 'lucide-react';
 import { getServicioTallerByIdAction } from '../../actions/get-servicio-taller-by-id.action';
 import { getTiposServiciosTallerAction } from '../../actions/get-tipos-servicios-taller.action';
 import { useServicioTallerMutation } from '../../hooks/useServicioTallerMutation';
 import { getVariablesAction } from '../../actions/get-variables.action';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { QuickCreateTipoServicioModal } from '../../components/modals/QuickCreateTipoServicioModal';
 
 export const ServicioTallerFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,6 +60,9 @@ export const ServicioTallerFormPage = () => {
   const [montoVenta, setMontoVenta] = useState<number | ''>('');
   const [utilidad, setUtilidad] = useState<number | ''>('');
   const [porcentajeGanancia, setPorcentajeGanancia] = useState<number | ''>('');
+
+  // Modal de Creación In-Situ de Tipo de Servicio
+  const [isCreateTipoOpen, setIsCreateTipoOpen] = useState(false);
 
   // Sincronizar datos al editar
   useEffect(() => {
@@ -273,15 +277,27 @@ export const ServicioTallerFormPage = () => {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Campo: Tipo de Servicio del Taller (id_tipo_servicio_taller) */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-blue-500" />
-              Tipo de Servicio del Taller <span className="text-rose-500">*</span>
-              {!isCreating && (
-                <span className="text-[10px] font-normal normal-case text-amber-500 ml-1">
-                  (No editable)
-                </span>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-blue-500" />
+                Tipo de Servicio del Taller <span className="text-rose-500">*</span>
+                {!isCreating && (
+                  <span className="text-[10px] font-normal normal-case text-amber-500 ml-1">
+                    (No editable)
+                  </span>
+                )}
+              </label>
+              {isCreating && (
+                <button
+                  type="button"
+                  onClick={() => setIsCreateTipoOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Nuevo Tipo de Servicio
+                </button>
               )}
-            </label>
+            </div>
 
             {isCreating ? (
               <SearchableSelect
@@ -433,6 +449,15 @@ export const ServicioTallerFormPage = () => {
           </div>
         </form>
       </div>
+
+      {/* Modal Quick-Create In-Situ de Tipo de Servicio */}
+      <QuickCreateTipoServicioModal
+        isOpen={isCreateTipoOpen}
+        onClose={() => setIsCreateTipoOpen(false)}
+        onSuccess={(newTipo) => {
+          setIdTipoServicio(newTipo.id_tipo_servicio_taller);
+        }}
+      />
     </div>
   );
 };

@@ -2,15 +2,18 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Car } from 'lucide-react';
+import { ArrowLeft, Save, Car, Plus } from 'lucide-react';
 import { getVehiculosAction } from '../../actions/get-vehiculos.action';
 import { getClientesAction } from '../../actions/get-clientes.action';
 import { getModelosVehiculosAction } from '../../actions/get-modelos-vehiculos.action';
 import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.action';
 import { getTiposOrdenesAction } from '../../actions/get-tipos-ordenes.action';
+import { getTiposVehiculosAction } from '../../actions/get-tipos-vehiculos.action';
 import { useIngresoMutation } from '../../hooks/useIngresoMutation';
 import type { CreateIngresoPayload } from '../../interfaces/ingreso.interface';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { QuickCreateVehiculoModal } from '../../components/modals/QuickCreateVehiculoModal';
+import { QuickCreateTipoOrdenModal } from '../../components/modals/QuickCreateTipoOrdenModal';
 
 export const IngresoFormPage = () => {
   const { createIngreso, isCreating } = useIngresoMutation();
@@ -41,6 +44,11 @@ export const IngresoFormPage = () => {
   const { data: marcasVehiculos = [] } = useQuery({
     queryKey: ['marcas-vehiculos-listado'],
     queryFn: getMarcasVehiculosAction,
+  });
+
+  const { data: tiposVehiculos = [] } = useQuery({
+    queryKey: ['tipos-vehiculos-listado'],
+    queryFn: getTiposVehiculosAction,
   });
 
   // Mapas
@@ -96,6 +104,10 @@ export const IngresoFormPage = () => {
     id_vehiculo: 0,
     observaciones_cliente: '',
   });
+
+  // Modales Quick-Create In-Situ
+  const [isCreateVehiculoOpen, setIsCreateVehiculoOpen] = useState(false);
+  const [isCreateTipoOrdenOpen, setIsCreateTipoOrdenOpen] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -201,9 +213,19 @@ export const IngresoFormPage = () => {
 
         {/* Vehículo */}
         <div>
-          <label className="block text-xs font-bold text-foreground mb-1.5">
-            Vehículo <span className="text-rose-500">*</span>
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-bold text-foreground">
+              Vehículo <span className="text-rose-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsCreateVehiculoOpen(true)}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Nuevo Vehículo
+            </button>
+          </div>
           <SearchableSelect
             options={vehiculoOptions}
             value={formData.id_vehiculo}
@@ -219,6 +241,7 @@ export const IngresoFormPage = () => {
                 : 'Seleccione el vehículo...'
             }
             searchPlaceholder="Buscar por placa, cliente o cédula..."
+            emptyMessage="No se encontraron vehículos registrados"
             disabled={isLoadingVehiculos}
             required
           />
@@ -266,6 +289,33 @@ export const IngresoFormPage = () => {
           </button>
         </div>
       </form>
+
+      {/* Modales Quick-Create In-Situ */}
+      <QuickCreateVehiculoModal
+        isOpen={isCreateVehiculoOpen}
+        onClose={() => setIsCreateVehiculoOpen(false)}
+        clientes={clientes}
+        tiposVehiculos={tiposVehiculos}
+        modelosVehiculos={modelosVehiculos}
+        marcasVehiculos={marcasVehiculos}
+        onSuccess={(newVehiculo) => {
+          setFormData((prev) => ({
+            ...prev,
+            id_vehiculo: newVehiculo.id_vehiculo,
+          }));
+        }}
+      />
+
+      <QuickCreateTipoOrdenModal
+        isOpen={isCreateTipoOrdenOpen}
+        onClose={() => setIsCreateTipoOrdenOpen(false)}
+        onSuccess={(newTipo) => {
+          setFormData((prev) => ({
+            ...prev,
+            id_tipo_orden: newTipo.id_tipo_orden,
+          }));
+        }}
+      />
     </div>
   );
 };

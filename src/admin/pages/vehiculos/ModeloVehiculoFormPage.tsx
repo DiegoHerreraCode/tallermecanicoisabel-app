@@ -2,12 +2,13 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Car } from 'lucide-react';
+import { ArrowLeft, Save, Car, Plus } from 'lucide-react';
 import { getModeloVehiculoByIdAction } from '../../actions/get-modelo-vehiculo-by-id.action';
 import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.action';
 import { useModeloVehiculoMutation } from '../../hooks/useModeloVehiculoMutation';
 import type { CreateUpdateModeloVehiculoPayload } from '../../interfaces/modelo-vehiculo.interface';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { QuickCreateMarcaVehiculoModal } from '../../components/modals/QuickCreateMarcaVehiculoModal';
 
 export const ModeloVehiculoFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +44,9 @@ export const ModeloVehiculoFormPage = () => {
     nombre: '',
     id_marca_vehiculo: 0,
   });
+
+  // Modal de Creación In-Situ de Marca de Vehículo
+  const [isCreateMarcaOpen, setIsCreateMarcaOpen] = useState(false);
 
   // Sincronizar datos al cargar el modelo de vehículo existente
   useEffect(() => {
@@ -123,9 +127,19 @@ export const ModeloVehiculoFormPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Marca de Vehículo */}
           <div>
-            <label className="block text-xs font-bold text-foreground mb-1.5">
-              Marca de Vehículo <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-foreground">
+                Marca de Vehículo <span className="text-rose-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsCreateMarcaOpen(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Nueva Marca
+              </button>
+            </div>
             <SearchableSelect
               options={marcasOptions}
               value={formData.id_marca_vehiculo}
@@ -177,6 +191,18 @@ export const ModeloVehiculoFormPage = () => {
           </button>
         </div>
       </form>
+
+      {/* Modal Quick-Create In-Situ de Marca de Vehículo */}
+      <QuickCreateMarcaVehiculoModal
+        isOpen={isCreateMarcaOpen}
+        onClose={() => setIsCreateMarcaOpen(false)}
+        onSuccess={(newMarca) => {
+          setFormData((prev) => ({
+            ...prev,
+            id_marca_vehiculo: newMarca.id_marca_vehiculo,
+          }));
+        }}
+      />
     </div>
   );
 };

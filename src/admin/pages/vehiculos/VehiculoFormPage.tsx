@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Lock, User, Car } from 'lucide-react';
+import { ArrowLeft, Save, Lock, User, Car, Plus } from 'lucide-react';
 import { getVehiculoByIdAction } from '../../actions/get-vehiculo-by-id.action';
 import { getClientesAction } from '../../actions/get-clientes.action';
 import { getTiposVehiculosAction } from '../../actions/get-tipos-vehiculos.action';
@@ -11,6 +11,10 @@ import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.act
 import { useVehiculoMutation } from '../../hooks/useVehiculoMutation';
 import type { CreateUpdateVehiculoPayload } from '../../interfaces/vehiculo.interface';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { QuickCreateClienteModal } from '../../components/modals/QuickCreateClienteModal';
+import { QuickCreateTipoVehiculoModal } from '../../components/modals/QuickCreateTipoVehiculoModal';
+import { QuickCreateMarcaVehiculoModal } from '../../components/modals/QuickCreateMarcaVehiculoModal';
+import { QuickCreateModeloVehiculoModal } from '../../components/modals/QuickCreateModeloVehiculoModal';
 
 export const VehiculoFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -92,6 +96,16 @@ export const VehiculoFormPage = () => {
     }));
   }, [tiposVehiculos]);
 
+  // Opciones de clientes para SearchableSelect con búsqueda por nombre y cédula
+  const clientesOptions = useMemo(() => {
+    return clientes.map((c) => ({
+      value: c.id_cliente,
+      label: c.nombre,
+      subtext: `C.I. ${c.cedula}`,
+      searchText: `${c.nombre} ${c.cedula}`,
+    }));
+  }, [clientes]);
+
   const modelosVehiculosOptions = useMemo(() => {
     return filteredModelos.map((mod) => {
       const marcaNombre = mod.marca?.nombre || marcasMap.get(mod.id_marca_vehiculo) || '';
@@ -103,6 +117,12 @@ export const VehiculoFormPage = () => {
       };
     });
   }, [filteredModelos, marcasMap]);
+
+  // Modales Quick-Create In-Situ
+  const [isCreateClienteOpen, setIsCreateClienteOpen] = useState(false);
+  const [isCreateTipoOpen, setIsCreateTipoOpen] = useState(false);
+  const [isCreateMarcaOpen, setIsCreateMarcaOpen] = useState(false);
+  const [isCreateModeloOpen, setIsCreateModeloOpen] = useState(false);
 
   // Sincronizar datos al cargar vehículo existente
   useEffect(() => {
@@ -259,27 +279,37 @@ export const VehiculoFormPage = () => {
       <form onSubmit={handleSubmit} className="bg-card p-6 rounded-2xl border border-border/80 shadow-xs space-y-5">
         {/* Cliente asociado: NO editable cuando se está editando */}
         <div>
-          <label className="block text-xs font-bold text-foreground mb-1.5">
-            Cliente Propietario <span className="text-rose-500">*</span>
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-bold text-foreground">
+              Cliente Propietario <span className="text-rose-500">*</span>
+            </label>
+            {isCreating && (
+              <button
+                type="button"
+                onClick={() => setIsCreateClienteOpen(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Nuevo Cliente
+              </button>
+            )}
+          </div>
 
           {isCreating ? (
-            <div className="relative">
-              <select
-                name="id_cliente"
-                value={formData.id_cliente}
-                onChange={handleChange}
-                className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 cursor-pointer"
-                required
-              >
-                <option value={0}>Selecciona un cliente...</option>
-                {clientes.map((cli) => (
-                  <option key={cli.id_cliente} value={cli.id_cliente}>
-                    {cli.nombre} - C.I. {cli.cedula}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SearchableSelect
+              options={clientesOptions}
+              value={formData.id_cliente}
+              onChange={(val) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  id_cliente: val ? Number(val) : 0,
+                }))
+              }
+              placeholder="Selecciona un cliente..."
+              searchPlaceholder="Buscar por nombre o cédula..."
+              emptyMessage="No se encontraron clientes"
+              required
+            />
           ) : (
             <div className="relative flex items-center justify-between p-3.5 bg-muted/40 border border-border/80 rounded-xl">
               <div className="flex items-center gap-2.5">
@@ -310,9 +340,19 @@ export const VehiculoFormPage = () => {
 
         {/* Tipo de Vehículo */}
         <div>
-          <label className="block text-xs font-bold text-foreground mb-1.5">
-            Tipo de Vehículo <span className="text-rose-500">*</span>
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-xs font-bold text-foreground">
+              Tipo de Vehículo <span className="text-rose-500">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsCreateTipoOpen(true)}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Nuevo Tipo
+            </button>
+          </div>
           <SearchableSelect
             options={tiposVehiculosOptions}
             value={formData.id_tipo_vehiculo}
@@ -332,9 +372,19 @@ export const VehiculoFormPage = () => {
         {/* Marca (Filtro auxiliar) y Modelo de Vehículo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-foreground mb-1.5">
-              Marca (Filtrar modelos)
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-foreground">
+                Marca (Filtrar modelos)
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsCreateMarcaOpen(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Nueva Marca
+              </button>
+            </div>
             <SearchableSelect
               options={marcasOptions}
               value={selectedMarcaId}
@@ -363,9 +413,19 @@ export const VehiculoFormPage = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-foreground mb-1.5">
-              Modelo de Vehículo <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-foreground">
+                Modelo de Vehículo <span className="text-rose-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsCreateModeloOpen(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Nuevo Modelo
+              </button>
+            </div>
             <SearchableSelect
               options={modelosVehiculosOptions}
               value={formData.id_modelo_vehiculo}
@@ -452,6 +512,53 @@ export const VehiculoFormPage = () => {
           </button>
         </div>
       </form>
+
+      {/* Modales Quick-Create In-Situ */}
+      <QuickCreateClienteModal
+        isOpen={isCreateClienteOpen}
+        onClose={() => setIsCreateClienteOpen(false)}
+        onSuccess={(newCliente) => {
+          setFormData((prev) => ({
+            ...prev,
+            id_cliente: newCliente.id_cliente,
+          }));
+        }}
+      />
+
+      <QuickCreateTipoVehiculoModal
+        isOpen={isCreateTipoOpen}
+        onClose={() => setIsCreateTipoOpen(false)}
+        onSuccess={(newTipo) => {
+          setFormData((prev) => ({
+            ...prev,
+            id_tipo_vehiculo: newTipo.id_tipo_vehiculo,
+          }));
+        }}
+      />
+
+      <QuickCreateMarcaVehiculoModal
+        isOpen={isCreateMarcaOpen}
+        onClose={() => setIsCreateMarcaOpen(false)}
+        onSuccess={(newMarca) => {
+          setSelectedMarcaId(newMarca.id_marca_vehiculo);
+        }}
+      />
+
+      <QuickCreateModeloVehiculoModal
+        isOpen={isCreateModeloOpen}
+        onClose={() => setIsCreateModeloOpen(false)}
+        marcas={marcasVehiculos}
+        defaultMarcaId={selectedMarcaId || undefined}
+        onSuccess={(newModelo) => {
+          setFormData((prev) => ({
+            ...prev,
+            id_modelo_vehiculo: newModelo.id_modelo_vehiculo,
+          }));
+          if (newModelo.id_marca_vehiculo) {
+            setSelectedMarcaId(newModelo.id_marca_vehiculo);
+          }
+        }}
+      />
     </div>
   );
 };

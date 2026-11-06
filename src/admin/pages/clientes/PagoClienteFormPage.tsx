@@ -10,12 +10,14 @@ import {
   FileText,
   CheckCircle2,
   Eye,
+  Plus,
 } from 'lucide-react';
 import { getPagoClienteByIdAction } from '../../actions/get-pago-cliente-by-id.action';
 import { getClientesAction } from '../../actions/get-clientes.action';
 import { getOrdenesAction } from '../../actions/get-ordenes.action';
 import { usePagoClienteMutation } from '../../hooks/usePagoClienteMutation';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { QuickCreateClienteModal } from '../../components/modals/QuickCreateClienteModal';
 
 export const PagoClienteFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -64,6 +66,9 @@ export const PagoClienteFormPage = () => {
       searchText: `${c.nombre} ${c.cedula}`,
     }));
   }, [clientes]);
+
+  // Modal Quick-Create In-Situ de Cliente
+  const [isCreateClienteOpen, setIsCreateClienteOpen] = useState(false);
 
   // Previsualización de imagen al crear
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,9 +215,19 @@ export const PagoClienteFormPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Cliente */}
             <div>
-              <label className="block text-xs font-bold text-foreground mb-1.5">
-                Cliente <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-bold text-foreground">
+                  Cliente <span className="text-rose-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsCreateClienteOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Nuevo Cliente
+                </button>
+              </div>
               <SearchableSelect
                 options={clientesOptions}
                 value={idCliente}
@@ -465,6 +480,15 @@ export const PagoClienteFormPage = () => {
           </div>
         </div>
       )}
+
+      {/* Modal Quick-Create In-Situ de Cliente */}
+      <QuickCreateClienteModal
+        isOpen={isCreateClienteOpen}
+        onClose={() => setIsCreateClienteOpen(false)}
+        onSuccess={(newCliente) => {
+          handleClienteChange(String(newCliente.id_cliente));
+        }}
+      />
     </div>
   );
 };

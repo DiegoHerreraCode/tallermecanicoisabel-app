@@ -2,12 +2,13 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Wrench } from 'lucide-react';
+import { ArrowLeft, Save, Wrench, Plus } from 'lucide-react';
 import { getRepuestoByIdAction } from '../../actions/get-repuesto-by-id.action';
 import { getMarcasRepuestosAction } from '../../actions/get-marcas-repuestos.action';
 import { getVariablesAction } from '../../actions/get-variables.action';
 import { useRepuestoMutation } from '../../hooks/useRepuestoMutation';
 import { SearchableSelect } from '@/components/ui/searchable-select';
+import { QuickCreateMarcaRepuestoModal } from '../../components/modals/QuickCreateMarcaRepuestoModal';
 
 export const RepuestoFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +59,9 @@ export const RepuestoFormPage = () => {
   const [montoVenta, setMontoVenta] = useState<number | ''>('');
   const [utilidad, setUtilidad] = useState<number | ''>('');
   const [porcentajeGanancia, setPorcentajeGanancia] = useState<number | ''>('');
+
+  // Modal de Creación In-Situ de Marca de Repuesto
+  const [isCreateMarcaOpen, setIsCreateMarcaOpen] = useState(false);
 
   // Sincronizar datos al editar
   useEffect(() => {
@@ -244,9 +248,19 @@ export const RepuestoFormPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Marca de Repuesto */}
           <div>
-            <label className="block text-xs font-bold text-foreground mb-1.5">
-              Marca de Repuesto <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-foreground">
+                Marca de Repuesto <span className="text-rose-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsCreateMarcaOpen(true)}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Nueva Marca
+              </button>
+            </div>
             <SearchableSelect
               options={marcasOptions}
               value={idMarcaRepuesto}
@@ -367,6 +381,15 @@ export const RepuestoFormPage = () => {
           </button>
         </div>
       </form>
+
+      {/* Modal Quick-Create In-Situ de Marca de Repuesto */}
+      <QuickCreateMarcaRepuestoModal
+        isOpen={isCreateMarcaOpen}
+        onClose={() => setIsCreateMarcaOpen(false)}
+        onSuccess={(newMarca) => {
+          setIdMarcaRepuesto(newMarca.id_marca_repuesto);
+        }}
+      />
     </div>
   );
 };
