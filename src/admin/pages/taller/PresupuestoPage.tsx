@@ -51,8 +51,9 @@ export const PresupuestoPage = () => {
   } = usePresupuestoMutation();
 
   // Estados de filtros según el boceto:
-  // "opcion de filtrado por num_presupuesto, tipo de orden, tipo, estado, fecha desde y fecha hasta"
+  // "opcion de filtrado por num_presupuesto, cliente (nombre y cédula), tipo de orden, tipo, estado, fecha desde y fecha hasta"
   const [numPresupuestoFilter, setNumPresupuestoFilter] = useState('');
+  const [clienteFilter, setClienteFilter] = useState('');
   const [tipoOrdenFilter, setTipoOrdenFilter] = useState('');
   const [tipoFilter, setTipoFilter] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('');
@@ -99,6 +100,13 @@ export const PresupuestoPage = () => {
         : undefined) ||
       'No especificado';
 
+    // cliente (nombre y cédula)
+    const clienteObj =
+      presupuesto.orden?.cliente ||
+      presupuesto.ingreso?.vehiculo?.cliente;
+    const clienteNombre = clienteObj?.nombre || 'No asignado';
+    const clienteCedula = clienteObj?.cedula ? `C.I. ${clienteObj.cedula}` : '';
+
     // tipo (inicial | extra)
     const tipo = presupuesto.tipo || 'inicial';
 
@@ -111,6 +119,8 @@ export const PresupuestoPage = () => {
 
     return {
       numPresupuesto,
+      clienteNombre,
+      clienteCedula,
       tipoOrdenNombre,
       tipo,
       fechaCreacion,
@@ -130,6 +140,14 @@ export const PresupuestoPage = () => {
         const matchesNum = resolved.numPresupuesto.toLowerCase().includes(query);
         const matchesId = String(item.id_presupuesto).includes(query);
         if (!matchesNum && !matchesId) return false;
+      }
+
+      // Filtro por cliente (nombre o cédula)
+      if (clienteFilter.trim()) {
+        const query = clienteFilter.trim().toLowerCase();
+        const matchesNombre = resolved.clienteNombre.toLowerCase().includes(query);
+        const matchesCedula = resolved.clienteCedula.toLowerCase().includes(query);
+        if (!matchesNombre && !matchesCedula) return false;
       }
 
       // Filtro por tipo de orden
@@ -186,6 +204,7 @@ export const PresupuestoPage = () => {
   }, [
     presupuestos,
     numPresupuestoFilter,
+    clienteFilter,
     tipoOrdenFilter,
     tipoFilter,
     estadoFilter,
@@ -383,7 +402,7 @@ export const PresupuestoPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
           {/* Filtro: num_presupuesto */}
           <div>
             <label className="block text-xs font-bold text-foreground mb-1">
@@ -395,6 +414,23 @@ export const PresupuestoPage = () => {
               value={numPresupuestoFilter}
               onChange={(e) => {
                 setNumPresupuestoFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+            />
+          </div>
+
+          {/* Filtro: cliente */}
+          <div>
+            <label className="block text-xs font-bold text-foreground mb-1">
+              cliente (nombre / cédula)
+            </label>
+            <input
+              type="text"
+              placeholder="Buscar cliente o C.I..."
+              value={clienteFilter}
+              onChange={(e) => {
+                setClienteFilter(e.target.value);
                 setCurrentPage(1);
               }}
               className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
@@ -507,6 +543,9 @@ export const PresupuestoPage = () => {
                   num_presupuesto
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
+                  cliente
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
                   tipo de orden
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
@@ -529,7 +568,7 @@ export const PresupuestoPage = () => {
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <td colSpan={8} className="text-center py-12 text-muted-foreground">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
                       <span className="text-xs">Cargando presupuestos...</span>
@@ -538,7 +577,7 @@ export const PresupuestoPage = () => {
                 </tr>
               ) : currentPresupuestos.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <td colSpan={8} className="text-center py-12 text-muted-foreground">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <FileText className="w-8 h-8 text-muted-foreground/50" />
                       <span className="text-sm font-medium">
@@ -560,6 +599,20 @@ export const PresupuestoPage = () => {
                       {/* num_presupuesto */}
                       <td className="py-3 px-4 text-center font-bold text-foreground whitespace-nowrap">
                         {resolved.numPresupuesto}
+                      </td>
+
+                      {/* cliente */}
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
+                        <div className="flex flex-col items-center">
+                          <span className="font-semibold text-foreground text-xs sm:text-sm">
+                            {resolved.clienteNombre}
+                          </span>
+                          {resolved.clienteCedula && (
+                            <span className="text-[11px] text-muted-foreground">
+                              {resolved.clienteCedula}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* tipo de orden */}

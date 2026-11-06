@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -7,6 +7,7 @@ import { getModeloVehiculoByIdAction } from '../../actions/get-modelo-vehiculo-b
 import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.action';
 import { useModeloVehiculoMutation } from '../../hooks/useModeloVehiculoMutation';
 import type { CreateUpdateModeloVehiculoPayload } from '../../interfaces/modelo-vehiculo.interface';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 export const ModeloVehiculoFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,15 @@ export const ModeloVehiculoFormPage = () => {
     queryKey: ['marcas-vehiculos-listado'],
     queryFn: getMarcasVehiculosAction,
   });
+
+  // Opciones de marcas para SearchableSelect con búsqueda por nombre de marca
+  const marcasOptions = useMemo(() => {
+    return marcasVehiculos.map((m) => ({
+      value: m.id_marca_vehiculo,
+      label: m.nombre,
+      searchText: m.nombre,
+    }));
+  }, [marcasVehiculos]);
 
   // Consulta los datos del modelo de vehículo si estamos en modo edición
   const { data: modeloVehiculoData, isLoading: isLoadingModeloVehiculo } = useQuery({
@@ -116,20 +126,20 @@ export const ModeloVehiculoFormPage = () => {
             <label className="block text-xs font-bold text-foreground mb-1.5">
               Marca de Vehículo <span className="text-rose-500">*</span>
             </label>
-            <select
-              name="id_marca_vehiculo"
-              value={formData.id_marca_vehiculo || ''}
-              onChange={handleChange}
+            <SearchableSelect
+              options={marcasOptions}
+              value={formData.id_marca_vehiculo}
+              onChange={(val) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  id_marca_vehiculo: val ? Number(val) : 0,
+                }))
+              }
+              placeholder="Selecciona una marca..."
+              searchPlaceholder="Buscar por nombre de marca..."
+              emptyMessage="No se encontraron marcas"
               required
-              className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 cursor-pointer"
-            >
-              <option value="">Selecciona una marca...</option>
-              {marcasVehiculos.map((m) => (
-                <option key={m.id_marca_vehiculo} value={m.id_marca_vehiculo}>
-                  {m.nombre}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           {/* Nombre del Modelo */}

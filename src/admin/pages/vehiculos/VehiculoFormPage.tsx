@@ -10,6 +10,7 @@ import { getModelosVehiculosAction } from '../../actions/get-modelos-vehiculos.a
 import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.action';
 import { useVehiculoMutation } from '../../hooks/useVehiculoMutation';
 import type { CreateUpdateVehiculoPayload } from '../../interfaces/vehiculo.interface';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 export const VehiculoFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -71,6 +72,38 @@ export const VehiculoFormPage = () => {
     return modelosVehiculos.filter((m) => m.id_marca_vehiculo === selectedMarcaId);
   }, [modelosVehiculos, selectedMarcaId]);
 
+  // Opciones para SearchableSelects
+  const marcasOptions = useMemo(() => {
+    return [
+      { value: 0, label: 'Todas las marcas...', searchText: 'todas todas las marcas' },
+      ...marcasVehiculos.map((m) => ({
+        value: m.id_marca_vehiculo,
+        label: m.nombre,
+        searchText: m.nombre,
+      })),
+    ];
+  }, [marcasVehiculos]);
+
+  const tiposVehiculosOptions = useMemo(() => {
+    return tiposVehiculos.map((t) => ({
+      value: t.id_tipo_vehiculo,
+      label: t.nombre,
+      searchText: t.nombre,
+    }));
+  }, [tiposVehiculos]);
+
+  const modelosVehiculosOptions = useMemo(() => {
+    return filteredModelos.map((mod) => {
+      const marcaNombre = mod.marca?.nombre || marcasMap.get(mod.id_marca_vehiculo) || '';
+      return {
+        value: mod.id_modelo_vehiculo,
+        label: mod.nombre,
+        subtext: marcaNombre ? `(${marcaNombre})` : undefined,
+        searchText: `${mod.nombre} ${marcaNombre}`,
+      };
+    });
+  }, [filteredModelos, marcasMap]);
+
   // Sincronizar datos al cargar vehículo existente
   useEffect(() => {
     if (vehiculoData) {
@@ -123,22 +156,6 @@ export const VehiculoFormPage = () => {
       ...prev,
       [name]: value,
     }));
-  };
-
-  // Manejar cambio en selector de marca (filtro auxiliar de modelos)
-  const handleMarcaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const marcaId = Number(e.target.value);
-    setSelectedMarcaId(marcaId);
-
-    // Si el modelo actualmente seleccionado no pertenece a la nueva marca, resetearlo
-    if (marcaId > 0 && formData.id_modelo_vehiculo) {
-      const modeloActual = modelosVehiculos.find(
-        (m) => m.id_modelo_vehiculo === formData.id_modelo_vehiculo
-      );
-      if (modeloActual && modeloActual.id_marca_vehiculo !== marcaId) {
-        setFormData((prev) => ({ ...prev, id_modelo_vehiculo: 0 }));
-      }
-    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -296,20 +313,20 @@ export const VehiculoFormPage = () => {
           <label className="block text-xs font-bold text-foreground mb-1.5">
             Tipo de Vehículo <span className="text-rose-500">*</span>
           </label>
-          <select
-            name="id_tipo_vehiculo"
+          <SearchableSelect
+            options={tiposVehiculosOptions}
             value={formData.id_tipo_vehiculo}
-            onChange={handleChange}
-            className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 cursor-pointer"
+            onChange={(val) =>
+              setFormData((prev) => ({
+                ...prev,
+                id_tipo_vehiculo: val ? Number(val) : 0,
+              }))
+            }
+            placeholder="Selecciona un tipo de vehículo..."
+            searchPlaceholder="Buscar por nombre del tipo de vehículo..."
+            emptyMessage="No se encontraron tipos de vehículos"
             required
-          >
-            <option value={0}>Selecciona un tipo de vehículo...</option>
-            {tiposVehiculos.map((tipo) => (
-              <option key={tipo.id_tipo_vehiculo} value={tipo.id_tipo_vehiculo}>
-                {tipo.nombre}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
         {/* Marca (Filtro auxiliar) y Modelo de Vehículo */}
@@ -318,42 +335,59 @@ export const VehiculoFormPage = () => {
             <label className="block text-xs font-bold text-foreground mb-1.5">
               Marca (Filtrar modelos)
             </label>
-            <select
+            <SearchableSelect
+              options={marcasOptions}
               value={selectedMarcaId}
-              onChange={handleMarcaChange}
-              className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 cursor-pointer"
-            >
-              <option value={0}>Todas las marcas...</option>
-              {marcasVehiculos.map((marca) => (
-                <option key={marca.id_marca_vehiculo} value={marca.id_marca_vehiculo}>
-                  {marca.nombre}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => {
+                const marcaId = val ? Number(val) : 0;
+                setSelectedMarcaId(marcaId);
+                // Si el modelo actual no pertenece a la nueva marca, limpiar modelo
+                if (marcaId !== 0) {
+                  const modeloValido = modelosVehiculos.find(
+                    (m) =>
+                      m.id_modelo_vehiculo === formData.id_modelo_vehiculo &&
+                      m.id_marca_vehiculo === marcaId
+                  );
+                  if (!modeloValido) {
+                    setFormData((prev) => ({
+                      ...prev,
+                      id_modelo_vehiculo: 0,
+                    }));
+                  }
+                }
+              }}
+              placeholder="Todas las marcas..."
+              searchPlaceholder="Buscar por nombre de marca..."
+              emptyMessage="No se encontraron marcas"
+            />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-foreground mb-1.5">
               Modelo de Vehículo <span className="text-rose-500">*</span>
             </label>
-            <select
-              name="id_modelo_vehiculo"
+            <SearchableSelect
+              options={modelosVehiculosOptions}
               value={formData.id_modelo_vehiculo}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 cursor-pointer"
+              onChange={(val) => {
+                const modeloId = val ? Number(val) : 0;
+                setFormData((prev) => ({
+                  ...prev,
+                  id_modelo_vehiculo: modeloId,
+                }));
+                // Sincronizar marca si está seleccionada "todas"
+                if (modeloId) {
+                  const mod = modelosVehiculos.find((m) => m.id_modelo_vehiculo === modeloId);
+                  if (mod && mod.id_marca_vehiculo && !selectedMarcaId) {
+                    setSelectedMarcaId(mod.id_marca_vehiculo);
+                  }
+                }
+              }}
+              placeholder="Selecciona un modelo..."
+              searchPlaceholder="Buscar por nombre del modelo de vehículo..."
+              emptyMessage="No se encontraron modelos de vehículos"
               required
-            >
-              <option value={0}>Selecciona un modelo...</option>
-              {filteredModelos.map((mod) => {
-                const marcaNombre =
-                  mod.marca?.nombre || marcasMap.get(mod.id_marca_vehiculo) || '';
-                return (
-                  <option key={mod.id_modelo_vehiculo} value={mod.id_modelo_vehiculo}>
-                    {mod.nombre} {marcaNombre ? `(${marcaNombre})` : ''}
-                  </option>
-                );
-              })}
-            </select>
+            />
           </div>
         </div>
 

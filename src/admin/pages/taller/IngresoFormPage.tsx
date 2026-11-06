@@ -10,6 +10,7 @@ import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.act
 import { getTiposOrdenesAction } from '../../actions/get-tipos-ordenes.action';
 import { useIngresoMutation } from '../../hooks/useIngresoMutation';
 import type { CreateIngresoPayload } from '../../interfaces/ingreso.interface';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 export const IngresoFormPage = () => {
   const { createIngreso, isCreating } = useIngresoMutation();
@@ -69,6 +70,25 @@ export const IngresoFormPage = () => {
     });
     return map;
   }, [modelosVehiculos, marcasMap]);
+
+  // Opciones de vehículos para SearchableSelect con búsqueda por cliente, cédula y placa
+  const vehiculoOptions = useMemo(() => {
+    return vehiculos.map((v) => {
+      const cliente = clientesMap.get(v.id_cliente);
+      const modelo = modelosMap.get(v.id_modelo_vehiculo);
+      const modeloNombre = modelo?.nombre || 'N/A';
+      const marcaNombre = modelo?.marca || '';
+      const clienteNombre = cliente?.nombre || 'Sin cliente';
+      const clienteCedula = cliente?.cedula ? `C.I. ${cliente.cedula}` : '';
+
+      return {
+        value: v.id_vehiculo,
+        label: `[${v.placa}] ${modeloNombre} ${marcaNombre}`,
+        description: `Propietario: ${clienteNombre} ${clienteCedula ? `(${clienteCedula})` : ''}`,
+        searchText: `${v.placa} ${clienteNombre} ${cliente?.cedula || ''} ${modeloNombre} ${marcaNombre}`,
+      };
+    });
+  }, [vehiculos, clientesMap, modelosMap]);
 
   // Form State
   const [formData, setFormData] = useState<CreateIngresoPayload>({
@@ -184,34 +204,24 @@ export const IngresoFormPage = () => {
           <label className="block text-xs font-bold text-foreground mb-1.5">
             Vehículo <span className="text-rose-500">*</span>
           </label>
-          <select
-            name="id_vehiculo"
+          <SearchableSelect
+            options={vehiculoOptions}
             value={formData.id_vehiculo}
-            onChange={handleChange}
-            required
-            disabled={isLoadingVehiculos}
-            className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 cursor-pointer disabled:opacity-50"
-          >
-            <option value={0}>
-              {isLoadingVehiculos
+            onChange={(val) =>
+              setFormData((prev) => ({
+                ...prev,
+                id_vehiculo: val ? Number(val) : 0,
+              }))
+            }
+            placeholder={
+              isLoadingVehiculos
                 ? 'Cargando vehículos...'
-                : 'seleccione el vehículo'}
-            </option>
-            {vehiculos.map((v) => {
-              const cliente = clientesMap.get(v.id_cliente);
-              const modelo = modelosMap.get(v.id_modelo_vehiculo);
-              const modeloNombre = modelo?.nombre || 'N/A';
-              const marcaNombre = modelo?.marca || '';
-              const clienteNombre = cliente?.nombre || 'Sin cliente';
-              const clienteCedula = cliente?.cedula ? `(C.I. ${cliente.cedula})` : '';
-
-              return (
-                <option key={v.id_vehiculo} value={v.id_vehiculo}>
-                  [{v.placa}] {modeloNombre} {marcaNombre} — Propietario: {clienteNombre} {clienteCedula}
-                </option>
-              );
-            })}
-          </select>
+                : 'Seleccione el vehículo...'
+            }
+            searchPlaceholder="Buscar por placa, cliente o cédula..."
+            disabled={isLoadingVehiculos}
+            required
+          />
         </div>
 
         {/* Observaciones del Cliente */}

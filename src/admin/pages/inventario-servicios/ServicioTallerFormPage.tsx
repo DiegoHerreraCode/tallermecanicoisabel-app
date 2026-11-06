@@ -7,6 +7,7 @@ import { getServicioTallerByIdAction } from '../../actions/get-servicio-taller-b
 import { getTiposServiciosTallerAction } from '../../actions/get-tipos-servicios-taller.action';
 import { useServicioTallerMutation } from '../../hooks/useServicioTallerMutation';
 import { getVariablesAction } from '../../actions/get-variables.action';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 export const ServicioTallerFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +41,15 @@ export const ServicioTallerFormPage = () => {
     const v = variables.find((item) => item.nombre === 'calculo_ganancia');
     return v?.valor === 'sobre_costo' ? 'sobre_costo' : 'sobre_venta';
   }, [variables]);
+
+  // Opciones de tipos de servicios para SearchableSelect con búsqueda por nombre de tipo de servicio
+  const tiposServiciosOptions = useMemo(() => {
+    return tiposServicios.map((t) => ({
+      value: t.id_tipo_servicio_taller,
+      label: t.nombre,
+      searchText: t.nombre,
+    }));
+  }, [tiposServicios]);
 
   // Estado del formulario
   const [idTipoServicio, setIdTipoServicio] = useState<number | ''>('');
@@ -274,20 +284,16 @@ export const ServicioTallerFormPage = () => {
             </label>
 
             {isCreating ? (
-              <select
+              <SearchableSelect
+                options={tiposServiciosOptions}
                 value={idTipoServicio}
-                onChange={(e) => setIdTipoServicio(e.target.value ? Number(e.target.value) : '')}
+                onChange={(val) => setIdTipoServicio(val ? Number(val) : '')}
+                placeholder="-- Selecciona un tipo de servicio --"
+                searchPlaceholder="Buscar por nombre de tipo de servicio..."
+                emptyMessage="No se encontraron tipos de servicios"
                 disabled={isLoadingTipos}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all cursor-pointer"
                 required
-              >
-                <option value="">-- Selecciona un tipo de servicio --</option>
-                {tiposServicios.map((t) => (
-                  <option key={t.id_tipo_servicio_taller} value={t.id_tipo_servicio_taller}>
-                    {t.nombre}
-                  </option>
-                ))}
-              </select>
+              />
             ) : (
               <div className="p-3 rounded-xl bg-muted/40 border border-border/60">
                 <span className="text-sm font-bold text-foreground">

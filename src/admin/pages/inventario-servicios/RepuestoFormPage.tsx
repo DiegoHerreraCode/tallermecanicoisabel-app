@@ -7,6 +7,7 @@ import { getRepuestoByIdAction } from '../../actions/get-repuesto-by-id.action';
 import { getMarcasRepuestosAction } from '../../actions/get-marcas-repuestos.action';
 import { getVariablesAction } from '../../actions/get-variables.action';
 import { useRepuestoMutation } from '../../hooks/useRepuestoMutation';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 export const RepuestoFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +34,15 @@ export const RepuestoFormPage = () => {
     const v = variables.find((item) => item.nombre === 'calculo_ganancia');
     return v?.valor === 'sobre_costo' ? 'sobre_costo' : 'sobre_venta';
   }, [variables]);
+
+  // Opciones de marcas para SearchableSelect
+  const marcasOptions = useMemo(() => {
+    return marcas.map((m) => ({
+      value: m.id_marca_repuesto,
+      label: m.nombre,
+      searchText: m.nombre,
+    }));
+  }, [marcas]);
 
   // Consulta datos del repuesto si estamos editando
   const { data: repuestoData, isLoading: isLoadingRepuesto } = useQuery({
@@ -237,20 +247,15 @@ export const RepuestoFormPage = () => {
             <label className="block text-xs font-bold text-foreground mb-1.5">
               Marca de Repuesto <span className="text-rose-500">*</span>
             </label>
-            <select
-              name="id_marca_repuesto"
+            <SearchableSelect
+              options={marcasOptions}
               value={idMarcaRepuesto}
-              onChange={(e) => setIdMarcaRepuesto(e.target.value ? Number(e.target.value) : '')}
+              onChange={(val) => setIdMarcaRepuesto(val ? Number(val) : '')}
+              placeholder="Selecciona una marca..."
+              searchPlaceholder="Buscar por nombre de marca..."
+              emptyMessage="No se encontraron marcas"
               required
-              className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 cursor-pointer"
-            >
-              <option value="">Selecciona una marca...</option>
-              {marcas.map((m) => (
-                <option key={m.id_marca_repuesto} value={m.id_marca_repuesto}>
-                  {m.nombre}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           {/* Nombre / Modelo */}

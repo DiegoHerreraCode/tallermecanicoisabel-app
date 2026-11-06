@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import { getPagoClienteByIdAction } from '../../actions/get-pago-cliente-by-id.a
 import { getClientesAction } from '../../actions/get-clientes.action';
 import { getOrdenesAction } from '../../actions/get-ordenes.action';
 import { usePagoClienteMutation } from '../../hooks/usePagoClienteMutation';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 export const PagoClienteFormPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,6 +54,16 @@ export const PagoClienteFormPage = () => {
   const [numReferencia, setNumReferencia] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Opciones de clientes para SearchableSelect con búsqueda por nombre y cédula
+  const clientesOptions = useMemo(() => {
+    return clientes.map((c) => ({
+      value: c.id_cliente,
+      label: c.nombre,
+      subtext: `C.I. ${c.cedula}`,
+      searchText: `${c.nombre} ${c.cedula}`,
+    }));
+  }, [clientes]);
 
   // Previsualización de imagen al crear
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -202,19 +213,15 @@ export const PagoClienteFormPage = () => {
               <label className="block text-xs font-bold text-foreground mb-1.5">
                 Cliente <span className="text-rose-500">*</span>
               </label>
-              <select
+              <SearchableSelect
+                options={clientesOptions}
                 value={idCliente}
-                onChange={(e) => handleClienteChange(e.target.value)}
+                onChange={(val) => handleClienteChange(val ? String(val) : '')}
+                placeholder="Selecciona un cliente..."
+                searchPlaceholder="Buscar por nombre o cédula..."
+                emptyMessage="No se encontraron clientes"
                 required
-                className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-              >
-                <option value="">Selecciona un cliente...</option>
-                {clientes.map((c) => (
-                  <option key={c.id_cliente} value={c.id_cliente}>
-                    {c.nombre} ({c.cedula})
-                  </option>
-                ))}
-              </select>
+              />
             </div>
 
             {/* Orden de Trabajo */}
