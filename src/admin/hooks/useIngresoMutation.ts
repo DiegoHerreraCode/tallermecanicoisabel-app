@@ -6,7 +6,7 @@ import {
   type CreateUpdateIngresoPayload,
 } from '../actions/create-update-ingreso.action';
 import { anularIngresoAction } from '../actions/anular-ingreso.action';
-import { uploadPdfChecklistAction } from '../actions/upload-pdf-checklist.action';
+import { uploadImageChecklistAction } from '../actions/upload-pdf-checklist.action';
 import type { AnularIngresoPayload } from '../interfaces/ingreso.interface';
 
 export const useIngresoMutation = () => {
@@ -59,18 +59,18 @@ export const useIngresoMutation = () => {
     },
   });
 
-  // Subir PDF de Checklist
-  const uploadPdfMutation = useMutation({
+  // Subir Imagen de Checklist
+  const uploadImageMutation = useMutation({
     mutationFn: ({ id, file }: { id: number | string; file: File }) =>
-      uploadPdfChecklistAction(id, file),
+      uploadImageChecklistAction(id, file),
     onSuccess: () => {
-      toast.success('PDF de checklist subido correctamente');
+      toast.success('Imagen de checklist subida correctamente');
       queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
     },
     onError: (error: any) => {
       const message =
         error?.response?.data?.message ||
-        'Ocurrió un error al subir el checklist en PDF';
+        'Ocurrió un error al subir la imagen del checklist';
       toast.error(message);
     },
   });
@@ -85,7 +85,12 @@ export const useIngresoMutation = () => {
 
     anularIngreso: anularMutation.mutate,
     isAnulando: anularMutation.isPending,
-    uploadPdfChecklist: uploadPdfMutation.mutate,
-    isUploadingPdf: uploadPdfMutation.isPending,
+
+    uploadImageChecklist: uploadImageMutation.mutate,
+    isUploadingImage: uploadImageMutation.isPending,
+
+    // Compatibilidad hacia atrás
+    uploadPdfChecklist: uploadImageMutation.mutate,
+    isUploadingPdf: uploadImageMutation.isPending,
   };
 };

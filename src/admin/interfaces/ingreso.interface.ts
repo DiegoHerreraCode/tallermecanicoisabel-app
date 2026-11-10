@@ -16,7 +16,8 @@ export interface IngresoItem {
   fecha_ingreso: string;
   estado: IngresoEstadoType;
   observaciones_cliente?: string | null;
-  pdf_checklist?: string | null;
+  image?: string | null;
+  imagePath?: string | null;
   last_update?: string;
   fecha_anulacion?: string | null;
   id_admin_anulacion?: number | null;

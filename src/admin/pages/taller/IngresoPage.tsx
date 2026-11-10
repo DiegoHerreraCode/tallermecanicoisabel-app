@@ -11,7 +11,7 @@ import {
   // User,
   // Calendar,
   X,
-  FileText,
+  ImageIcon,
 } from 'lucide-react';
 import { useIngresos } from '../../hooks/useIngresos';
 import { useIngresoMutation } from '../../hooks/useIngresoMutation';
@@ -28,7 +28,7 @@ export const IngresoPage = () => {
     isLoading,
   } = useIngresos();
 
-  const { anularIngreso, isAnulando, uploadPdfChecklist, isUploadingPdf } =
+  const { anularIngreso, isAnulando, uploadImageChecklist, isUploadingImage } =
     useIngresoMutation();
 
   const navigate = useNavigate();
@@ -53,10 +53,11 @@ export const IngresoPage = () => {
   const [ingresoParaAnular, setIngresoParaAnular] =
     useState<IngresoItem | null>(null);
   const [motivoAnulacion, setMotivoAnulacion] = useState('');
-  const [ingresoParaPdf, setIngresoParaPdf] = useState<IngresoItem | null>(
+  const [ingresoParaImagen, setIngresoParaImagen] = useState<IngresoItem | null>(
     null
   );
-  const [archivoPdf, setArchivoPdf] = useState<File | null>(null);
+  const [archivoImagen, setArchivoImagen] = useState<File | null>(null);
+  const [previewImagen, setPreviewImagen] = useState<string | null>(null);
 
   // Mapas para resolver relaciones rápidamente
   const clientesMap = useMemo(() => {
@@ -300,19 +301,20 @@ export const IngresoPage = () => {
     );
   };
 
-  // Manejo de subida de PDF
-  const handleConfirmUploadPdf = () => {
-    if (!ingresoParaPdf || !archivoPdf) return;
+  // Manejo de subida de imagen de checklist
+  const handleConfirmUploadImagen = () => {
+    if (!ingresoParaImagen || !archivoImagen) return;
 
-    uploadPdfChecklist(
+    uploadImageChecklist(
       {
-        id: ingresoParaPdf.id_ingreso,
-        file: archivoPdf,
+        id: ingresoParaImagen.id_ingreso,
+        file: archivoImagen,
       },
       {
         onSuccess: () => {
-          setIngresoParaPdf(null);
-          setArchivoPdf(null);
+          setIngresoParaImagen(null);
+          setArchivoImagen(null);
+          setPreviewImagen(null);
         },
       }
     );
@@ -336,7 +338,7 @@ export const IngresoPage = () => {
     }
   };
 
-  // Resuelve la URL pública del backend para el archivo PDF del checklist
+  // Resuelve la URL pública del backend para la imagen del checklist
   const getBackendChecklistUrl = (path?: string | null) => {
     if (!path) return null;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
@@ -662,16 +664,20 @@ export const IngresoPage = () => {
                       {/* Acciones según boceto */}
                       <td className="py-3.5 px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                          {/* 1. Botón Subir PDF (visible cuando checklist_pendiente) */}
+                          {/* 1. Botón Subir Imagen (visible cuando checklist_pendiente) */}
                           {isChecklistPendiente && (
                             <button
                               type="button"
-                              onClick={() => setIngresoParaPdf(ing)}
+                              onClick={() => {
+                                setIngresoParaImagen(ing);
+                                setArchivoImagen(null);
+                                setPreviewImagen(null);
+                              }}
                               className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer shadow-2xs"
-                              title="Subir PDF Checklist"
+                              title="Subir Imagen de Checklist"
                             >
                               <Upload className="w-3.5 h-3.5 text-blue-500" />
-                              Subir pdf
+                              Subir imagen
                             </button>
                           )}
 
@@ -866,21 +872,40 @@ export const IngresoPage = () => {
                     </div>
                   </div>
 
-                  {/* Si tiene archivo PDF de checklist agregar link para abrirlo en otra pestaña*/}
-                  {selectedIngresoDetalle.pdf_checklist && (
-                    <a
-                      href={getBackendChecklistUrl(selectedIngresoDetalle.pdf_checklist) || ''}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="cursor-pointer mb-3"
-                    >
-                      <div className="flex items-center gap-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-xl hover:bg-blue-500/20 hover:border-blue-500/40 transition-colors cursor-pointer">
-                        <FileText className="w-5 h-5 text-blue-500" />
-                        <span className="text-sm font-semibold text-foreground">
-                          Visualizar pdf de la revisión
-                        </span>
+                  {/* Si tiene archivo de imagen de checklist (imagePath o image) */}
+                  {(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-foreground block">
+                        Imagen del Checklist de Revisión:
+                      </label>
+                      <div className="p-3 bg-muted/20 border border-border/80 rounded-xl flex flex-col items-center gap-2.5">
+                        <a
+                          href={getBackendChecklistUrl(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) || ''}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="relative group block overflow-hidden rounded-xl border border-border max-w-sm w-full"
+                        >
+                          <img
+                            src={getBackendChecklistUrl(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) || ''}
+                            alt="Checklist de revisión"
+                            className="max-h-64 w-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-200"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">
+                            <Eye className="w-4 h-4 mr-1" />
+                            Ver Imagen Completa
+                          </div>
+                        </a>
+                        <a
+                          href={getBackendChecklistUrl(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) || ''}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-semibold text-blue-500 hover:underline flex items-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Abrir imagen en pestaña nueva
+                        </a>
                       </div>
-                    </a>
+                    </div>
                   )}
 
                   {/* Datos de Anulación si fue anulado */}
@@ -973,17 +998,21 @@ export const IngresoPage = () => {
         </div>
       )}
 
-      {/* MODAL 3: Subir PDF Checklist */}
-      {ingresoParaPdf && (
+      {/* MODAL 3: Subir Imagen de Checklist */}
+      {ingresoParaImagen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
           <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border/80">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <Upload className="w-5 h-5 text-blue-500" />
-                Subir PDF de Checklist
+                <ImageIcon className="w-5 h-5 text-blue-500" />
+                Subir Imagen de Checklist
               </h3>
               <button
-                onClick={() => setIngresoParaPdf(null)}
+                onClick={() => {
+                  setIngresoParaImagen(null);
+                  setArchivoImagen(null);
+                  setPreviewImagen(null);
+                }}
                 className="p-1 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -991,40 +1020,61 @@ export const IngresoPage = () => {
             </div>
 
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Adjunta el archivo PDF correspondiente al checklist del ingreso{' '}
-              <strong className="text-foreground">#{ingresoParaPdf.id_ingreso}</strong>. Al subirlo, el estado pasará automáticamente a <span className="font-semibold text-blue-600 dark:text-blue-400">esperando_orden</span>.
+              Adjunta la imagen correspondiente al checklist del ingreso{' '}
+              <strong className="text-foreground">#{ingresoParaImagen.id_ingreso}</strong>. Al subirla, el estado pasará automáticamente a <span className="font-semibold text-blue-600 dark:text-blue-400">esperando_orden</span>.
             </p>
 
             <div>
               <label className="block text-xs font-bold text-foreground mb-1.5">
-                Archivo PDF <span className="text-rose-500">*</span>
+                Foto o Imagen del Checklist <span className="text-rose-500">*</span>
               </label>
               <input
                 type="file"
-                accept=".pdf,application/pdf"
+                accept="image/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) setArchivoPdf(file);
+                  if (file) {
+                    setArchivoImagen(file);
+                    setPreviewImagen(URL.createObjectURL(file));
+                  }
                 }}
                 className="w-full text-xs text-foreground file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
               />
             </div>
 
+            {/* Previsualización de la imagen seleccionada */}
+            {previewImagen && (
+              <div className="p-2 border border-border/80 rounded-xl bg-muted/20 flex flex-col items-center">
+                <img
+                  src={previewImagen}
+                  alt="Vista previa del checklist"
+                  className="max-h-48 object-contain rounded-lg"
+                />
+                <span className="text-[11px] text-muted-foreground mt-1 truncate max-w-xs">
+                  {archivoImagen?.name}
+                </span>
+              </div>
+            )}
+
             <div className="flex justify-end gap-2.5 pt-2 border-t border-border/80">
               <button
                 type="button"
-                onClick={() => setIngresoParaPdf(null)}
+                onClick={() => {
+                  setIngresoParaImagen(null);
+                  setArchivoImagen(null);
+                  setPreviewImagen(null);
+                }}
                 className="px-4 py-2 text-xs font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 type="button"
-                disabled={!archivoPdf || isUploadingPdf}
-                onClick={handleConfirmUploadPdf}
+                disabled={!archivoImagen || isUploadingImage}
+                onClick={handleConfirmUploadImagen}
                 className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
-                {isUploadingPdf ? 'Subiendo...' : 'Subir Archivo'}
+                {isUploadingImage ? 'Subiendo...' : 'Subir Imagen'}
               </button>
             </div>
           </div>

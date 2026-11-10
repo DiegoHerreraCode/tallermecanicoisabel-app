@@ -28,7 +28,7 @@ export const QuickActionsTable = () => {
     {
       title: 'Pagos de Clientes',
       subtitle: 'Registrar abonos y cobros',
-      to: '/admin/clientes',
+      to: '/admin/clientes/pagos-clientes',
       icon: CreditCard,
       color: 'text-emerald-500 bg-emerald-500/10',
     },
