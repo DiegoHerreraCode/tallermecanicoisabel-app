@@ -659,8 +659,8 @@ export const OrdenPage = () => {
       {/* MODAL: Anular Orden de Trabajo */}
       {ordenParaAnular && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
               <h3 className="text-lg font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
                 <Ban className="w-5 h-5" />
                 Anular Orden #{ordenParaAnular.id_orden}
@@ -674,25 +674,27 @@ export const OrdenPage = () => {
               </button>
             </div>
 
-            <p className="text-xs sm:text-sm text-foreground">
-              ¿Estás seguro de que deseas anular esta orden de trabajo? Esta acción anulará sus servicios asociados y no se puede deshacer.
-            </p>
+            <div className="overflow-y-auto pr-1 space-y-4">
+              <p className="text-xs sm:text-sm text-foreground">
+                ¿Estás seguro de que deseas anular esta orden de trabajo? Esta acción anulará sus servicios asociados y no se puede deshacer.
+              </p>
 
-            <div>
-              <label className="block text-xs font-bold text-foreground mb-1.5">
-                Motivo de anulación <span className="text-rose-500">*</span>
-              </label>
-              <textarea
-                rows={3}
-                value={motivoAnulacion}
-                onChange={(e) => setMotivoAnulacion(e.target.value)}
-                placeholder="Ingresa la razón por la cual se anula la orden..."
-                className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
-                required
-              />
+              <div>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  Motivo de anulación <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={motivoAnulacion}
+                  onChange={(e) => setMotivoAnulacion(e.target.value)}
+                  placeholder="Ingresa la razón por la cual se anula la orden..."
+                  className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-2 border-t border-border/80">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-border/80 shrink-0">
               <button
                 type="button"
                 onClick={() => setOrdenParaAnular(null)}
@@ -716,8 +718,8 @@ export const OrdenPage = () => {
       {/* MODAL: Finalizar Orden de Trabajo */}
       {ordenParaFinalizar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
               <h3 className="text-lg font-bold text-purple-600 dark:text-purple-400 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5" />
                 Finalizar Orden #{ordenParaFinalizar.id_orden}
@@ -731,34 +733,36 @@ export const OrdenPage = () => {
               </button>
             </div>
 
-            <p className="text-xs sm:text-sm text-foreground">
-              ¿Estás seguro de que deseas marcar esta orden de trabajo como <strong className="text-purple-600 dark:text-purple-400">Finalizada</strong>?
-            </p>
+            <div className="overflow-y-auto pr-1 space-y-4">
+              <p className="text-xs sm:text-sm text-foreground">
+                ¿Estás seguro de que deseas marcar esta orden de trabajo como <strong className="text-purple-600 dark:text-purple-400">Finalizada</strong>?
+              </p>
 
-            <div className="p-3 bg-muted/40 rounded-xl border border-border/60 text-xs space-y-1.5">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">ID Orden:</span>
-                <span className="font-bold text-foreground">#{ordenParaFinalizar.id_orden}</span>
+              <div className="p-3 bg-muted/40 rounded-xl border border-border/60 text-xs space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">ID Orden:</span>
+                  <span className="font-bold text-foreground">#{ordenParaFinalizar.id_orden}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Cliente:</span>
+                  <span className="font-semibold text-foreground">
+                    {getOrdenResolvedData(ordenParaFinalizar).clienteNombre}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Monto Total:</span>
+                  <span className="font-bold text-foreground">
+                    {Number(ordenParaFinalizar.monto_total || 0).toFixed(2)}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Cliente:</span>
-                <span className="font-semibold text-foreground">
-                  {getOrdenResolvedData(ordenParaFinalizar).clienteNombre}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Monto Total:</span>
-                <span className="font-bold text-foreground">
-                  {Number(ordenParaFinalizar.monto_total || 0).toFixed(2)}
-                </span>
-              </div>
+
+              <p className="text-[11px] text-muted-foreground">
+                Recuerda que todos los servicios del taller asociados deben encontrarse finalizados para poder completar la orden.
+              </p>
             </div>
 
-            <p className="text-[11px] text-muted-foreground">
-              Recuerda que todos los servicios del taller asociados deben encontrarse finalizados para poder completar la orden.
-            </p>
-
-            <div className="flex justify-end gap-2.5 pt-2 border-t border-border/80">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-border/80 shrink-0">
               <button
                 type="button"
                 onClick={() => setOrdenParaFinalizar(null)}

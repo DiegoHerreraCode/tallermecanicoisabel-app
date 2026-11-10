@@ -71,22 +71,25 @@ export const LoginPage = () => {
                     ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  placeholder="••••••••"
-                  className="rounded-xl h-11 px-3.5 focus-visible:ring-primary/40"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <Eye /> : <EyeOff />}
-                </Button>
+                {/* colocar el input y el boton del ojo en una misma fila */}
+                <div className='flex relative w-full'>
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    placeholder="••••••••"
+                    className="rounded-xl h-11 px-3.5 focus-visible:ring-primary/40 pr-10"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <Eye /> : <EyeOff />}
+                  </Button>
+                </div>
               </div>
 
               <Button

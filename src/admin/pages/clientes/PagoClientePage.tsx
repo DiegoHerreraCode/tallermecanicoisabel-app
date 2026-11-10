@@ -372,11 +372,11 @@ export const PagoClientePage = () => {
       {/* 5. POP-UP MODAL: Confirmar Eliminacion */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-card w-full max-w-md rounded-2xl border border-border shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-border/80">
+          <div className="bg-card w-full max-w-md rounded-2xl border border-border shadow-2xl p-5 sm:p-6 space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-2 border-b border-border/80 shrink-0">
               <div className="flex items-center gap-2 text-rose-500 font-bold text-base">
                 <AlertTriangle className="w-5 h-5" />
-                Confirmar Eliminación del Pago  #{selectedPagoId}
+                Confirmar Eliminación del Pago #{selectedPagoId}
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -386,12 +386,18 @@ export const PagoClientePage = () => {
               </button>
             </div>
 
-            <form onSubmit={handleConfirmAnulacion} className="space-y-4">
-              <div className="flex items-center justify-end gap-2.5 pt-2">
+            <div className="overflow-y-auto pr-1">
+              <p className="text-xs sm:text-sm text-foreground">
+                ¿Estás seguro de que deseas eliminar este registro de pago? Esta acción no se puede deshacer.
+              </p>
+            </div>
+
+            <form onSubmit={handleConfirmAnulacion} className="shrink-0 pt-2 border-t border-border/80">
+              <div className="flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors"
+                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -401,7 +407,7 @@ export const PagoClientePage = () => {
                   className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-500/20 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Eliminar
+                  {isDeleting ? 'Eliminando...' : 'Eliminar'}
                 </button>
               </div>
             </form>

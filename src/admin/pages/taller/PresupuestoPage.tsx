@@ -744,8 +744,8 @@ export const PresupuestoPage = () => {
       {/* MODAL 1: Aceptar Presupuesto */}
       {presupuestoParaAceptar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
               <h3 className="text-lg font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5" />
                 Aceptar Presupuesto{' '}
@@ -761,32 +761,34 @@ export const PresupuestoPage = () => {
               </button>
             </div>
 
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              {presupuestoParaAceptar.tipo === 'inicial'
-                ? 'Al aceptar este presupuesto inicial, se generará formalmente la Orden de Trabajo correspondiente.'
-                : 'Al aceptar este presupuesto extra, los repuestos y servicios solicitados se incorporarán a la Orden de Trabajo.'}
-            </p>
+            <div className="overflow-y-auto pr-1 space-y-4">
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {presupuestoParaAceptar.tipo === 'inicial'
+                  ? 'Al aceptar este presupuesto inicial, se generará formalmente la Orden de Trabajo correspondiente.'
+                  : 'Al aceptar este presupuesto extra, los repuestos y servicios solicitados se incorporarán a la Orden de Trabajo.'}
+              </p>
 
-            {presupuestoParaAceptar.tipo === 'inicial' && (
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-blue-500" />
-                  Fecha tentativa de culminación *
-                </label>
-                <input
-                  type="date"
-                  value={fechaFinTentativa}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setFechaFinTentativa(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all cursor-pointer"
-                />
-                <span className="text-[11px] text-muted-foreground">
-                  Estimación requerida para programar la orden de trabajo
-                </span>
-              </div>
-            )}
+              {presupuestoParaAceptar.tipo === 'inicial' && (
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-blue-500" />
+                    Fecha tentativa de culminación *
+                  </label>
+                  <input
+                    type="date"
+                    value={fechaFinTentativa}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setFechaFinTentativa(e.target.value)}
+                    className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all cursor-pointer"
+                  />
+                  <span className="text-[11px] text-muted-foreground">
+                    Estimación requerida para programar la orden de trabajo
+                  </span>
+                </div>
+              )}
+            </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80 shrink-0">
               <button
                 type="button"
                 onClick={() => setPresupuestoParaAceptar(null)}
@@ -815,8 +817,8 @@ export const PresupuestoPage = () => {
       {/* MODAL 2: Rechazar Presupuesto */}
       {presupuestoParaRechazar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
               <h3 className="text-lg font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
                 Rechazar Presupuesto{' '}
@@ -832,20 +834,20 @@ export const PresupuestoPage = () => {
               </button>
             </div>
 
+            <div className="overflow-y-auto pr-1 space-y-4">
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                ¿Estás seguro de que deseas marcar como <strong>rechazado</strong>{' '}
+                este presupuesto?
+                {presupuestoParaRechazar.tipo === 'inicial' ? (
+                  <>{' '}El ingreso vehicular volverá a quedar disponible en estado{' '}
+                    <em>esperando orden</em>.</>
+                ) : (
+                  <>{' '}Al tratarse de un presupuesto extra, la orden de trabajo vinculada no se verá afectada.</>
+                )}
+              </p>
+            </div>
 
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              ¿Estás seguro de que deseas marcar como <strong>rechazado</strong>{' '}
-              este presupuesto?
-              {presupuestoParaRechazar.tipo === 'inicial' ? (
-                <>{' '}El ingreso vehicular volverá a quedar disponible en estado{' '}
-                  <em>esperando orden</em>.</>
-              ) : (
-                <>{' '}Al tratarse de un presupuesto extra, la orden de trabajo vinculada no se verá afectada.</>
-              )}
-            </p>
-
-
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80 shrink-0">
               <button
                 type="button"
                 onClick={() => setPresupuestoParaRechazar(null)}
@@ -870,8 +872,8 @@ export const PresupuestoPage = () => {
       {/* MODAL 3: Anular Presupuesto */}
       {presupuestoParaAnular && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Ban className="w-5 h-5 text-rose-500" />
                 Anular Presupuesto{' '}
@@ -887,20 +889,22 @@ export const PresupuestoPage = () => {
               </button>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-foreground">
-                Motivo de la anulación <span className="text-rose-600">*</span>
-              </label>
-              <textarea
-                rows={3}
-                value={motivoAnulacion}
-                onChange={(e) => setMotivoAnulacion(e.target.value)}
-                placeholder="Explique el motivo por el cual se anula la cotización..."
-                className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all resize-none"
-              />
+            <div className="overflow-y-auto pr-1 space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-foreground">
+                  Motivo de la anulación <span className="text-rose-600">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={motivoAnulacion}
+                  onChange={(e) => setMotivoAnulacion(e.target.value)}
+                  placeholder="Explique el motivo por el cual se anula la cotización..."
+                  className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500 transition-all resize-none"
+                />
+              </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80 shrink-0">
               <button
                 type="button"
                 onClick={() => setPresupuestoParaAnular(null)}

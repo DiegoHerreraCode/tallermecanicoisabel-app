@@ -1559,8 +1559,8 @@ export const OrdenFormPage = () => {
       {/* MODAL: REGISTRAR HALLAZGO TÉCNICO (CON SCROLL VERTICAL) */}
       {showHallazgoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-amber-500" />
                 Registrar Hallazgo Técnico
@@ -1574,35 +1574,37 @@ export const OrdenFormPage = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveHallazgo} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Hallazgo / Resumen <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej: Fuga de aceite en la empacadura de la tapa..."
-                  value={hallazgoTitulo}
-                  onChange={(e) => setHallazgoTitulo(e.target.value)}
-                  required
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
+            <form onSubmit={handleSaveHallazgo} className="flex flex-col flex-1 min-h-0 space-y-4">
+              <div className="overflow-y-auto pr-1 space-y-4 flex-1">
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
+                    Hallazgo / Resumen <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Fuga de aceite en la empacadura de la tapa..."
+                    value={hallazgoTitulo}
+                    onChange={(e) => setHallazgoTitulo(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
+                    Detalles / Especificaciones Técnicas
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="Describe las observaciones técnicas y recomendaciones..."
+                    value={hallazgoDetalle}
+                    onChange={(e) => setHallazgoDetalle(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Detalles / Especificaciones Técnicas
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder="Describe las observaciones técnicas y recomendaciones..."
-                  value={hallazgoDetalle}
-                  onChange={(e) => setHallazgoDetalle(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-border/80">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-border/80 shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowHallazgoModal(false)}
@@ -1626,8 +1628,8 @@ export const OrdenFormPage = () => {
       {/* MODAL: ASIGNAR PERSONAL AL SERVICIO DEL TALLER */}
       {assignModalService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <UserCheck className="w-5 h-5 text-blue-500" />
                 Asignar Personal
@@ -1641,15 +1643,15 @@ export const OrdenFormPage = () => {
               </button>
             </div>
 
-            <div className="p-3 rounded-xl bg-muted/40 border border-border/60">
+            <div className="p-3 rounded-xl bg-muted/40 border border-border/60 shrink-0">
               <p className="text-xs text-muted-foreground">Servicio seleccionado:</p>
               <p className="text-sm font-bold text-foreground mt-0.5">
                 {assignModalService.nombre}
               </p>
             </div>
 
-            <form onSubmit={handleSaveAssignPersonal} className="space-y-4">
-              <div>
+            <form onSubmit={handleSaveAssignPersonal} className="flex flex-col flex-1 min-h-0 space-y-4">
+              <div className="overflow-y-auto pr-1 flex-1">
                 <label className="block text-xs font-bold text-foreground mb-1.5">
                   Seleccionar Empleado / Mecánico <span className="text-rose-500">*</span>
                 </label>
@@ -1668,12 +1670,12 @@ export const OrdenFormPage = () => {
                       </option>
                     ))}
                 </select>
-                <p className="text-[11px] text-muted-foreground mt-1">
+                <p className="text-[11px] text-muted-foreground mt-1.5">
                   Al asignar personal, el estado del servicio cambiará automáticamente a <span className="font-semibold text-blue-500">En Espera</span>.
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-border/80">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-border/80 shrink-0">
                 <button
                   type="button"
                   onClick={() => setAssignModalService(null)}
