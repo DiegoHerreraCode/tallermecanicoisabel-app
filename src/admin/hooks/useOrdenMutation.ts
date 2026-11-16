@@ -39,6 +39,7 @@ export const useOrdenMutation = () => {
       );
       queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
       queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'ordenes'] });
       if (variables.id && variables.id !== 'new') {
         queryClient.invalidateQueries({ queryKey: ['orden-item', String(variables.id)] });
       }
@@ -132,6 +133,7 @@ export const useOrdenMutation = () => {
       toast.success('Orden anulada correctamente');
       queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
       queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'ordenes'] });
       queryClient.invalidateQueries({
         queryKey: ['orden-item', String(variables.id)],
       });
@@ -153,6 +155,7 @@ export const useOrdenMutation = () => {
       queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
       queryClient.invalidateQueries({ queryKey: ['orden-item', String(id)] });
       queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'ordenes'] });
     },
     onError: (error: any) => {
       const message =

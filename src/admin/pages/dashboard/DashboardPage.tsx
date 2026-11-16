@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import {
   ClipboardList,
   Users,
@@ -7,7 +8,10 @@ import {
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { MetricCard } from '../../components/dashboard/MetricCard';
 import { MonthlyOrdersBarChart } from '../../components/dashboard/MonthlyOrdersBarChart';
-import { OrderStatusPieChart } from '../../components/dashboard/OrderStatusPieChart';
+import {
+  OrderStatusPieChart,
+  type OrderStatusFilterMode,
+} from '../../components/dashboard/OrderStatusPieChart';
 import { EconomicMetricsCard } from '../../components/dashboard/EconomicMetricsCard';
 import { DashboardCalendar } from '../../components/dashboard/DashboardCalendar';
 import { RecentOrdersTable } from '../../components/dashboard/RecentOrdersTable';
@@ -17,6 +21,10 @@ import { Button } from '@/components/ui/button';
 export const DashboardPage = () => {
   const { ordenes, personal, presupuestos, pagosClientes, isLoading, refetchAll } =
     useDashboardData();
+
+  // Estado para el modo de filtrado de la gráfica de pastel (histórico vs mes actual)
+  const [pieFilterMode, setPieFilterMode] =
+    useState<OrderStatusFilterMode>('mes_actual');
 
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -60,13 +68,27 @@ export const DashboardPage = () => {
     });
   }
 
-  // 5. Gráfica de pastel: Distribución (no en porcentaje) de estados operativos de órdenes
-  const pieData = {
-    en_espera: ordenes.filter((o) => o.estado_operativo === 'en_espera').length,
-    en_proceso: ordenes.filter((o) => o.estado_operativo === 'en_proceso').length,
-    finalizada: ordenes.filter((o) => o.estado_operativo === 'finalizada').length,
-    anulada: ordenes.filter((o) => o.estado_operativo === 'anulada').length,
-  };
+  // 5. Gráfica de pastel: Distribución por estados operativos de órdenes (con filtrado modo histórico o mes actual)
+  const ordenesParaPie = useMemo(() => {
+    if (pieFilterMode === 'mes_actual') {
+      return ordenes.filter((ord) => {
+        if (!ord.fecha_creacion) return false;
+        const d = new Date(ord.fecha_creacion);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      });
+    }
+    // 'historico' (todas las órdenes)
+    return ordenes;
+  }, [ordenes, pieFilterMode, currentMonth, currentYear]);
+
+  const pieData = useMemo(() => {
+    return {
+      en_espera: ordenesParaPie.filter((o) => o.estado_operativo === 'en_espera').length,
+      en_proceso: ordenesParaPie.filter((o) => o.estado_operativo === 'en_proceso').length,
+      finalizada: ordenesParaPie.filter((o) => o.estado_operativo === 'finalizada').length,
+      anulada: ordenesParaPie.filter((o) => o.estado_operativo === 'anulada').length,
+    };
+  }, [ordenesParaPie]);
 
   // 6. Calendario de fechas tentativas de finalización de órdenes
   // Se debe marcar si y solo si ese día hay una orden con estado_operativo != 'finalizada' o 'anulada' con esa fecha_fin_tentativa
@@ -147,6 +169,8 @@ export const DashboardPage = () => {
         <OrderStatusPieChart
           title="Distribución de Estados Operativos"
           data={pieData}
+          filterMode={pieFilterMode}
+          onFilterModeChange={setPieFilterMode}
         />
       </section>
 

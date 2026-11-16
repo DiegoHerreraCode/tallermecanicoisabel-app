@@ -56,6 +56,7 @@ export const usePresupuestoMutation = () => {
       toast.success(msg);
       queryClient.invalidateQueries({ queryKey: ['presupuestos-listado'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'presupuestos'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard', 'ordenes'] });
       queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
       queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
     },

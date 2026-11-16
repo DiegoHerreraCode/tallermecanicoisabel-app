@@ -114,8 +114,8 @@ export const DashboardCalendar = ({
       </div>
 
       {/* Cabecera del Calendario */}
-      <div className="rounded-xl overflow-hidden border border-border">
-        <div className="bg-sky-500 dark:bg-sky-600 px-4 py-2.5 flex items-center justify-between text-white font-bold text-sm tracking-wider">
+      <div className="rounded-xl border border-border">
+        <div className="bg-sky-500 dark:bg-sky-600 px-4 py-2.5 rounded-t-xl flex items-center justify-between text-white font-bold text-sm tracking-wider">
           <button
             type="button"
             onClick={handlePrevMonth}
@@ -145,35 +145,58 @@ export const DashboardCalendar = ({
         </div>
 
         {/* Cuadrícula de Números */}
-        <div className="grid grid-cols-7 text-center divide-x divide-y divide-border/60 bg-card">
+        <div className="grid grid-cols-7 text-center divide-x divide-y divide-border/60 bg-card rounded-b-xl">
           {calendarCells.map((day, idx) => {
             if (day === null) {
               return <div key={idx} className="h-10 bg-muted/10" />;
             }
 
             const dayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const dayOrders = ordersByDateMap.get(dayString);
-            const isHighlighted = Boolean(dayOrders && dayOrders.length > 0);
+            const dayOrders = ordersByDateMap.get(dayString) || [];
+            const isHighlighted = dayOrders.length > 0;
 
-            const tooltipText = isHighlighted
-              ? `Órdenes por finalizar: ${dayOrders?.map((id) => `#${id}`).join(', ')}`
+            const nativeTitle = isHighlighted
+              ? `Órdenes por finalizar: ${dayOrders.map((id) => `#${id}`).join(', ')}`
               : undefined;
 
             return (
               <div
                 key={idx}
-                title={tooltipText}
-                className={`h-10 flex items-center justify-center text-xs transition-colors relative cursor-default ${
+                title={nativeTitle}
+                className={`h-10 flex items-center justify-center text-xs transition-colors relative group ${
                   isHighlighted
                     ? `!bg-amber-300 dark:!bg-amber-500/40 ${
-                        theme === 'dark' ? 'text-amber-100' : 'text-amber-950'
-                      } font-extrabold shadow-inner`
-                    : 'text-foreground hover:bg-muted/40 font-medium'
+                        theme === 'dark' ? 'text-white font-extrabold' : 'text-black font-extrabold'
+                      } shadow-inner cursor-pointer`
+                    : 'text-foreground hover:bg-muted/40 font-medium cursor-default'
                 }`}
               >
                 <span>{day}</span>
                 {isHighlighted && (
                   <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-amber-600 dark:bg-amber-400" />
+                )}
+
+                {/* Tooltip flotante enriquecido al hacer hover en casilla amarilla */}
+                {isHighlighted && dayOrders.length > 0 && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center z-50 pointer-events-none transition-all duration-150">
+                    <div className="bg-popover text-popover-foreground border border-border/90 px-3 py-1.5 rounded-xl shadow-lg text-[11px] font-semibold whitespace-nowrap min-w-max">
+                      <div className="text-muted-foreground font-medium text-[10px] pb-0.5 border-b border-border/60 mb-1">
+                        {day} de {MONTH_NAMES[month].toLowerCase()} ({dayOrders.length} {dayOrders.length === 1 ? 'orden' : 'órdenes'})
+                      </div>
+                      <div className="flex flex-wrap gap-1 justify-center max-w-[220px]">
+                        {dayOrders.map((id) => (
+                          <span
+                            key={id}
+                            className="inline-block bg-primary/10 text-primary px-1.5 py-0.5 rounded-md font-bold text-[10px]"
+                          >
+                            Orden #{id}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Flecha del tooltip */}
+                    <div className="w-2 h-2 bg-popover border-b border-r border-border/90 rotate-45 -mt-1" />
+                  </div>
                 )}
               </div>
             );
