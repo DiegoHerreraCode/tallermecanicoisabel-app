@@ -62,7 +62,7 @@ export const QuickActionsTable = () => {
           Accesos Rápidos
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Las 5 funcionalidades más relevantes del taller
+          Las 6 funcionalidades más relevantes del taller
         </p>
       </div>
 
