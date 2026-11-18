@@ -36,6 +36,7 @@ import { VehiculoFormPage } from './admin/pages/vehiculos/VehiculoFormPage';
 import { TallerMenuPage } from './admin/pages/taller/TallerMenuPage';
 import { IngresoPage } from './admin/pages/taller/IngresoPage';
 import { IngresoFormPage } from './admin/pages/taller/IngresoFormPage';
+import { IngresoDetallePage } from './admin/pages/taller/IngresoDetallePage';
 import { TipoOrdenPage } from './admin/pages/taller/TipoOrdenPage';
 import { TipoOrdenFormPage } from './admin/pages/taller/TipoOrdenFormPage';
 import { OrdenPage } from './admin/pages/taller/OrdenPage';
@@ -103,8 +104,12 @@ export const appRouter = createBrowserRouter([
             element: <IngresoPage />
           },
           {
-            path: 'ingresos/:id', // ruta: admin/taller/ingresos/:id
+            path: 'ingresos/new', // ruta: admin/taller/ingresos/new (crear nuevo ingreso)
             element: <IngresoFormPage />
+          },
+          {
+            path: 'ingresos/:id', // ruta: admin/taller/ingresos/:id (ver detalle completo del ingreso)
+            element: <IngresoDetallePage />
           },
           {
             path: 'ordenes', // ruta: admin/taller/ordenes

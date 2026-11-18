@@ -59,12 +59,26 @@ export const useOrdenMutation = () => {
       createHallazgoTecnicoAction(payload),
     onSuccess: (_, variables) => {
       toast.success('Hallazgo técnico registrado correctamente');
-      queryClient.invalidateQueries({
-        queryKey: ['hallazgos-orden', String(variables.id_orden)],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ['orden-item', String(variables.id_orden)],
-      });
+      if (variables.id_orden) {
+        queryClient.invalidateQueries({
+          queryKey: ['hallazgos-orden', String(variables.id_orden)],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['orden-item', String(variables.id_orden)],
+        });
+      }
+      if (variables.id_ingreso) {
+        queryClient.invalidateQueries({
+          queryKey: ['hallazgos-ingreso', String(variables.id_ingreso)],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['ingreso-item', String(variables.id_ingreso)],
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['hallazgos-orden'] });
+      queryClient.invalidateQueries({ queryKey: ['hallazgos-ingreso'] });
+      queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
     },
     onError: (error: any) => {
       const message =
@@ -76,8 +90,11 @@ export const useOrdenMutation = () => {
 
   // Eliminar Hallazgo Técnico
   const deleteHallazgoMutation = useMutation({
-    mutationFn: (variables: { id: number | string; ordenId?: number | string }) =>
-      deleteHallazgoTecnicoAction(variables.id),
+    mutationFn: (variables: {
+      id: number | string;
+      ordenId?: number | string;
+      ingresoId?: number | string;
+    }) => deleteHallazgoTecnicoAction(variables.id),
     onSuccess: (_, variables) => {
       toast.success('Hallazgo técnico eliminado correctamente');
       if (variables.ordenId) {
@@ -88,7 +105,18 @@ export const useOrdenMutation = () => {
           queryKey: ['orden-item', String(variables.ordenId)],
         });
       }
+      if (variables.ingresoId) {
+        queryClient.invalidateQueries({
+          queryKey: ['hallazgos-ingreso', String(variables.ingresoId)],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['ingreso-item', String(variables.ingresoId)],
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ['hallazgos-orden'] });
+      queryClient.invalidateQueries({ queryKey: ['hallazgos-ingreso'] });
+      queryClient.invalidateQueries({ queryKey: ['ordenes-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
     },
     onError: (error: any) => {
       const message =

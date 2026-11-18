@@ -6,7 +6,8 @@ import type { ServicioTallerItem } from './servicio-taller.interface';
 
 export interface HallazgoTecnicoItem {
   id_hallazgo_tecnico: number;
-  id_orden: number;
+  id_orden?: number | null;
+  id_ingreso?: number | null;
   hallazgo: string;
   detalle?: string | null;
   created_at?: string;
@@ -142,7 +143,8 @@ export interface UpdateOrdenPayload {
 }
 
 export interface CreateHallazgoTecnicoPayload {
-  id_orden: number;
+  id_orden?: number | null;
+  id_ingreso?: number | null;
   hallazgo: string;
   detalle?: string;
 }

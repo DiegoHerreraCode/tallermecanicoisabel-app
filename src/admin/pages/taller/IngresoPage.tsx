@@ -48,8 +48,6 @@ export const IngresoPage = () => {
   const itemsPerPage = 7;
 
   // Estados para modales
-  const [selectedIngresoDetalle, setSelectedIngresoDetalle] =
-    useState<IngresoItem | null>(null);
   const [ingresoParaAnular, setIngresoParaAnular] =
     useState<IngresoItem | null>(null);
   const [motivoAnulacion, setMotivoAnulacion] = useState('');
@@ -336,14 +334,6 @@ export const IngresoPage = () => {
       default:
         return 'bg-muted text-muted-foreground border-border/80';
     }
-  };
-
-  // Resuelve la URL pública del backend para la imagen del checklist
-  const getBackendChecklistUrl = (path?: string | null) => {
-    if (!path) return null;
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    const baseUrlChecklist = import.meta.env.VITE_IMG_URL || 'http://localhost:8000';
-    return `${baseUrlChecklist}/${path}`;
   };
 
   return (
@@ -725,10 +715,10 @@ export const IngresoPage = () => {
                             </button>
                           )}
 
-                          {/* 5. Botón Ver Detalle (siempre presente en todos los estados) */}
+                          {/* 5. Botón Ver Detalle (navega a la pantalla completa de detalle) */}
                           <button
                             type="button"
-                            onClick={() => setSelectedIngresoDetalle(ing)}
+                            onClick={() => navigate(`/admin/taller/ingresos/${ing.id_ingreso}`)}
                             className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer shadow-2xs"
                             title="Ver detalle del ingreso"
                           >
@@ -777,170 +767,6 @@ export const IngresoPage = () => {
           >
             Siguiente
           </button>
-        </div>
-      )}
-
-      {/* MODAL 1: Ver Detalle del Ingreso */}
-      {selectedIngresoDetalle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-lg w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <Car className="w-5 h-5 text-blue-500" />
-                Detalle del Ingreso #{selectedIngresoDetalle.id_ingreso}
-              </h3>
-              <button
-                onClick={() => setSelectedIngresoDetalle(null)}
-                className="p-1 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto pr-1">
-              {(() => {
-                const res = getIngresoResolvedData(selectedIngresoDetalle);
-                return (
-                  <div className="space-y-3 text-xs sm:text-sm">
-                    <div className="grid grid-cols-2 gap-3 bg-muted/40 p-3 rounded-xl border border-border/60">
-                      <div>
-                        <span className="text-muted-foreground block text-xs">
-                          Tipo de Orden
-                        </span>
-                        <span className="font-semibold text-foreground capitalize">
-                          {res.tipoOrdenNombre}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs">
-                          Estado
-                        </span>
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getEstadoBadgeClass(
-                            selectedIngresoDetalle.estado
-                          )}`}
-                        >
-                          {selectedIngresoDetalle.estado}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs">
-                          Vehículo
-                        </span>
-                        <span className="font-semibold text-foreground">
-                          {res.modeloNombre} ({res.marcaNombre})
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs">
-                          Placa
-                        </span>
-                        <span className="font-mono font-bold text-foreground">
-                          {res.placa}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs">
-                          Cliente Propietario
-                        </span>
-                        <span className="font-semibold text-foreground">
-                          {res.clienteNombre}
-                        </span>
-                        {res.clienteCedula && (
-                          <span className="block text-xs text-muted-foreground">
-                            C.I. {res.clienteCedula}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs">
-                          Fecha Ingreso
-                        </span>
-                        <span className="text-foreground">
-                          {selectedIngresoDetalle.fecha_ingreso || '—'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Observaciones del cliente */}
-                    <div>
-                      <label className="text-xs font-bold text-foreground block mb-1">
-                        Observaciones del Cliente:
-                      </label>
-                      <div className="p-3 bg-background rounded-xl border border-border/80 text-foreground text-xs min-h-[60px] whitespace-pre-wrap">
-                        {selectedIngresoDetalle.observaciones_cliente ||
-                          'Sin observaciones registradas por el cliente.'}
-                      </div>
-                    </div>
-
-                    {/* Si tiene archivo de imagen de checklist (imagePath o image) */}
-                    {(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) && (
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-foreground block">
-                          Imagen del Checklist de Revisión:
-                        </label>
-                        <div className="p-3 bg-muted/20 border border-border/80 rounded-xl flex flex-col items-center gap-2.5">
-                          <a
-                            href={getBackendChecklistUrl(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) || ''}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="relative group block overflow-hidden rounded-xl border border-border max-w-sm w-full"
-                          >
-                            <img
-                              src={getBackendChecklistUrl(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) || ''}
-                              alt="Checklist de revisión"
-                              className="max-h-64 w-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-200"
-                            />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">
-                              <Eye className="w-4 h-4 mr-1" />
-                              Ver Imagen Completa
-                            </div>
-                          </a>
-                          <a
-                            href={getBackendChecklistUrl(selectedIngresoDetalle.imagePath || selectedIngresoDetalle.image) || ''}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs font-semibold text-blue-500 hover:underline flex items-center gap-1"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            Abrir imagen en pestaña nueva
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Datos de Anulación si fue anulado */}
-                    {selectedIngresoDetalle.estado === 'anulado' && (
-                      <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs space-y-1 mt-4">
-                        <span className="font-bold text-rose-600 dark:text-rose-400 block">
-                          Información de Anulación:
-                        </span>
-                        <p className="text-foreground">
-                          <strong>Motivo:</strong>{' '}
-                          {selectedIngresoDetalle.motivo_anulacion || 'No especificado'}
-                        </p>
-                        {selectedIngresoDetalle.fecha_anulacion && (
-                          <p className="text-muted-foreground text-[11px]">
-                            Fecha: {selectedIngresoDetalle.fecha_anulacion}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div className="flex justify-end pt-2 border-t border-border/80 shrink-0">
-              <button
-                type="button"
-                onClick={() => setSelectedIngresoDetalle(null)}
-                className="px-4 py-2 text-xs font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent cursor-pointer"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

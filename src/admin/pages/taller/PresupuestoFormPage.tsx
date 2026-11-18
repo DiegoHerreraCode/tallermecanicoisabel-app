@@ -98,11 +98,33 @@ export const PresupuestoFormPage = () => {
   });
 
   // 2.1 Consultar Hallazgos Técnicos de la orden cuando es presupuesto extra
-  const { data: hallazgos = [] } = useQuery({
+  const { data: hallazgosOrden = [] } = useQuery({
     queryKey: ['hallazgos-orden', queryOrdenId],
-    queryFn: () => getHallazgosTecnicosAction(queryOrdenId!),
+    queryFn: () => getHallazgosTecnicosAction({ idOrden: queryOrdenId! }),
     enabled: isExtra && !!queryOrdenId,
   });
+
+  // 2.2 Consultar Hallazgos Técnicos del ingreso asociado (tanto si es inicial como si es extra vinculado a un ingreso)
+  const { data: hallazgosIngreso = [] } = useQuery({
+    queryKey: ['hallazgos-ingreso', effectiveIngresoId],
+    queryFn: () => getHallazgosTecnicosAction({ idIngreso: effectiveIngresoId! }),
+    enabled: !!effectiveIngresoId,
+  });
+
+  // Lista unificada de hallazgos técnicos
+  const hallazgos = useMemo(() => {
+    if (!isExtra) {
+      // En presupuesto inicial a partir de un ingreso: mostrar hallazgos del ingreso
+      return hallazgosIngreso;
+    }
+    // En presupuesto extra: combinar hallazgos del ingreso y hallazgos propios de la orden
+    const map = new Map<number, typeof hallazgosOrden[0]>();
+    hallazgosIngreso.forEach((h) => map.set(h.id_hallazgo_tecnico, h));
+    hallazgosOrden.forEach((h) => map.set(h.id_hallazgo_tecnico, h));
+    return Array.from(map.values()).sort(
+      (a, b) => a.id_hallazgo_tecnico - b.id_hallazgo_tecnico
+    );
+  }, [isExtra, hallazgosIngreso, hallazgosOrden]);
 
   // Mapas de repuestos y servicios preexistentes en la orden (para cuando es tipo extra)
   const ordenRepuestosMap = useMemo(() => {
@@ -580,7 +602,7 @@ export const PresupuestoFormPage = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* LAYOUT CON 2 COLUMNAS (Lado izquierdo Observaciones del cliente, Lado derecho tablas y catálogos) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* COLUMNA IZQUIERDA: Observaciones del cliente y Hallazgos técnicos (solo lectura en tipo extra) */}
+          {/* COLUMNA IZQUIERDA: Observaciones del cliente y Hallazgos técnicos */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-2">
               <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
@@ -592,40 +614,48 @@ export const PresupuestoFormPage = () => {
               </div>
             </div>
 
-            {/* Tarjeta: Hallazgos técnicos (visible a modo de solo lectura cuando es presupuesto de tipo extra) */}
-            {isExtra && (
-              <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-3">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-amber-500" />
-                  Hallazgos técnicos
-                </h3>
+            {/* Tarjeta: Hallazgos técnicos (visible tanto en presupuesto inicial a partir de un ingreso como en presupuesto extra) */}
+            <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-3">
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                <AlertCircle className="w-4 h-4 text-amber-500" />
+                Hallazgos técnicos
+              </h3>
 
-                {/* Lista de hallazgos registrados a modo de solo lectura */}
-                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                  {hallazgos.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic text-center py-4">
-                      Sin hallazgos técnicos registrados.
-                    </p>
-                  ) : (
-                    hallazgos.map((h) => (
+              {/* Lista de hallazgos registrados a modo de solo lectura */}
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {hallazgos.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic text-center py-4">
+                    Sin hallazgos técnicos registrados.
+                  </p>
+                ) : (
+                  hallazgos.map((h) => {
+                    const isFromIngreso = !h.id_orden && !!h.id_ingreso;
+                    return (
                       <div
                         key={h.id_hallazgo_tecnico}
                         className="p-2.5 bg-background border border-border/80 rounded-xl text-xs space-y-1"
                       >
-                        <span className="font-bold text-foreground block">
-                          {h.hallazgo}
-                        </span>
+                        <div>
+                          <span className="font-bold text-foreground block">
+                            {h.hallazgo}
+                          </span>
+                          {isFromIngreso && isExtra && (
+                            <span className="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 mt-0.5">
+                              Del Ingreso #{h.id_ingreso}
+                            </span>
+                          )}
+                        </div>
                         {h.detalle && (
                           <p className="text-muted-foreground text-[11px] whitespace-pre-wrap">
                             {h.detalle}
                           </p>
                         )}
                       </div>
-                    ))
-                  )}
-                </div>
+                    );
+                  })
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* COLUMNA DERECHA: Listas de Repuestos y Servicios con Paneles Laterales de Selección */}

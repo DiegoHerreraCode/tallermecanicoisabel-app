@@ -1,5 +1,6 @@
 import type { VehiculoItem } from './vehiculo.interface';
 import type { TipoOrdenItem } from './tipo-orden.interface';
+import type { HallazgoTecnicoItem } from './orden.interface';
 
 export type IngresoEstadoType =
   | 'checklist_pendiente'
@@ -26,6 +27,7 @@ export interface IngresoItem {
   // Relaciones
   vehiculo?: VehiculoItem;
   tipo_orden?: TipoOrdenItem;
+  hallazgos_tecnicos?: HallazgoTecnicoItem[];
 }
 
 export interface CreateIngresoPayload {

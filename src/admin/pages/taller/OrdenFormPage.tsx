@@ -200,12 +200,34 @@ export const OrdenFormPage = () => {
     return Number(p.toFixed(1));
   };
 
-  // 6. Consultar hallazgos técnicos si estamos en una orden existente
-  const { data: hallazgos = [] } = useQuery({
+  // 6. Consultar hallazgos técnicos asociados a la orden
+  const { data: hallazgosOrden = [] } = useQuery({
     queryKey: ['hallazgos-orden', id],
-    queryFn: () => getHallazgosTecnicosAction(id!),
+    queryFn: () => getHallazgosTecnicosAction({ idOrden: id! }),
     enabled: !isNew && !!id,
   });
+
+  // 7. Consultar hallazgos técnicos asociados al ingreso vinculado
+  const { data: hallazgosIngreso = [] } = useQuery({
+    queryKey: ['hallazgos-ingreso', effectiveIngresoId],
+    queryFn: () => getHallazgosTecnicosAction({ idIngreso: effectiveIngresoId! }),
+    enabled: !!effectiveIngresoId,
+  });
+
+  // Lista unificada o combinada de hallazgos
+  const hallazgos = useMemo(() => {
+    if (isNew) {
+      // Al crear una nueva orden a partir de un ingreso: mostrar los hallazgos del ingreso
+      return hallazgosIngreso;
+    }
+    // En orden existente: combinar hallazgos del ingreso y hallazgos propios de la orden
+    const map = new Map<number, typeof hallazgosOrden[0]>();
+    hallazgosIngreso.forEach((h) => map.set(h.id_hallazgo_tecnico, h));
+    hallazgosOrden.forEach((h) => map.set(h.id_hallazgo_tecnico, h));
+    return Array.from(map.values()).sort(
+      (a, b) => a.id_hallazgo_tecnico - b.id_hallazgo_tecnico
+    );
+  }, [isNew, hallazgosIngreso, hallazgosOrden]);
 
   // Estado del Formulario
   const [fechaFinTentativa, setFechaFinTentativa] = useState('');
@@ -875,42 +897,50 @@ export const OrdenFormPage = () => {
               </div>
             </div>
 
-            {/* Tarjeta: Hallazgos técnicos (visible cuando la orden ya existe) */}
-            {!isNew && (
-              <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4 text-amber-500" />
-                    Hallazgos técnicos
-                  </h3>
-                  {(mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada') && (
-                    <button
-                      type="button"
-                      onClick={() => setShowHallazgoModal(true)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer shadow-xs"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Nuevo
-                    </button>
-                  )}
-                </div>
+            {/* Tarjeta: Hallazgos técnicos (visible tanto en nueva orden como en orden existente) */}
+            <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 text-amber-500" />
+                  Hallazgos técnicos
+                </h3>
+                {(mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada') && (
+                  <button
+                    type="button"
+                    onClick={() => setShowHallazgoModal(true)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Nuevo
+                  </button>
+                )}
+              </div>
 
-                {/* Lista de hallazgos registrados */}
-                <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                  {hallazgos.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic text-center py-4">
-                      Sin hallazgos técnicos registrados.
-                    </p>
-                  ) : (
-                    hallazgos.map((h) => (
+              {/* Lista de hallazgos registrados */}
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {hallazgos.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic text-center py-4">
+                    Sin hallazgos técnicos registrados.
+                  </p>
+                ) : (
+                  hallazgos.map((h) => {
+                    const isFromIngreso = !h.id_orden && !!h.id_ingreso;
+                    return (
                       <div
                         key={h.id_hallazgo_tecnico}
                         className="p-2.5 bg-background border border-border/80 rounded-xl text-xs space-y-1 relative group"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <span className="font-bold text-foreground block">
-                            {h.hallazgo}
-                          </span>
+                          <div>
+                            <span className="font-bold text-foreground block">
+                              {h.hallazgo}
+                            </span>
+                            {isFromIngreso && (
+                              <span className="inline-block px-1.5 py-0.5 text-[10px] font-semibold rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 mt-0.5">
+                                Del Ingreso #{h.id_ingreso}
+                              </span>
+                            )}
+                          </div>
                           {mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada' && (
                             <button
                               type="button"
@@ -918,7 +948,8 @@ export const OrdenFormPage = () => {
                                 if (window.confirm(`¿Estás seguro de eliminar el hallazgo "${h.hallazgo}"?`)) {
                                   deleteHallazgo({
                                     id: h.id_hallazgo_tecnico,
-                                    ordenId: ordenData?.id_orden
+                                    ordenId: ordenData?.id_orden,
+                                    ingresoId: h.id_ingreso ?? undefined,
                                   });
                                 }
                               }}
@@ -936,11 +967,11 @@ export const OrdenFormPage = () => {
                           </p>
                         )}
                       </div>
-                    ))
-                  )}
-                </div>
+                    );
+                  })
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* COLUMNA DERECHA: Listas de Repuestos y Servicios con Paneles Laterales de Selección */}
