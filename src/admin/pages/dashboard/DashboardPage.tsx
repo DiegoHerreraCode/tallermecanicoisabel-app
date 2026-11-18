@@ -12,6 +12,11 @@ import {
   OrderStatusPieChart,
   type OrderStatusFilterMode,
 } from '../../components/dashboard/OrderStatusPieChart';
+import {
+  GenericPieChart,
+  type GenericPieFilterMode,
+  type GenericPieItem,
+} from '../../components/dashboard/GenericPieChart';
 import { EconomicMetricsCard } from '../../components/dashboard/EconomicMetricsCard';
 import { DashboardCalendar } from '../../components/dashboard/DashboardCalendar';
 import { RecentOrdersTable } from '../../components/dashboard/RecentOrdersTable';
@@ -19,12 +24,24 @@ import { QuickActionsTable } from '../../components/dashboard/QuickActionsTable'
 import { Button } from '@/components/ui/button';
 
 export const DashboardPage = () => {
-  const { ordenes, personal, presupuestos, pagosClientes, isLoading, refetchAll } =
-    useDashboardData();
+  const {
+    ordenes,
+    personal,
+    presupuestos,
+    pagosClientes,
+    tiposOrdenes,
+    tiposServicios,
+    isLoading,
+    refetchAll,
+  } = useDashboardData();
 
-  // Estado para el modo de filtrado de la gráfica de pastel (histórico vs mes actual)
+  // Estados para el modo de filtrado de las gráficas de pastel (histórico vs mes actual)
   const [pieFilterMode, setPieFilterMode] =
     useState<OrderStatusFilterMode>('mes_actual');
+  const [tiposServiciosFilterMode, setTiposServiciosFilterMode] =
+    useState<GenericPieFilterMode>('mes_actual');
+  const [tiposOrdenesFilterMode, setTiposOrdenesFilterMode] =
+    useState<GenericPieFilterMode>('mes_actual');
 
   const now = new Date();
   const currentMonth = now.getMonth();
@@ -90,7 +107,141 @@ export const DashboardPage = () => {
     };
   }, [ordenesParaPie]);
 
-  // 6. Calendario de fechas tentativas de finalización de órdenes
+  // 6. Gráfica de pastel: Tipos de Servicios del Taller más solicitados
+  const PALETTE_SERVICIOS = [
+    { color: '#3b82f6', bgDot: 'bg-blue-500' },
+    { color: '#10b981', bgDot: 'bg-emerald-500' },
+    { color: '#f59e0b', bgDot: 'bg-amber-500' },
+    { color: '#8b5cf6', bgDot: 'bg-purple-500' },
+    { color: '#ec4899', bgDot: 'bg-pink-500' },
+    { color: '#06b6d4', bgDot: 'bg-cyan-500' },
+    { color: '#f97316', bgDot: 'bg-orange-500' },
+    { color: '#6366f1', bgDot: 'bg-indigo-500' },
+  ];
+
+  const tiposServiciosData: GenericPieItem[] = useMemo(() => {
+    // Filtrar órdenes por período
+    const ordenesPeriodo =
+      tiposServiciosFilterMode === 'mes_actual'
+        ? ordenes.filter((ord) => {
+            if (!ord.fecha_creacion) return false;
+            const d = new Date(ord.fecha_creacion);
+            return (
+              d.getMonth() === currentMonth && d.getFullYear() === currentYear
+            );
+          })
+        : ordenes;
+
+    // Contar servicios por tipo_servicio_taller
+    const countsMap = new Map<string, number>();
+
+    // Inicializar con los tipos de servicio conocidos si los hay
+    tiposServicios.forEach((ts) => {
+      countsMap.set(ts.nombre, 0);
+    });
+
+    ordenesPeriodo.forEach((ord) => {
+      ord.servicios_taller?.forEach((st) => {
+        const nombreTipo =
+          st.servicio_taller?.tipo_servicio_taller?.nombre ||
+          st.servicio_taller?.tipoServicioTaller?.nombre ||
+          'Otros';
+        countsMap.set(nombreTipo, (countsMap.get(nombreTipo) || 0) + 1);
+      });
+    });
+
+    // Convertir a array ordenado descendentemente
+    const entries = Array.from(countsMap.entries())
+      .filter(([_, count]) => count > 0)
+      .sort((a, b) => b[1] - a[1]);
+
+    // Si todos están en 0, mostrar al menos las categorías con 0 si existen
+    const finalEntries =
+      entries.length > 0
+        ? entries
+        : tiposServicios.slice(0, 4).map((ts) => [ts.nombre, 0] as [string, number]);
+
+    return finalEntries.map(([label, count], idx) => {
+      const palette = PALETTE_SERVICIOS[idx % PALETTE_SERVICIOS.length];
+      return {
+        label,
+        count,
+        color: palette.color,
+        bgDot: palette.bgDot,
+      };
+    });
+  }, [
+    ordenes,
+    tiposServicios,
+    tiposServiciosFilterMode,
+    currentMonth,
+    currentYear,
+  ]);
+
+  // 7. Gráfica de pastel: Tipos de Órdenes más solicitados
+  const PALETTE_ORDENES = [
+    { color: '#3b82f6', bgDot: 'bg-blue-500' },
+    { color: '#10b981', bgDot: 'bg-emerald-500' },
+    { color: '#f59e0b', bgDot: 'bg-amber-500' },
+    { color: '#8b5cf6', bgDot: 'bg-purple-500' },
+    { color: '#ec4899', bgDot: 'bg-pink-500' },
+  ];
+
+  const tiposOrdenesData: GenericPieItem[] = useMemo(() => {
+    const ordenesPeriodo =
+      tiposOrdenesFilterMode === 'mes_actual'
+        ? ordenes.filter((ord) => {
+            if (!ord.fecha_creacion) return false;
+            const d = new Date(ord.fecha_creacion);
+            return (
+              d.getMonth() === currentMonth && d.getFullYear() === currentYear
+            );
+          })
+        : ordenes;
+
+    const countsMap = new Map<string, number>();
+
+    // Inicializar con los tipos de orden disponibles
+    tiposOrdenes.forEach((to) => {
+      countsMap.set(to.nombre, 0);
+    });
+
+    ordenesPeriodo.forEach((ord) => {
+      const nombreTipo =
+        ord.tipo_orden?.nombre ||
+        tiposOrdenes.find((to) => to.id_tipo_orden === ord.id_tipo_orden)
+          ?.nombre ||
+        'Otro';
+      countsMap.set(nombreTipo, (countsMap.get(nombreTipo) || 0) + 1);
+    });
+
+    const entries = Array.from(countsMap.entries())
+      .filter(([_, count]) => count > 0)
+      .sort((a, b) => b[1] - a[1]);
+
+    const finalEntries =
+      entries.length > 0
+        ? entries
+        : tiposOrdenes.slice(0, 4).map((to) => [to.nombre, 0] as [string, number]);
+
+    return finalEntries.map(([label, count], idx) => {
+      const palette = PALETTE_ORDENES[idx % PALETTE_ORDENES.length];
+      return {
+        label: label.charAt(0).toUpperCase() + label.slice(1),
+        count,
+        color: palette.color,
+        bgDot: palette.bgDot,
+      };
+    });
+  }, [
+    ordenes,
+    tiposOrdenes,
+    tiposOrdenesFilterMode,
+    currentMonth,
+    currentYear,
+  ]);
+
+  // 8. Calendario de fechas tentativas de finalización de órdenes
   // Se debe marcar si y solo si ese día hay una orden con estado_operativo != 'finalizada' o 'anulada' con esa fecha_fin_tentativa
   const ordenesParaCalendario = ordenes
     .filter(
@@ -174,7 +325,30 @@ export const DashboardPage = () => {
         />
       </section>
 
-      {/* FILA 3: Métricas Económicas con selector de fecha & Calendario de fechas tentativas */}
+      {/* FILA 3: Gráficas de Pastel Adicionales (Tipos de Servicios y Tipos de Órdenes) */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <GenericPieChart
+          title="Tipos de Servicios del Taller Más Solicitados"
+          subtitle="Frecuencia de servicios solicitados en órdenes"
+          centerLabel="Servicios"
+          items={tiposServiciosData}
+          filterMode={tiposServiciosFilterMode}
+          onFilterModeChange={setTiposServiciosFilterMode}
+          filterGroupName="tipos_servicios_filter"
+        />
+
+        <GenericPieChart
+          title="Tipos de Órdenes Más Solicitadas"
+          subtitle="Frecuencia por categoría de orden de trabajo"
+          centerLabel="Órdenes"
+          items={tiposOrdenesData}
+          filterMode={tiposOrdenesFilterMode}
+          onFilterModeChange={setTiposOrdenesFilterMode}
+          filterGroupName="tipos_ordenes_filter"
+        />
+      </section>
+
+      {/* FILA 4: Métricas Económicas con selector de fecha & Calendario de fechas tentativas */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <EconomicMetricsCard
           pagos={pagosClientes}
@@ -188,7 +362,7 @@ export const DashboardPage = () => {
         />
       </section>
 
-      {/* FILA 4: Tabla con las 5 órdenes más recientes & Accesos Rápidos */}
+      {/* FILA 5: Tabla con las 5 órdenes más recientes & Accesos Rápidos */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecentOrdersTable ordenes={ordenes} />
         <QuickActionsTable />

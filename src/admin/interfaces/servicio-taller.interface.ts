@@ -11,4 +11,5 @@ export interface ServicioTallerItem {
   porcentaje_ganancia: number;
   is_deleted: boolean;
   tipo_servicio_taller?: TipoServicioTallerItem;
+  tipoServicioTaller?: TipoServicioTallerItem;
 }
