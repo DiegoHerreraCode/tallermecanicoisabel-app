@@ -71,7 +71,7 @@ export const QuickCreateTipoServicioModal: React.FC<QuickCreateTipoServicioModal
         description="Registra una categoría de servicios (ej: Frenos, Motor, Eléctrico)"
         zIndex={zIndex}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-xs font-bold text-foreground mb-1.5">
               Nombre del Tipo de Servicio <span className="text-rose-500">*</span>
@@ -102,7 +102,7 @@ export const QuickCreateTipoServicioModal: React.FC<QuickCreateTipoServicioModal
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/80">
             <button
               type="button"
               onClick={onClose}

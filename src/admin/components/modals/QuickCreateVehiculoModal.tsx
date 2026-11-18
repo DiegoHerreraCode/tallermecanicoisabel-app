@@ -139,11 +139,11 @@ export const QuickCreateVehiculoModal: React.FC<QuickCreateVehiculoModalProps> =
         onClose={onClose}
         title="Registrar Nuevo Vehículo"
         description="Ingresa los datos del vehículo para seleccionarlo en el ingreso"
-        maxWidth="max-w-lg"
+        maxWidth="max-w-xl"
         zIndex={zIndex}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4.5">
             {/* Cliente */}
             <div className="sm:col-span-2">
               <div className="flex items-center justify-between mb-1.5">
@@ -276,7 +276,7 @@ export const QuickCreateVehiculoModal: React.FC<QuickCreateVehiculoModalProps> =
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/80">
             <button
               type="button"
               onClick={onClose}

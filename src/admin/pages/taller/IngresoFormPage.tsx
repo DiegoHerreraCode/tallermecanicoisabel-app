@@ -254,7 +254,7 @@ export const IngresoFormPage = () => {
           </label>
           <textarea
             name="observaciones_cliente"
-            rows={4}
+            rows={8}
             value={formData.observaciones_cliente || ''}
             onChange={handleChange}
             placeholder="Ingrese las observaciones del cliente..."

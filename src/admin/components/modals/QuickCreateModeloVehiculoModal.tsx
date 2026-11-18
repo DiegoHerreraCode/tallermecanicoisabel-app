@@ -92,7 +92,7 @@ export const QuickCreateModeloVehiculoModal: React.FC<QuickCreateModeloVehiculoM
         description="Registra un modelo asignándolo a su marca correspondiente"
         zIndex={zIndex}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-bold text-foreground">
@@ -139,7 +139,7 @@ export const QuickCreateModeloVehiculoModal: React.FC<QuickCreateModeloVehiculoM
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/80">
             <button
               type="button"
               onClick={onClose}

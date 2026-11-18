@@ -66,7 +66,7 @@ export const QuickCreateMarcaRepuestoModal: React.FC<QuickCreateMarcaRepuestoMod
         description="Registra rápidamente una marca para asignarla de inmediato"
         zIndex={zIndex}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-xs font-bold text-foreground mb-1.5">
               Nombre de la Marca <span className="text-rose-500">*</span>
@@ -83,7 +83,7 @@ export const QuickCreateMarcaRepuestoModal: React.FC<QuickCreateMarcaRepuestoMod
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border/80">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-border/80">
             <button
               type="button"
               onClick={onClose}
