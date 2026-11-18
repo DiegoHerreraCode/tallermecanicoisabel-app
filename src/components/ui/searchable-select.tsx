@@ -204,7 +204,14 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                     } ${opt.disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                   >
                     <div className="flex flex-col truncate pr-2">
-                      <span className="truncate">{opt.label}</span>
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="truncate">{opt.label}</span>
+                        {opt.subtext && (
+                          <span className="text-[11px] text-muted-foreground font-normal shrink-0">
+                            {opt.subtext}
+                          </span>
+                        )}
+                      </div>
                       {opt.description && (
                         <span className="text-[11px] text-muted-foreground truncate">
                           {opt.description}
