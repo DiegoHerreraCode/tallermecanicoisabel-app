@@ -540,28 +540,28 @@ export const PresupuestoPage = () => {
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
                 <th scope="col" className="py-3 px-4 text-center">
-                  num_presupuesto
+                  Num Presupuesto
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  cliente
+                  Cliente
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  tipo de orden
+                  Tipo Orden
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  tipo
+                  Tipo
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  fecha_creacion
+                  Fecha Creación
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  fecha_vencimiento
+                  Fecha Vencimiento
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  estado
+                  Estado
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  acciones
+                  Acciones
                 </th>
               </tr>
             </thead>

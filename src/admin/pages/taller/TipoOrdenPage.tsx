@@ -112,8 +112,8 @@ export const TipoOrdenPage = () => {
           <table className="w-full text-left text-xs sm:text-sm border-collapse">
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
-                <th className="py-3 px-4 text-center">nombre</th>
-                <th className="py-3 px-4 text-center">descripción</th>
+                <th className="py-3 px-4 text-center">Nombre</th>
+                <th className="py-3 px-4 text-center">Descripción</th>
                 <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>

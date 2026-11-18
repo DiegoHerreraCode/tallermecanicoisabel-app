@@ -140,9 +140,9 @@ export const ModeloVehiculoPage = () => {
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
-                <th className="py-3 px-4 text-center">ID modelo</th>
-                <th className="py-3 px-4 text-center">nombre (modelo)</th>
-                <th className="py-3 px-4 text-center">nombre (marca)</th>
+                <th className="py-3 px-4 text-center">Id Modelo</th>
+                <th className="py-3 px-4 text-center">Nombre (modelo)</th>
+                <th className="py-3 px-4 text-center">Nombre (marca)</th>
                 <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>
@@ -225,8 +225,8 @@ export const ModeloVehiculoPage = () => {
               key={pageNum}
               onClick={() => setCurrentPage(pageNum)}
               className={`w-8 h-8 text-xs font-semibold rounded-lg transition-all cursor-pointer ${validCurrentPage === pageNum
-                  ? 'bg-blue-600 text-white shadow-sm font-bold'
-                  : 'bg-card border border-border/80 text-foreground hover:bg-accent'
+                ? 'bg-blue-600 text-white shadow-sm font-bold'
+                : 'bg-card border border-border/80 text-foreground hover:bg-accent'
                 }`}
             >
               {pageNum}

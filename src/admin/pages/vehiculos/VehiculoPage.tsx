@@ -241,7 +241,7 @@ export const VehiculoPage = () => {
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
                 <th scope="col" className="py-3 px-4 text-center">
-                  ID Vehículo
+                  Id Vehículo
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
                   Placa

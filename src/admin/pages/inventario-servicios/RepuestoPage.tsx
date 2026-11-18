@@ -140,13 +140,13 @@ export const RepuestoPage = () => {
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
-                <th className="py-3 px-4 text-center">ID repuesto</th>
-                <th className="py-3 px-4 text-center">nombre (modelo)</th>
-                <th className="py-3 px-4 text-center">nombre (marca)</th>
-                <th className="py-3 px-4 text-center">ultimo costo compra unitario</th>
-                <th className="py-3 px-4 text-center">monto de venta</th>
-                <th className="py-3 px-4 text-center">utilidad</th>
-                <th className="py-3 px-4 text-center">porcentaje de ganancia</th>
+                <th className="py-3 px-4 text-center">Id Repuesto</th>
+                <th className="py-3 px-4 text-center">Nombre (modelo)</th>
+                <th className="py-3 px-4 text-center">Nombre (marca)</th>
+                <th className="py-3 px-4 text-center">Ultimo Costo Compra Unitario</th>
+                <th className="py-3 px-4 text-center">Monto de Venta</th>
+                <th className="py-3 px-4 text-center">Utilidad</th>
+                <th className="py-3 px-4 text-center">Porcentaje de Ganancia</th>
                 <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>

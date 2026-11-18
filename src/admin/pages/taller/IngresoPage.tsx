@@ -528,25 +528,25 @@ export const IngresoPage = () => {
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
                 <th scope="col" className="py-3 px-4 text-center">
-                  ID ingreso
+                  Id Ingreso
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  tipo de orden
+                  Tipo de Orden
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  modelo/marca (vehiculo)
+                  Modelo/Marca (vehiculo)
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  placa (vehiculo)
+                  Placa (vehiculo)
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  nombre (cliente)
+                  Nombre (cliente)
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  fecha de ingreso
+                  Fecha de Ingreso
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  estado
+                  Estado
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
                   Acciones

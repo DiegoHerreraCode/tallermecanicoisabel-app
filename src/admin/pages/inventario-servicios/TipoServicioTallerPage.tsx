@@ -21,7 +21,7 @@ export const TipoServicioTallerPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
-  // Filtrado de modelos
+  // Filtrado de tipos de servicios del taller
   const filteredTiposServiciosTaller = useMemo(() => {
     return tiposServiciosTaller.filter((tipoServicioTaller: TipoServicioTallerItem) => {
       const nombreTipoServicio = (tipoServicioTaller.nombre || '').toLowerCase();
@@ -112,8 +112,8 @@ export const TipoServicioTallerPage = () => {
           <table className="w-full text-left text-xs sm:text-sm border-collapse">
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
-                <th className="py-3 px-4 text-center">nombre</th>
-                <th className="py-3 px-4 text-center">descripción</th>
+                <th className="py-3 px-4 text-center">Nombre</th>
+                <th className="py-3 px-4 text-center">Descripción</th>
                 <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>

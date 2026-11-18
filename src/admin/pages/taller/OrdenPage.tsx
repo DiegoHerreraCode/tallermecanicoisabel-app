@@ -441,31 +441,31 @@ export const OrdenPage = () => {
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
                 <th scope="col" className="py-3 px-4 text-center">
-                  id_orden
+                  Id Orden
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  nombre / cedula
+                  Nombre / Cedula
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  tipo de orden
+                  Tipo de Orden
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  fecha finalizacion tentativa
+                  Fecha Finalización Tentativa
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  fecha creacion
+                  Fecha Creación
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  monto total
+                  Monto Total
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  monto pendiente
+                  Monto Pendiente
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  estado operativo
+                  Estado Operativo
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  estado administrativo
+                  Estado Administrativo
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
                   Acciones

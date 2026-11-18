@@ -110,8 +110,8 @@ export const TipoVehiculoPage = () => {
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
-                <th className="py-3 px-4 text-center">ID tipo</th>
-                <th className="py-3 px-4 text-center">nombre</th>
+                <th className="py-3 px-4 text-center">Id Tipo</th>
+                <th className="py-3 px-4 text-center">Nombre</th>
                 <th className="py-3 px-4 text-center">Acciones</th>
               </tr>
             </thead>
