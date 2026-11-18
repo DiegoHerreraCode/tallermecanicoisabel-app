@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams, useSearchParams, Link, useNavigate } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -12,6 +12,7 @@ import {
   Save,
 } from 'lucide-react';
 
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { getIngresoByIdAction } from '../../actions/get-ingreso-by-id.action';
 import { getOrdenByIdAction } from '../../actions/get-orden-by-id.action';
 import { getPresupuestoByIdAction } from '../../actions/get-presupuesto-by-id.action';
@@ -58,7 +59,7 @@ interface ServicioLineState {
 export const PresupuestoFormPage = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const { goBack } = useAppNavigation();
 
   const isNew = id === 'new';
 
@@ -588,13 +589,14 @@ export const PresupuestoFormPage = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Link
-            to={volverLink}
+          <button
+            type="button"
+            onClick={() => goBack(volverLink)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -1068,7 +1070,7 @@ export const PresupuestoFormPage = () => {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => navigate(volverLink)}
+                  onClick={() => goBack(volverLink)}
                   className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-all cursor-pointer shadow-xs"
                 >
                   Cancelar

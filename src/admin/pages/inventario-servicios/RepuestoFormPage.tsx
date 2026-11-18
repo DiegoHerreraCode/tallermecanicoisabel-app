@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router';
+import { useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Wrench, Plus } from 'lucide-react';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { getRepuestoByIdAction } from '../../actions/get-repuesto-by-id.action';
 import { getMarcasRepuestosAction } from '../../actions/get-marcas-repuestos.action';
 import { getVariablesAction } from '../../actions/get-variables.action';
@@ -12,6 +13,7 @@ import { QuickCreateMarcaRepuestoModal } from '../../components/modals/QuickCrea
 
 export const RepuestoFormPage = () => {
   const { id } = useParams<{ id: string }>();
+  const { goBack } = useAppNavigation();
 
   // Si id === 'new', estamos creando; en cualquier otro caso estamos editando
   const isCreating = !id || id === 'new';
@@ -222,13 +224,14 @@ export const RepuestoFormPage = () => {
       {/* Encabezado con Botón Volver */}
       <div className="flex items-center justify-between pb-2 border-b border-border/80">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin/inventario-servicios/repuestos"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/inventario-servicios/repuestos')}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Wrench className="w-6 h-6 text-blue-500" />
@@ -365,12 +368,13 @@ export const RepuestoFormPage = () => {
 
         {/* Botones de Cancelar y Guardar */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/80">
-          <Link
-            to="/admin/inventario-servicios/repuestos"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/inventario-servicios/repuestos')}
             className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
           >
             Cancelar
-          </Link>
+          </button>
           <button
             type="submit"
             disabled={isPending}

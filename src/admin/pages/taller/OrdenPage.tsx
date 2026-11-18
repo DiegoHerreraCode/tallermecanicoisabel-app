@@ -10,6 +10,7 @@ import {
   X,
   SquareText,
 } from 'lucide-react';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 
 import { getOrdenesAction } from '../../actions/get-ordenes.action';
 import { getTiposOrdenesAction } from '../../actions/get-tipos-ordenes.action';
@@ -18,6 +19,7 @@ import { useOrdenMutation } from '../../hooks/useOrdenMutation';
 import type { OrdenItem } from '../../interfaces/orden.interface';
 
 export const OrdenPage = () => {
+  const { goBack } = useAppNavigation();
   // 1. Consultar listado de órdenes
   const { data: ordenes = [], isLoading } = useQuery({
     queryKey: ['ordenes-listado'],
@@ -283,13 +285,14 @@ export const OrdenPage = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Link
-            to="/admin/taller"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/taller')}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
         </div>
       </div>
 

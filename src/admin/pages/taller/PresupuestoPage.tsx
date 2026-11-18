@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
@@ -15,12 +14,14 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { getPresupuestosAction } from '../../actions/get-presupuestos.action';
 import { getTiposOrdenesAction } from '../../actions/get-tipos-ordenes.action';
 import { usePresupuestoMutation } from '../../hooks/usePresupuestoMutation';
 import type { PresupuestoItem } from '../../interfaces/presupuesto.interface';
 
 export const PresupuestoPage = () => {
+  const { goBack } = useAppNavigation();
   // 1. Obtener listado de presupuestos
   const { data: presupuestos = [], isLoading } = useQuery({
     queryKey: ['presupuestos-listado'],
@@ -382,13 +383,14 @@ export const PresupuestoPage = () => {
           </p>
         </div>
 
-        <Link
-          to="/admin/taller"
+        <button
+          type="button"
+          onClick={() => goBack('/admin/taller')}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-card border border-border/80 text-foreground hover:bg-accent hover:border-border transition-all shadow-xs cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver</span>
-        </Link>
+        </button>
       </div>
 
       {/* 2. CARD DE FILTROS fiel al boceto */}

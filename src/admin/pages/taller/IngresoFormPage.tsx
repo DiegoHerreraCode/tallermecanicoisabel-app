@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Car, Plus } from 'lucide-react';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { getVehiculosAction } from '../../actions/get-vehiculos.action';
 import { getClientesAction } from '../../actions/get-clientes.action';
 import { getModelosVehiculosAction } from '../../actions/get-modelos-vehiculos.action';
@@ -17,6 +17,7 @@ import { QuickCreateTipoOrdenModal } from '../../components/modals/QuickCreateTi
 
 export const IngresoFormPage = () => {
   const { createIngreso, isCreating } = useIngresoMutation();
+  const { goBack } = useAppNavigation();
 
   // 1. Tipos de ordenes
   const { data: tiposOrdenes = [] } = useQuery({
@@ -166,13 +167,14 @@ export const IngresoFormPage = () => {
       {/* 1. Encabezado con Botón Volver */}
       <div className="flex items-center justify-between pb-2 border-b border-border/80">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin/taller/ingresos"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/taller/ingresos')}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Car className="w-6 h-6 text-blue-500" />
@@ -264,12 +266,13 @@ export const IngresoFormPage = () => {
 
         {/* Botón Guardar según boceto */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/80">
-          <Link
-            to="/admin/taller/ingresos"
-            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/taller/ingresos')}
+            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
           >
             Cancelar
-          </Link>
+          </button>
           <button
             type="submit"
             disabled={isCreating}

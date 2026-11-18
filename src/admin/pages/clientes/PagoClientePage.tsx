@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import {
   ArrowLeft,
   Plus,
@@ -11,11 +11,12 @@ import {
   AlertTriangle,
   Trash2,
 } from 'lucide-react';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { usePagosClientes } from '../../hooks/usePagosClientes';
 import type { PagoClienteItem } from '../../interfaces/pago-cliente.interface';
 
 export const PagoClientePage = () => {
-  const navigate = useNavigate();
+  const { goBack, navigate } = useAppNavigation();
   const { pagos, clientes, isLoading, deletePago, isDeleting } = usePagosClientes();
 
   // Estados de filtrado
@@ -124,13 +125,14 @@ export const PagoClientePage = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Link
-            to="/admin/clientes"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/clientes')}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
           <Link
             to="/admin/clientes/pagos-clientes/new"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer"

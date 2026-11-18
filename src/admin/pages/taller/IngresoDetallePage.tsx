@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -15,6 +15,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { getIngresoByIdAction } from '../../actions/get-ingreso-by-id.action';
 import { getVehiculosAction } from '../../actions/get-vehiculos.action';
 import { getClientesAction } from '../../actions/get-clientes.action';
@@ -26,7 +27,7 @@ import { useOrdenMutation } from '../../hooks/useOrdenMutation';
 
 export const IngresoDetallePage = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const { goBack, navigate } = useAppNavigation();
 
   const {
     createHallazgo,
@@ -210,13 +211,14 @@ export const IngresoDetallePage = () => {
         <p className="text-sm text-muted-foreground">
           El ingreso vehicular solicitado no existe o no se pudo cargar.
         </p>
-        <Link
-          to="/admin/taller/ingresos"
+        <button
+          type="button"
+          onClick={() => goBack('/admin/taller/ingresos')}
           className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver a Ingresos
-        </Link>
+        </button>
       </div>
     );
   }
@@ -226,13 +228,14 @@ export const IngresoDetallePage = () => {
       {/* 1. Encabezado con Botón Volver y Acciones */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/80">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin/taller/ingresos"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/taller/ingresos')}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Car className="w-6 h-6 text-blue-500" />

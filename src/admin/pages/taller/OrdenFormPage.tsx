@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useSearchParams, Link, useNavigate } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -19,6 +19,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { getOrdenByIdAction } from '../../actions/get-orden-by-id.action';
 import { getIngresoByIdAction } from '../../actions/get-ingreso-by-id.action';
 import { getRepuestosAction } from '../../actions/get-repuestos.action';
@@ -64,7 +65,7 @@ interface ServicioLineState {
 export const OrdenFormPage = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const { goBack, navigate } = useAppNavigation();
 
   // Determinación de modo:
   // Si id === 'new', modo creación
@@ -791,13 +792,14 @@ export const OrdenFormPage = () => {
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Link
-            to="/admin/taller/ordenes"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/taller/ordenes')}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
         </div>
       </div>
 

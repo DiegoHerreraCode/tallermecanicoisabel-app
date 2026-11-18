@@ -66,7 +66,7 @@ export const RecentOrdersTable = ({ ordenes }: Props) => {
         </div>
 
         <Button
-          onClick={() => navigate('/admin/taller')}
+          onClick={() => navigate('/admin/taller/ordenes')}
           variant="outline"
           size="sm"
           className="rounded-xl font-semibold shadow-xs hover:border-primary/50 text-xs px-3"
@@ -79,10 +79,10 @@ export const RecentOrdersTable = ({ ordenes }: Props) => {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border/80 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              <th className="py-2.5 px-3">ID</th>
-              <th className="py-2.5 px-3">Estado</th>
-              <th className="py-2.5 px-3">Monto</th>
-              <th className="py-2.5 px-3 text-right">Actualizada</th>
+              <th className="py-2.5 px-3 text-center">ID</th>
+              <th className="py-2.5 px-3 text-center">Estado</th>
+              <th className="py-2.5 px-3 text-center">Monto</th>
+              <th className="py-2.5 px-3 text-center">Actualizada</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
@@ -95,19 +95,19 @@ export const RecentOrdersTable = ({ ordenes }: Props) => {
             ) : (
               topOrders.map((ord) => (
                 <tr key={ord.id_orden} className="hover:bg-muted/30 transition-colors">
-                  <td className="py-3 px-3 font-semibold text-foreground">
+                  <td className="py-3 px-3 font-semibold text-foreground text-center">
                     #{ord.id_orden}
                   </td>
-                  <td className="py-3 px-3">
+                  <td className="py-3 px-3 text-center">
                     {getStatusBadge(ord.estado_operativo)}
                   </td>
-                  <td className="py-3 px-3 font-medium text-foreground">
+                  <td className="py-3 px-3 font-medium text-foreground text-center">
                     ${Number(ord.monto_total || 0).toLocaleString('en-US', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
                   </td>
-                  <td className="py-3 px-3 text-right text-xs text-muted-foreground font-mono">
+                  <td className="py-3 px-3 text-center text-xs text-muted-foreground font-mono">
                     {ord.last_update ? ord.last_update.split('T')[0] : ord.fecha_creacion?.split('T')[0] || '-'}
                   </td>
                 </tr>

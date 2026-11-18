@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router';
+import { useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { ArrowLeft, Save, Users } from 'lucide-react';
+import { useAppNavigation } from '../../hooks/useAppNavigation';
 import { getMarcaVehiculoByIdAction } from '../../actions/get-marca-vehiculo-by-id.action';
 import { useMarcaVehiculoMutation } from '../../hooks/useMarcaVehiculoMutation';
 import type { CreateUpdateMarcaVehiculoPayload } from '../../actions/create-update-marca-vehiculo.action';
 
 export const MarcaVehiculoFormPage = () => {
   const { id } = useParams<{ id: string }>();
+  const { goBack } = useAppNavigation();
 
   // Si id === 'new', estamos creando; en cualquier otro caso estamos editando
   const isCreating = !id || id === 'new';
@@ -71,13 +73,14 @@ export const MarcaVehiculoFormPage = () => {
       {/* Encabezado con Botón Volver */}
       <div className="flex items-center justify-between pb-2 border-b border-border/80">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin/vehiculos/marcas"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/vehiculos/marcas')}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver
-          </Link>
+          </button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Users className="w-6 h-6 text-emerald-500" />
@@ -114,12 +117,13 @@ export const MarcaVehiculoFormPage = () => {
 
         {/* Botones de Cancelar y Guardar */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/80">
-          <Link
-            to="/admin/vehiculos/marcas"
-            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors"
+          <button
+            type="button"
+            onClick={() => goBack('/admin/vehiculos/marcas')}
+            className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
           >
             Cancelar
-          </Link>
+          </button>
           <button
             type="submit"
             disabled={isPending}
