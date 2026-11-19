@@ -69,6 +69,32 @@ export const PagoClienteFormPage = () => {
     }));
   }, [clientes]);
 
+  // Opciones de órdenes para SearchableSelect con búsqueda por número de orden, montos y cliente
+  const ordenesOptions = useMemo(() => {
+    return ordenes
+      .filter((o) => {
+        // Permitir registrar pagos a órdenes que NO estén anuladas
+        // y que NO estén finalizadas y pagadas al mismo tiempo
+        if (o.estado_operativo === 'anulada') return false;
+        if (o.estado_operativo === 'finalizada' && o.estado_administrativo === 'pagada') return false;
+        return true;
+      })
+      .filter((o) => (!idCliente ? true : Number(o.id_cliente) === Number(idCliente)))
+      .map((o) => {
+        const cobrable = Number(o.monto_por_cobrar !== undefined ? o.monto_por_cobrar : o.monto_total || 0);
+        const favor = Number(o.monto_a_favor || 0);
+        const extra = favor > 0 ? ` (A favor: $${favor.toLocaleString('es-CL')})` : '';
+        const clientNombre = o.cliente?.nombre ? ` - ${o.cliente.nombre}` : '';
+
+        return {
+          value: o.id_orden,
+          label: `Orden #${o.id_orden} - Por Cobrar: $${cobrable.toLocaleString('es-CL')}${extra}`,
+          subtext: `Total: $${Number(o.monto_total || 0).toLocaleString('es-CL')}${clientNombre}`,
+          searchText: `Orden ${o.id_orden} #${o.id_orden} ${cobrable} ${favor} ${o.cliente?.nombre || ''} ${o.cliente?.cedula || ''}`,
+        };
+      });
+  }, [ordenes, idCliente]);
+
   // Modal Quick-Create In-Situ de Cliente
   const [isCreateClienteOpen, setIsCreateClienteOpen] = useState(false);
 
@@ -234,38 +260,20 @@ export const PagoClienteFormPage = () => {
               />
             </div>
 
-            {/* Orden de Trabajo */}
+            {/* Orden de Trabajo con SearchableSelect */}
             <div>
               <label className="block text-xs font-bold text-foreground mb-1.5">
                 N° de Orden de Trabajo <span className="text-rose-500">*</span>
               </label>
-              <select
-                value={idOrden}
-                onChange={(e) => handleOrdenChange(e.target.value)}
+              <SearchableSelect
+                options={ordenesOptions}
+                value={idOrden ? Number(idOrden) : ''}
+                onChange={(val) => handleOrdenChange(val ? String(val) : '')}
+                placeholder="Selecciona la orden..."
+                searchPlaceholder="Buscar orden por #, cliente o monto..."
+                emptyMessage="No se encontraron órdenes disponibles para pago"
                 required
-                className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-              >
-                <option value="">Selecciona la orden...</option>
-                {ordenes
-                  .filter((o) => {
-                    // Permitir registrar pagos a órdenes que NO estén anuladas
-                    // y que NO estén finalizadas y pagadas al mismo tiempo
-                    if (o.estado_operativo === 'anulada') return false;
-                    if (o.estado_operativo === 'finalizada' && o.estado_administrativo === 'pagada') return false;
-                    return true;
-                  })
-                  .filter((o) => (!idCliente ? true : Number(o.id_cliente) === Number(idCliente)))
-                  .map((o) => {
-                    const cobrable = Number(o.monto_por_cobrar !== undefined ? o.monto_por_cobrar : o.monto_total || 0);
-                    const favor = Number(o.monto_a_favor || 0);
-                    const extra = favor > 0 ? ` (A favor: $${favor.toLocaleString('es-CL')})` : '';
-                    return (
-                      <option key={o.id_orden} value={o.id_orden}>
-                        Orden #{o.id_orden} - Por Cobrar: ${cobrable.toLocaleString('es-CL')}{extra} (Total: ${Number(o.monto_total || 0).toLocaleString('es-CL')})
-                      </option>
-                    );
-                  })}
-              </select>
+              />
             </div>
 
             {/* Monto del Pago */}

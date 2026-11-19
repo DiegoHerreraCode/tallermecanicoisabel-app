@@ -18,6 +18,8 @@ import {
   Play,
   CheckCircle2,
   CheckCircle,
+  Receipt,
+  Eye,
 } from 'lucide-react';
 
 import { useAppNavigation } from '../../hooks/useAppNavigation';
@@ -100,7 +102,12 @@ export const OrdenFormPage = () => {
     isDeletingHallazgo,
     updateServicio,
     isUpdatingServicio,
+    finalizarOrden,
+    isFinalizandoOrden,
   } = useOrdenMutation();
+
+  // Modal para confirmar finalización de orden en modo view
+  const [showFinalizarModal, setShowFinalizarModal] = useState(false);
 
   // 1. Consultar Orden si no es new
   const { data: ordenData, isLoading: isLoadingOrden } = useQuery({
@@ -888,6 +895,14 @@ export const OrdenFormPage = () => {
     }
   };
 
+  // Resuelve la URL pública del backend para la imagen del comprobante
+  const getBackendImageUrl = (path?: string | null) => {
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const baseUrlImg = import.meta.env.VITE_IMG_URL || 'http://localhost:8000';
+    return `${baseUrlImg}/${path}`;
+  };
+
   if (!isNew && (isLoadingOrden || isLoadingIngreso)) {
     return (
       <div className="flex items-center justify-center min-h-[350px]">
@@ -1204,11 +1219,10 @@ export const OrdenFormPage = () => {
                                           parseInt(e.target.value) || 0
                                         )
                                       }
-                                      className={`w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border ${
-                                        r.cantidad_cubierta_garantia > 0
-                                          ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
-                                          : 'border-border/80 text-foreground'
-                                      }`}
+                                      className={`w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border ${r.cantidad_cubierta_garantia > 0
+                                        ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
+                                        : 'border-border/80 text-foreground'
+                                        }`}
                                     />
                                     <button
                                       type="button"
@@ -1218,11 +1232,10 @@ export const OrdenFormPage = () => {
                                           r.cantidad_cubierta_garantia === r.cantidad ? 0 : r.cantidad
                                         )
                                       }
-                                      className={`p-1 rounded text-[10px] font-semibold border transition-colors cursor-pointer ${
-                                        r.cantidad_cubierta_garantia === r.cantidad
-                                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
-                                          : 'bg-muted/50 text-muted-foreground border-border/60 hover:text-foreground'
-                                      }`}
+                                      className={`p-1 rounded text-[10px] font-semibold border transition-colors cursor-pointer ${r.cantidad_cubierta_garantia === r.cantidad
+                                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                                        : 'bg-muted/50 text-muted-foreground border-border/60 hover:text-foreground'
+                                        }`}
                                       title={r.cantidad_cubierta_garantia === r.cantidad ? 'Quitar garantía' : 'Cubrir toda la cantidad'}
                                     >
                                       {r.cantidad_cubierta_garantia === r.cantidad ? '100%' : 'Max'}
@@ -1483,11 +1496,10 @@ export const OrdenFormPage = () => {
                                             parseInt(e.target.value) || 0
                                           )
                                         }
-                                        className={`w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border ${
-                                          s.cantidad_cubierta_garantia > 0
-                                            ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
-                                            : 'border-border/80 text-foreground'
-                                        }`}
+                                        className={`w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border ${s.cantidad_cubierta_garantia > 0
+                                          ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
+                                          : 'border-border/80 text-foreground'
+                                          }`}
                                       />
                                       <button
                                         type="button"
@@ -1497,11 +1509,10 @@ export const OrdenFormPage = () => {
                                             s.cantidad_cubierta_garantia === s.cantidad ? 0 : s.cantidad
                                           )
                                         }
-                                        className={`p-1 rounded text-[10px] font-semibold border transition-colors cursor-pointer ${
-                                          s.cantidad_cubierta_garantia === s.cantidad
-                                            ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
-                                            : 'bg-muted/50 text-muted-foreground border-border/60 hover:text-foreground'
-                                        }`}
+                                        className={`p-1 rounded text-[10px] font-semibold border transition-colors cursor-pointer ${s.cantidad_cubierta_garantia === s.cantidad
+                                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                                          : 'bg-muted/50 text-muted-foreground border-border/60 hover:text-foreground'
+                                          }`}
                                         title={s.cantidad_cubierta_garantia === s.cantidad ? 'Quitar garantía' : 'Cubrir toda la cantidad'}
                                       >
                                         {s.cantidad_cubierta_garantia === s.cantidad ? '100%' : 'Max'}
@@ -1866,6 +1877,19 @@ export const OrdenFormPage = () => {
 
                 {mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada' && (
                   <>
+                    {/* Botón Finalizar Orden (cuando la orden está 'en_proceso') */}
+                    {ordenData.estado_operativo === 'en_proceso' && (
+                      <button
+                        type="button"
+                        onClick={() => setShowFinalizarModal(true)}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+                        title="Finalizar orden de trabajo"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        Finalizar Orden
+                      </button>
+                    )}
+
                     {/* Botón Generar Presupuesto Extra */}
                     <button
                       type="button"
@@ -1892,6 +1916,95 @@ export const OrdenFormPage = () => {
                 )}
               </div>
             </div>
+
+            {/* SECCIÓN 4: TABLA DE PAGOS ASOCIADOS A LA ORDEN (solo en modo 'view') */}
+            {mode === 'view' && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+                    <Receipt className="w-5 h-5 text-blue-500" />
+                    Historial de Pagos Registrados
+                  </h2>
+                  <span className="text-xs text-muted-foreground font-medium">
+                    Total Acumulado:{' '}
+                    <strong className="text-foreground font-bold">
+                      ${economicData.total_pagado.toFixed(2)}
+                    </strong>
+                  </span>
+                </div>
+
+                <div className="bg-card rounded-2xl border border-border/80 shadow-xs overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
+                          <th className="py-2.5 px-3 text-center">Id Pago</th>
+                          <th className="py-2.5 px-3 text-center">Fecha de Pago</th>
+                          <th className="py-2.5 px-3 text-center">Método</th>
+                          <th className="py-2.5 px-3 text-center">N° Referencia</th>
+                          <th className="py-2.5 px-3 text-center">Monto</th>
+                          <th className="py-2.5 px-3 text-center">Comprobante</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60">
+                        {!ordenData?.pagos || ordenData.pagos.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="py-6 text-center text-muted-foreground text-xs"
+                            >
+                              No hay pagos registrados para esta orden de trabajo.
+                            </td>
+                          </tr>
+                        ) : (
+                          ordenData.pagos.map((p) => {
+                            const comprobanteUrl = getBackendImageUrl(p.imagePath) || '';
+                            return (
+                              <tr key={p.id_pago_cliente} className="hover:bg-accent/40 transition-colors">
+                                <td className="py-2.5 px-3 font-mono font-bold text-center text-foreground">
+                                  #{p.id_pago_cliente}
+                                </td>
+                                <td className="py-2.5 px-3 text-center text-foreground font-medium">
+                                  {p.fecha_pago ? p.fecha_pago.substring(0, 10) : '—'}
+                                </td>
+                                <td className="py-2.5 px-3 text-center capitalize text-foreground font-medium">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                    {p.metodo_pago}
+                                  </span>
+                                </td>
+                                <td className="py-2.5 px-3 text-center font-mono text-muted-foreground">
+                                  {p.num_referencia || '—'}
+                                </td>
+                                <td className="py-2.5 px-3 text-center font-bold text-blue-600 dark:text-blue-400">
+                                  ${Number(p.monto || 0).toFixed(2)}
+                                </td>
+                                <td className="py-2.5 px-3 text-center">
+                                  {comprobanteUrl ? (
+                                    <a
+                                      href={comprobanteUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
+                                    >
+                                      <Eye className="w-3.5 h-3.5 text-blue-500" />
+                                      Ver Detalle
+                                    </a>
+                                  ) : (
+                                    <span className="text-muted-foreground italic text-[11px]">
+                                      Sin adjunto
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </form>
@@ -2032,6 +2145,86 @@ export const OrdenFormPage = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: FINALIZAR ORDEN DE TRABAJO */}
+      {showFinalizarModal && ordenData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
+          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
+              <h3 className="text-lg font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                Finalizar Orden #{ordenData.id_orden}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowFinalizarModal(false)}
+                className="p-1 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto pr-1 space-y-4">
+              <p className="text-xs sm:text-sm text-foreground">
+                ¿Estás seguro de que deseas marcar esta orden de trabajo como <strong className="text-emerald-600 dark:text-emerald-400">Finalizada</strong>?
+              </p>
+
+              <div className="p-3 bg-muted/40 rounded-xl border border-border/60 text-xs space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">ID Orden:</span>
+                  <span className="font-bold text-foreground">#{ordenData.id_orden}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Cliente:</span>
+                  <span className="font-semibold text-foreground">
+                    {ordenData.cliente?.nombre || ingresoData?.vehiculo?.cliente?.nombre || '—'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Monto Total:</span>
+                  <span className="font-bold text-foreground">
+                    ${Number(ordenData.monto_total || economicData.monto_total).toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Monto por Cobrar:</span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400">
+                    ${Number(ordenData.monto_por_cobrar ?? economicData.monto_por_cobrar).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground">
+                Recuerda que todos los servicios del taller asociados deben encontrarse finalizados para poder completar la orden.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-border/80 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowFinalizarModal(false)}
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isFinalizandoOrden}
+                onClick={() => {
+                  finalizarOrden(ordenData.id_orden, {
+                    onSuccess: () => {
+                      setShowFinalizarModal(false);
+                    },
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isFinalizandoOrden ? 'Finalizando...' : 'Confirmar Finalización'}
+              </button>
+            </div>
           </div>
         </div>
       )}
