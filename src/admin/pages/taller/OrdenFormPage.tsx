@@ -967,6 +967,24 @@ export const OrdenFormPage = () => {
             </div>
           </div>
 
+          {/* Reingreso por Falla en modo edición/creación */}
+          {mode !== 'view' && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm font-bold text-foreground">
+                Reingreso por Falla:
+              </span>
+              {ingresoData?.reingreso_por_falla || ordenData?.ingreso?.reingreso_por_falla ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                  Sí
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/80">
+                  No
+                </span>
+              )}
+            </div>
+          )}
+
           {/* Fechas y Estados adicionales visibles en 'Ver Detalle' */}
           {mode === 'view' && ordenData && (
             <div className="flex items-center gap-3 flex-wrap">
@@ -980,6 +998,22 @@ export const OrdenFormPage = () => {
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-background border border-border/80 text-xs font-medium text-foreground">
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>Fin: {ordenData.fecha_fin ? ordenData.fecha_fin.substring(0, 10) : 'Pendiente'}</span>
+              </div>
+
+              {/* Reingreso por Falla */}
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                  reingreso por falla
+                </span>
+                {ingresoData?.reingreso_por_falla || ordenData.ingreso?.reingreso_por_falla ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                    Sí
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/80">
+                    No
+                  </span>
+                )}
               </div>
 
               {/* Estado Operativo con su color de badge pero con texto negro */}

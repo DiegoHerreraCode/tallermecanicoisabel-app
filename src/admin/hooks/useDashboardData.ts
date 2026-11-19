@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getOrdenesAction } from '../actions/get-ordenes.action';
+import { getIngresosAction } from '../actions/get-ingresos.action';
 import { getPersonalAction } from '../actions/get-personal.action';
 import { getPresupuestosAction } from '../actions/get-presupuestos.action';
 import { getPagosClientesAction } from '../actions/get-pagos-clientes.action';
@@ -11,6 +12,12 @@ export const useDashboardData = () => {
     queryKey: ['dashboard', 'ordenes'],
     queryFn: getOrdenesAction,
     staleTime: 1000 * 60 * 3, // 3 minutos
+  });
+
+  const ingresosQuery = useQuery({
+    queryKey: ['dashboard', 'ingresos'],
+    queryFn: getIngresosAction,
+    staleTime: 1000 * 60 * 3,
   });
 
   const personalQuery = useQuery({
@@ -45,6 +52,7 @@ export const useDashboardData = () => {
 
   const isLoading =
     ordenesQuery.isLoading ||
+    ingresosQuery.isLoading ||
     personalQuery.isLoading ||
     presupuestosQuery.isLoading ||
     pagosClientesQuery.isLoading ||
@@ -53,6 +61,7 @@ export const useDashboardData = () => {
 
   return {
     ordenes: ordenesQuery.data || [],
+    ingresos: ingresosQuery.data || [],
     personal: personalQuery.data || [],
     presupuestos: presupuestosQuery.data || [],
     pagosClientes: pagosClientesQuery.data || [],
@@ -61,6 +70,7 @@ export const useDashboardData = () => {
     isLoading,
     refetchAll: () => {
       ordenesQuery.refetch();
+      ingresosQuery.refetch();
       personalQuery.refetch();
       presupuestosQuery.refetch();
       pagosClientesQuery.refetch();

@@ -41,6 +41,7 @@ export const IngresoPage = () => {
   const [placaFilter, setPlacaFilter] = useState('');
   const [clienteFilter, setClienteFilter] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('');
+  const [reingresoFilter, setReingresoFilter] = useState<'all' | 'si' | 'no'>('all');
   const [fechaDesdeFilter, setFechaDesdeFilter] = useState('');
   const [fechaHastaFilter, setFechaHastaFilter] = useState('');
 
@@ -231,6 +232,13 @@ export const IngresoPage = () => {
         return false;
       }
 
+      // 6.1 Filtro por reingreso por falla
+      if (reingresoFilter !== 'all') {
+        const isFalla = Boolean(ing.reingreso_por_falla);
+        if (reingresoFilter === 'si' && !isFalla) return false;
+        if (reingresoFilter === 'no' && isFalla) return false;
+      }
+
       // 7. Filtro fecha desde
       if (fechaDesdeFilter) {
         if (!resolved.fechaIngresoSolo || resolved.fechaIngresoSolo < fechaDesdeFilter) {
@@ -261,6 +269,7 @@ export const IngresoPage = () => {
     clientesMap,
     modelosMap,
     tiposOrdenesMap,
+    reingresoFilter,
   ]);
 
   // Ordenar el arreglo FilteredIngresos por el campo last_update de forma descendente
@@ -489,6 +498,25 @@ export const IngresoPage = () => {
             </select>
           </div>
 
+          {/* Reingreso por Falla */}
+          <div>
+            <label className="block text-xs font-bold text-foreground mb-1">
+              Reingreso por Falla
+            </label>
+            <select
+              value={reingresoFilter}
+              onChange={(e) => {
+                setReingresoFilter(e.target.value as 'all' | 'si' | 'no');
+                setCurrentPage(1);
+              }}
+              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all cursor-pointer"
+            >
+              <option value="all">Todos...</option>
+              <option value="si">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
           {/* Fecha Desde */}
           <div>
             <label className="block text-xs font-bold text-foreground mb-1">
@@ -551,6 +579,9 @@ export const IngresoPage = () => {
                   Estado
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
+                  Reingreso por Falla
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
                   Acciones
                 </th>
               </tr>
@@ -558,7 +589,7 @@ export const IngresoPage = () => {
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={9} className="py-8 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       Cargando listado de ingresos...
@@ -567,7 +598,7 @@ export const IngresoPage = () => {
                 </tr>
               ) : paginatedIngresos.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={9} className="py-8 text-center text-muted-foreground">
                     <Car className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-foreground">
                       No se encontraron ingresos
@@ -651,6 +682,17 @@ export const IngresoPage = () => {
                         >
                           {ing.estado}
                         </span>
+                      </td>
+
+                      {/* Reingreso por Falla */}
+                      <td className="py-3.5 px-4 text-center">
+                        {ing.reingreso_por_falla ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                            Sí
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">No</span>
+                        )}
                       </td>
 
                       {/* Acciones según boceto */}

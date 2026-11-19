@@ -27,12 +27,14 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
   }, [ordenes]);
 
   // Filtrar pagos dentro del rango [fechaDesde, fechaHasta]
-  const { totalIngresos, desgloses } = useMemo(() => {
-    const dDesde = fechaDesde ? new Date(`${fechaDesde}T00:00:00`) : null;
-    const dHasta = fechaHasta ? new Date(`${fechaHasta}T23:59:59`) : null;
+  const { totalIngresos, desgloses, ingresoPromedioPorOrden, totalOrdenesConPago } = useMemo(() => {
+    // Normalizar fechas solo como 'YYYY-MM-DD' para evitar desfases de huso horario (UTC vs local)
+    const strDesde = fechaDesde ? fechaDesde.substring(0, 10) : '';
+    const strHasta = fechaHasta ? fechaHasta.substring(0, 10) : '';
 
     let total = 0;
     const typeTotalsMap = new Map<string, number>();
+    const ordenesIdsSet = new Set<number>();
 
     // Inicializar tipos conocidos para garantizar el orden del boceto
     typeTotalsMap.set('diagnostico', 0);
@@ -41,13 +43,16 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
 
     pagos.forEach((pago) => {
       if (!pago.fecha_pago) return;
-      const pagoDate = new Date(pago.fecha_pago);
+      const pagoDateStr = String(pago.fecha_pago).substring(0, 10);
 
-      if (dDesde && pagoDate < dDesde) return;
-      if (dHasta && pagoDate > dHasta) return;
+      if (strDesde && pagoDateStr < strDesde) return;
+      if (strHasta && pagoDateStr > strHasta) return;
 
       const monto = Number(pago.monto || 0);
       total += monto;
+      if (pago.id_orden) {
+        ordenesIdsSet.add(pago.id_orden);
+      }
 
       // Buscar tipo de orden asociada
       const orden = ordenesMap.get(pago.id_orden);
@@ -68,7 +73,15 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
       { label: 'Ingresos por mantenimiento', monto: typeTotalsMap.get('mantenimiento') || 0 },
     ];
 
-    return { totalIngresos: total, desgloses: items };
+    const cantOrdenes = ordenesIdsSet.size;
+    const promedio = cantOrdenes > 0 ? total / cantOrdenes : 0;
+
+    return {
+      totalIngresos: total,
+      desgloses: items,
+      ingresoPromedioPorOrden: promedio,
+      totalOrdenesConPago: cantOrdenes,
+    };
   }, [pagos, ordenesMap, fechaDesde, fechaHasta]);
 
   return (
@@ -85,9 +98,9 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
           </div>
         </div>
 
-        {/* Filtros Desde - Hasta */}
-        <div className="flex items-center gap-2 text-xs flex-wrap">
-          <div className="flex items-center gap-1.5 bg-muted/40 border border-border/70 px-2.5 py-1 rounded-xl">
+        {/* Filtros Desde - Hasta alineados lado a lado */}
+        <div className="flex items-center gap-2 text-xs flex-nowrap shrink-0">
+          <div className="flex items-center gap-1.5 bg-muted/40 border border-border/70 px-2.5 py-1.5 rounded-xl">
             <span className="text-muted-foreground font-medium text-[11px]">Desde</span>
             <input
               type="date"
@@ -97,7 +110,7 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-muted/40 border border-border/70 px-2.5 py-1 rounded-xl">
+          <div className="flex items-center gap-1.5 bg-muted/40 border border-border/70 px-2.5 py-1.5 rounded-xl">
             <span className="text-muted-foreground font-medium text-[11px]">Hasta</span>
             <input
               type="date"
@@ -109,16 +122,35 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
         </div>
       </div>
 
-      {/* Total de ingresos */}
-      <div className="my-5 flex items-baseline justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Ingresos generados en el rango de fechas
-          </h1>
+      {/* Métricas de ingresos: Ingreso Promedio e Ingresos Totales */}
+      <div className="my-5 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+        {/* Ingreso Promedio por Orden */}
+        <div className="sm:col-span-5 p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-between gap-2">
+          <div>
+            <p className="text-xs sm:text-sm font-bold text-foreground">
+              Ingreso prom. por orden
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              {totalOrdenesConPago > 0
+                ? `${totalOrdenesConPago} ${totalOrdenesConPago === 1 ? 'orden' : 'órdenes'} con pago`
+                : 'Sin órdenes pagadas'}
+            </p>
+          </div>
+          <span className="text-xl sm:text-2xl font-extrabold text-emerald-500 tracking-tight">
+            ${ingresoPromedioPorOrden.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
         </div>
-        <div className="text-right">
-          <span className="text-3xl sm:text-4xl font-extrabold text-emerald-500 tracking-tight">
-            ${totalIngresos.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+
+        {/* Ingresos generados en el rango de fechas */}
+        <div className="sm:col-span-7 flex items-center justify-between gap-3 p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+          <div>
+            <h4 className="text-xs sm:text-sm font-bold text-foreground">
+              Ingresos generados en el rango
+            </h4>
+            <p className="text-[11px] text-muted-foreground">Total recaudado en el período</p>
+          </div>
+          <span className="text-2xl sm:text-3xl font-extrabold text-emerald-500 tracking-tight shrink-0">
+            ${totalIngresos.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
       </div>

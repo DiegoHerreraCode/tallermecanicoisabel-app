@@ -306,6 +306,17 @@ export const IngresoDetallePage = () => {
               </div>
 
               <div className="p-3 bg-muted/30 rounded-xl border border-border/60">
+                <span className="text-muted-foreground block text-xs">Reingreso por Falla</span>
+                {ingreso.reingreso_por_falla ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 mt-0.5">
+                    Sí
+                  </span>
+                ) : (
+                  <span className="font-semibold text-muted-foreground mt-0.5 block">No</span>
+                )}
+              </div>
+
+              <div className="p-3 bg-muted/30 rounded-xl border border-border/60">
                 <span className="text-muted-foreground block text-xs">Vehículo</span>
                 <span className="font-bold text-foreground">
                   {resolved.modeloNombre} ({resolved.marcaNombre})

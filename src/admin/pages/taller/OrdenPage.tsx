@@ -63,6 +63,7 @@ export const OrdenPage = () => {
   const [tipoOrdenFilter, setTipoOrdenFilter] = useState('');
   const [estadoOperativoFilter, setEstadoOperativoFilter] = useState('');
   const [estadoAdministrativoFilter, setEstadoAdministrativoFilter] = useState('');
+  const [reingresoFilter, setReingresoFilter] = useState<'all' | 'si' | 'no'>('all');
   const [fechaDesdeFilter, setFechaDesdeFilter] = useState('');
   const [fechaHastaFilter, setFechaHastaFilter] = useState('');
 
@@ -99,6 +100,10 @@ export const OrdenPage = () => {
       ? orden.fecha_creacion.substring(0, 10)
       : '—';
 
+    const fechaFinSolo = orden.fecha_fin
+      ? orden.fecha_fin.substring(0, 10)
+      : '—';
+
     // Montos
     const montoTotal = Number(orden.monto_total || 0).toFixed(2);
     const montoPorCobrar =
@@ -113,6 +118,7 @@ export const OrdenPage = () => {
       tipoOrdenNombre,
       fechaFinTentativaSolo,
       fechaCreacionSolo,
+      fechaFinSolo,
       montoTotal,
       montoPorCobrar,
       montoAFavor,
@@ -167,6 +173,13 @@ export const OrdenPage = () => {
         return false;
       }
 
+      // 5.1 Filtro por reingreso por falla
+      if (reingresoFilter !== 'all') {
+        const isFalla = Boolean(orden.ingreso?.reingreso_por_falla);
+        if (reingresoFilter === 'si' && !isFalla) return false;
+        if (reingresoFilter === 'no' && isFalla) return false;
+      }
+
       // 6. Filtro fecha desde (comparado contra fecha_creacion)
       if (fechaDesdeFilter) {
         if (!resolved.fechaCreacionSolo || resolved.fechaCreacionSolo < fechaDesdeFilter) {
@@ -190,6 +203,7 @@ export const OrdenPage = () => {
     tipoOrdenFilter,
     estadoOperativoFilter,
     estadoAdministrativoFilter,
+    reingresoFilter,
     fechaDesdeFilter,
     fechaHastaFilter,
     clientesMap,
@@ -405,6 +419,25 @@ export const OrdenPage = () => {
             </select>
           </div>
 
+          {/* Reingreso por Falla */}
+          <div>
+            <label className="block text-xs font-bold text-foreground mb-1">
+              Reingreso por Falla
+            </label>
+            <select
+              value={reingresoFilter}
+              onChange={(e) => {
+                setReingresoFilter(e.target.value as 'all' | 'si' | 'no');
+                setCurrentPage(1);
+              }}
+              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all cursor-pointer"
+            >
+              <option value="all">Todos los registros...</option>
+              <option value="si">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
           {/* Fecha Desde */}
           <div>
             <label className="block text-xs font-bold text-foreground mb-1">
@@ -461,6 +494,9 @@ export const OrdenPage = () => {
                   Fecha Creación
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
+                  Fecha Fin
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
                   Monto Total
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
@@ -476,6 +512,9 @@ export const OrdenPage = () => {
                   Estado Administrativo
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
+                  Reingreso por Falla
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
                   Acciones
                 </th>
               </tr>
@@ -483,7 +522,7 @@ export const OrdenPage = () => {
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 <tr>
-                  <td colSpan={11} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={12} className="py-8 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       Cargando listado de órdenes...
@@ -492,7 +531,7 @@ export const OrdenPage = () => {
                 </tr>
               ) : paginatedOrdenes.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={12} className="py-8 text-center text-muted-foreground">
                     <SquareText className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-foreground">
                       No se encontraron órdenes
@@ -549,6 +588,11 @@ export const OrdenPage = () => {
                         {resolved.fechaCreacionSolo}
                       </td>
 
+                      {/* fecha fin */}
+                      <td className="py-3.5 px-4 text-center text-foreground font-medium">
+                        {resolved.fechaFinSolo}
+                      </td>
+
                       {/* monto total */}
                       <td className="py-3.5 px-4 text-center font-bold text-foreground">
                         {resolved.montoTotal}
@@ -590,6 +634,17 @@ export const OrdenPage = () => {
                         >
                           {orden.estado_administrativo || 'pendiente_pago'}
                         </span>
+                      </td>
+
+                      {/* reingreso por falla */}
+                      <td className="py-3.5 px-4 text-center">
+                        {orden.ingreso?.reingreso_por_falla ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                            Sí
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">No</span>
+                        )}
                       </td>
 
                       {/* Acciones */}

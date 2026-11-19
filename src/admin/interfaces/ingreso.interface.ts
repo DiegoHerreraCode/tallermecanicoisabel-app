@@ -17,6 +17,7 @@ export interface IngresoItem {
   fecha_ingreso: string;
   estado: IngresoEstadoType;
   observaciones_cliente?: string | null;
+  reingreso_por_falla?: boolean;
   image?: string | null;
   imagePath?: string | null;
   last_update?: string;
@@ -34,6 +35,7 @@ export interface CreateIngresoPayload {
   id_tipo_orden: number;
   id_vehiculo: number;
   observaciones_cliente?: string | null;
+  reingreso_por_falla?: boolean;
 }
 
 export interface AnularIngresoPayload {

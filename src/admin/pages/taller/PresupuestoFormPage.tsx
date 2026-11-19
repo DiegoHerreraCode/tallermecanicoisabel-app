@@ -606,6 +606,22 @@ export const PresupuestoFormPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* COLUMNA IZQUIERDA: Observaciones del cliente y Hallazgos técnicos */}
           <div className="lg:col-span-3 space-y-6">
+            {/* Tarjeta: Estado de Reingreso por Falla */}
+            <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs flex items-center justify-between">
+              <span className="text-xs font-bold text-foreground">
+                Reingreso por Falla:
+              </span>
+              {ingresoData?.reingreso_por_falla || ordenData?.ingreso?.reingreso_por_falla ? (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                  Sí
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border/80">
+                  No
+                </span>
+              )}
+            </div>
+
             <div className="bg-card p-4 rounded-2xl border border-border/80 shadow-xs space-y-2">
               <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-blue-500" />

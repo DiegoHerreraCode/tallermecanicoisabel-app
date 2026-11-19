@@ -147,6 +147,7 @@ export const IngresoFormPage = () => {
       id_tipo_orden: Number(formData.id_tipo_orden),
       id_vehiculo: Number(formData.id_vehiculo),
       observaciones_cliente: formData.observaciones_cliente?.trim() || null,
+      reingreso_por_falla: Boolean(formData.reingreso_por_falla),
     });
   };
 
@@ -262,6 +263,26 @@ export const IngresoFormPage = () => {
             placeholder="Ingrese las observaciones del cliente..."
             className="w-full px-3.5 py-2 text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
           />
+        </div>
+
+        {/* Checkbox: Reingreso por Falla */}
+        <div className="flex items-center gap-2 p-3 bg-muted/30 border border-border/70 rounded-xl">
+          <input
+            type="checkbox"
+            id="reingreso_por_falla"
+            name="reingreso_por_falla"
+            checked={Boolean(formData.reingreso_por_falla)}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                reingreso_por_falla: e.target.checked,
+              }))
+            }
+            className="w-4 h-4 rounded border-border/80 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          />
+          <label htmlFor="reingreso_por_falla" className="text-xs sm:text-sm font-semibold text-foreground cursor-pointer select-none">
+            ¿Es un reingreso por falla previa?
+          </label>
         </div>
 
         {/* Botón Guardar según boceto */}

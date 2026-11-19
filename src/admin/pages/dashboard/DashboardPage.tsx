@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import {
   ClipboardList,
-  Users,
   FileCheck2,
   RefreshCw,
+  Gauge,
 } from 'lucide-react';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { MetricCard } from '../../components/dashboard/MetricCard';
@@ -26,7 +26,8 @@ import { Button } from '@/components/ui/button';
 export const DashboardPage = () => {
   const {
     ordenes,
-    personal,
+    ingresos,
+    personal: _personal,
     presupuestos,
     pagosClientes,
     tiposOrdenes,
@@ -47,15 +48,125 @@ export const DashboardPage = () => {
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
-  // 1. Métrica: Órdenes creadas en el mes actual
-  const ordenesMesActual = ordenes.filter((ord) => {
+  // 1. Métrica: Órdenes creadas en el mes actual y tiempo promedio de finalización
+  const ordenesCreadasMesActual = ordenes.filter((ord) => {
     if (!ord.fecha_creacion) return false;
     const d = new Date(ord.fecha_creacion);
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-  }).length;
+  });
 
-  // 2. Métrica: Num empleados registrados (personal no eliminado lógicamente)
-  const numEmpleadosRegistrados = personal.filter((p) => !p.is_deleted).length;
+  const ordenesMesActual = ordenesCreadasMesActual.length;
+
+  // Órdenes finalizadas en el mes actual (o creadas en el mes actual que estén finalizadas)
+  // Calculamos el tiempo de finalización (fecha_fin - fecha_creacion) en días
+  const promedioDiasFinalizacion = useMemo(() => {
+    // Tomamos las órdenes con estado 'finalizada' que tienen fecha_creacion en el mes actual
+    const finalizadasEsteMes = ordenes.filter((ord) => {
+      if (ord.estado_operativo !== 'finalizada' || !ord.fecha_fin || !ord.fecha_creacion) {
+        return false;
+      }
+      const df = new Date(ord.fecha_creacion);
+      return df.getMonth() === currentMonth && df.getFullYear() === currentYear;
+    });
+
+    // Si no hay finalizadas con fecha_creacion en este mes, evaluar creadas este mes que estén finalizadas
+    const ordenesParaPromedio = finalizadasEsteMes.length > 0
+      ? finalizadasEsteMes
+      : ordenesCreadasMesActual.filter((ord) => ord.estado_operativo === 'finalizada' && ord.fecha_fin);
+
+    if (ordenesParaPromedio.length === 0) {
+      return null;
+    }
+
+    const totalDias = ordenesParaPromedio.reduce((sum, ord) => {
+      const inicio = new Date(ord.fecha_creacion).getTime();
+      const fin = new Date(ord.fecha_fin!).getTime();
+      const diffMs = Math.max(0, fin - inicio);
+      const diffDias = diffMs / (1000 * 60 * 60 * 24);
+      return sum + diffDias;
+    }, 0);
+
+    const promedio = totalDias / ordenesParaPromedio.length;
+    return Number(promedio.toFixed(1));
+  }, [ordenes, ordenesCreadasMesActual, currentMonth, currentYear]);
+
+  // 2. Métricas de Calidad y Cumplimiento del Mes Actual (Reemplaza tarjeta Empleados Registrados)
+  // 2.1 Porcentaje de cumplimiento: órdenes creadas en el mes actual que estén finalizadas y donde fecha_fin <= fecha_fin_tentativa
+  // Rangos de color:
+  // - Cumplimiento: 0% a 25% rojo, >25% a 60% amarillo, >60% a 100% verde
+  // - Reingreso por falla: 0% a 20% verde, >20% a 35% amarillo, >35% a 100% rojo
+  const metricasCalidadMesActual = useMemo(() => {
+    // Órdenes creadas en el mes actual que se encuentren finalizadas y con fecha_fin
+    const ordenesFinalizadasMes = ordenesCreadasMesActual.filter(
+      (ord) => ord.estado_operativo === 'finalizada' && Boolean(ord.fecha_fin)
+    );
+
+    const totalFinalizadas = ordenesFinalizadasMes.length;
+    let cumplimientoPct = 0;
+
+    if (totalFinalizadas > 0) {
+      const cumplidas = ordenesFinalizadasMes.filter((ord) => {
+        if (!ord.fecha_fin_tentativa || !ord.fecha_fin) return false;
+        const fFin = ord.fecha_fin.substring(0, 10);
+        const fTentativa = ord.fecha_fin_tentativa.substring(0, 10);
+        return fFin <= fTentativa;
+      }).length;
+
+      // Sin redondear para permitir decimales (hasta 2 decimales si no es entero)
+      const rawPct = (cumplidas / totalFinalizadas) * 100;
+      cumplimientoPct = Number(rawPct.toFixed(2));
+    }
+
+    // 2.2 Porcentaje de reingreso por falla: ingresos registrados en el mes actual con reingreso_por_falla = true
+    const ingresosMes = ingresos.filter((ing) => {
+      if (!ing.fecha_ingreso) return false;
+      const di = new Date(ing.fecha_ingreso);
+      return di.getMonth() === currentMonth && di.getFullYear() === currentYear;
+    });
+
+    const totalIngresos = ingresosMes.length;
+    let reingresoFallaPct = 0;
+
+    if (totalIngresos > 0) {
+      const conFalla = ingresosMes.filter((ing) => Boolean(ing.reingreso_por_falla)).length;
+      // Sin redondear para permitir decimales (hasta 2 decimales si no es entero)
+      const rawPct = (conFalla / totalIngresos) * 100;
+      reingresoFallaPct = Number(rawPct.toFixed(2));
+    }
+
+    // Formateadores visuales (evita .00 si es entero, ej. 100% o 16.67%)
+    const formatPct = (val: number) => {
+      return Number.isInteger(val) ? `${val}%` : `${val.toFixed(2)}%`;
+    };
+
+    // Colores dinámicos
+    // Cumplimiento: 0 a 25 rojo, >25 a 60 amarillo, >60 a 100 verde
+    let cumplimientoColorClass = 'text-emerald-600 dark:text-emerald-400';
+    if (cumplimientoPct <= 25) {
+      cumplimientoColorClass = 'text-rose-600 dark:text-rose-400';
+    } else if (cumplimientoPct <= 60) {
+      cumplimientoColorClass = 'text-amber-500 dark:text-amber-400';
+    }
+
+    // Reingreso por falla: 0 a 20 verde, >20 a 35 amarillo, >35 a 100 rojo
+    let reingresoFallaColorClass = 'text-emerald-600 dark:text-emerald-400';
+    if (reingresoFallaPct > 35) {
+      reingresoFallaColorClass = 'text-rose-600 dark:text-rose-400';
+    } else if (reingresoFallaPct > 20) {
+      reingresoFallaColorClass = 'text-amber-500 dark:text-amber-400';
+    }
+
+    return {
+      cumplimientoPct,
+      reingresoFallaPct,
+      cumplimientoFormatted: formatPct(cumplimientoPct),
+      reingresoFallaFormatted: formatPct(reingresoFallaPct),
+      cumplimientoColorClass,
+      reingresoFallaColorClass,
+      totalFinalizadas,
+      totalIngresos,
+    };
+  }, [ordenesCreadasMesActual, ingresos, currentMonth, currentYear]);
 
   // 3. Métrica: Num de presupuestos pendientes (estado === 'pendiente')
   const presupuestosPendientes = presupuestos.filter(
@@ -124,12 +235,12 @@ export const DashboardPage = () => {
     const ordenesPeriodo =
       tiposServiciosFilterMode === 'mes_actual'
         ? ordenes.filter((ord) => {
-            if (!ord.fecha_creacion) return false;
-            const d = new Date(ord.fecha_creacion);
-            return (
-              d.getMonth() === currentMonth && d.getFullYear() === currentYear
-            );
-          })
+          if (!ord.fecha_creacion) return false;
+          const d = new Date(ord.fecha_creacion);
+          return (
+            d.getMonth() === currentMonth && d.getFullYear() === currentYear
+          );
+        })
         : ordenes;
 
     // Contar servicios por tipo_servicio_taller
@@ -191,12 +302,12 @@ export const DashboardPage = () => {
     const ordenesPeriodo =
       tiposOrdenesFilterMode === 'mes_actual'
         ? ordenes.filter((ord) => {
-            if (!ord.fecha_creacion) return false;
-            const d = new Date(ord.fecha_creacion);
-            return (
-              d.getMonth() === currentMonth && d.getFullYear() === currentYear
-            );
-          })
+          if (!ord.fecha_creacion) return false;
+          const d = new Date(ord.fecha_creacion);
+          return (
+            d.getMonth() === currentMonth && d.getFullYear() === currentYear
+          );
+        })
         : ordenes;
 
     const countsMap = new Map<string, number>();
@@ -288,18 +399,55 @@ export const DashboardPage = () => {
         <MetricCard
           title="Órdenes Creadas"
           value={ordenesMesActual}
-          subtitle="En el mes actual"
+          subtitle={
+            <div className="flex flex-col gap-0.5 mt-0.5">
+              <span>En el mes actual</span>
+              <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                {promedioDiasFinalizacion !== null
+                  ? `Tiempo prom. finalización: ${promedioDiasFinalizacion} ${promedioDiasFinalizacion === 1 ? 'día' : 'días'}`
+                  : 'Tiempo prom. finalización: Sin finalizar este mes'}
+              </span>
+            </div>
+          }
           icon={ClipboardList}
           color="bg-blue-500/10 text-blue-500 dark:bg-blue-500/20"
         />
 
-        <MetricCard
-          title="Empleados Registrados"
-          value={numEmpleadosRegistrados}
-          subtitle="Personal técnico y operativo activo"
-          icon={Users}
-          color="bg-cyan-500/10 text-cyan-500 dark:bg-cyan-500/20"
-        />
+        <div className="bg-card p-5 rounded-2xl border border-border/80 shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between">
+          <div className="space-y-3 flex-1 pr-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                % Cumplimiento
+              </p>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${metricasCalidadMesActual.cumplimientoColorClass}`}>
+                  {metricasCalidadMesActual.cumplimientoFormatted}
+                </span>
+                <span className="text-[11px] text-muted-foreground font-medium">
+                  ({metricasCalidadMesActual.totalFinalizadas} finalizadas)
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-border/60">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                % Reingreso por Falla
+              </p>
+              <div className="flex items-baseline gap-2 mt-0.5">
+                <span className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${metricasCalidadMesActual.reingresoFallaColorClass}`}>
+                  {metricasCalidadMesActual.reingresoFallaFormatted}
+                </span>
+                <span className="text-[11px] text-muted-foreground font-medium">
+                  ({metricasCalidadMesActual.totalIngresos} ingresos)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl flex items-center justify-center shrink-0 bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20 self-start">
+            <Gauge size={24} />
+          </div>
+        </div>
 
         <MetricCard
           title="Presupuestos Pendientes"

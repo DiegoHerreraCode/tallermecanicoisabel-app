@@ -1,9 +1,10 @@
 import { DivideIcon as LucideIcon } from 'lucide-react';
+import React from 'react';
 
 interface Props {
   title: string;
   value: number | string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   icon: typeof LucideIcon;
   color: string;
 }
@@ -19,9 +20,9 @@ export const MetricCard = ({ title, value, subtitle, icon: Icon, color }: Props)
           {value}
         </p>
         {subtitle && (
-          <p className="text-xs text-muted-foreground/80 font-medium">
+          <div className="text-xs text-muted-foreground/80 font-medium">
             {subtitle}
-          </p>
+          </div>
         )}
       </div>
 
