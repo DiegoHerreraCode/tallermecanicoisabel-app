@@ -91,4 +91,15 @@ body {
   input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(0);
   }
+
+  /* Cuando la app tiene la clase .dark en el HTML o Body */
+  .dark input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    /* Pone el icono blanco en modo oscuro */
+  }
+
+  /* Opcional: Forzar negro en modo claro si tu fondo base cambia */
+  input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+  }
 }
