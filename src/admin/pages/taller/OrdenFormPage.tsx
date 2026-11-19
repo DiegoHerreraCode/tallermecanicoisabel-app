@@ -1878,7 +1878,7 @@ export const OrdenFormPage = () => {
                 {mode === 'view' && ordenData?.estado_operativo !== 'finalizada' && ordenData?.estado_operativo !== 'anulada' && (
                   <>
                     {/* Botón Finalizar Orden (cuando la orden está 'en_proceso') */}
-                    {ordenData.estado_operativo === 'en_proceso' && (
+                    {ordenData?.estado_operativo === 'en_proceso' && (
                       <button
                         type="button"
                         onClick={() => setShowFinalizarModal(true)}
