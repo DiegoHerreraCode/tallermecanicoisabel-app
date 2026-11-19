@@ -101,10 +101,11 @@ export const OrdenPage = () => {
 
     // Montos
     const montoTotal = Number(orden.monto_total || 0).toFixed(2);
-    const montoPendiente =
-      orden.monto_pendiente !== undefined && orden.monto_pendiente !== null
-        ? Number(orden.monto_pendiente).toFixed(2)
+    const montoPorCobrar =
+      orden.monto_por_cobrar !== undefined && orden.monto_por_cobrar !== null
+        ? Number(orden.monto_por_cobrar).toFixed(2)
         : Number(orden.monto_total || 0).toFixed(2);
+    const montoAFavor = Number(orden.monto_a_favor || 0).toFixed(2);
 
     return {
       clienteNombre,
@@ -113,7 +114,8 @@ export const OrdenPage = () => {
       fechaFinTentativaSolo,
       fechaCreacionSolo,
       montoTotal,
-      montoPendiente,
+      montoPorCobrar,
+      montoAFavor,
     };
   };
 
@@ -462,7 +464,10 @@ export const OrdenPage = () => {
                   Monto Total
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  Monto Pendiente
+                  Monto por Cobrar
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
+                  Monto a Favor
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
                   Estado Operativo
@@ -478,7 +483,7 @@ export const OrdenPage = () => {
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={11} className="py-8 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       Cargando listado de órdenes...
@@ -487,7 +492,7 @@ export const OrdenPage = () => {
                 </tr>
               ) : paginatedOrdenes.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={11} className="py-8 text-center text-muted-foreground">
                     <SquareText className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-foreground">
                       No se encontraron órdenes
@@ -549,9 +554,20 @@ export const OrdenPage = () => {
                         {resolved.montoTotal}
                       </td>
 
-                      {/* monto pendiente */}
+                      {/* monto por cobrar */}
                       <td className="py-3.5 px-4 text-center font-bold text-blue-600 dark:text-blue-400">
-                        {resolved.montoPendiente}
+                        {resolved.montoPorCobrar}
+                      </td>
+
+                      {/* monto a favor */}
+                      <td className="py-3.5 px-4 text-center font-bold">
+                        {Number(resolved.montoAFavor) > 0 ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            +${resolved.montoAFavor}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">$0.00</span>
+                        )}
                       </td>
 
                       {/* estado operativo */}

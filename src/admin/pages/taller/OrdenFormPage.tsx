@@ -17,6 +17,7 @@ import {
   UserCheck,
   Play,
   CheckCircle2,
+  CheckCircle,
 } from 'lucide-react';
 
 import { useAppNavigation } from '../../hooks/useAppNavigation';
@@ -37,6 +38,7 @@ interface RepuestoLineState {
   id_repuesto: number;
   nombre: string;
   cantidad: number;
+  cantidad_cubierta_garantia: number;
   costo_unitario: number;
   monto_total_linea_costo: number;
   porcentaje_ganancia: number;
@@ -53,6 +55,7 @@ interface ServicioLineState {
   estado: string; // 'pendiente_asignacion' | 'en_espera' | 'en_proceso' | 'en_pausa' | 'finalizado' | 'anulado'
   nombre: string;
   cantidad: number;
+  cantidad_cubierta_garantia: number;
   costo_unitario: number;
   monto_total_linea_costo: number;
   porcentaje_ganancia: number;
@@ -288,10 +291,16 @@ export const OrdenFormPage = () => {
             ? Number(r.monto_total_linea)
             : Number((precioUnitConGanancia * cant).toFixed(2));
 
+        const cantGarantia = Math.min(
+          cant,
+          Math.max(0, Number(r.cantidad_cubierta_garantia || 0))
+        );
+
         return {
           id_repuesto: r.id_repuesto,
           nombre: matched?.nombre_modelo || `Repuesto #${r.id_repuesto}`,
           cantidad: cant,
+          cantidad_cubierta_garantia: cantGarantia,
           costo_unitario: Number(costoUnit.toFixed(2)),
           monto_total_linea_costo: Number(totalCostoBase.toFixed(2)),
           porcentaje_ganancia: pctGanancia,
@@ -341,6 +350,11 @@ export const OrdenFormPage = () => {
         const matchedPersonal = allPersonal.find((p) => p.id_personal === s.id_personal);
         const personalNombre = s.personal?.nombre || matchedPersonal?.nombre || '';
 
+        const cantGarantia = Math.min(
+          cant,
+          Math.max(0, Number(s.cantidad_cubierta_garantia || 0))
+        );
+
         return {
           id_orden_servicio_taller: s.id_orden_servicio_taller,
           id_servicio_taller: s.id_servicio_taller,
@@ -349,6 +363,7 @@ export const OrdenFormPage = () => {
           estado: estadoFinal,
           nombre: matched?.nombre || s.servicio_taller?.nombre || `Servicio #${s.id_servicio_taller}`,
           cantidad: cant,
+          cantidad_cubierta_garantia: cantGarantia,
           costo_unitario: Number(costoUnit.toFixed(2)),
           monto_total_linea_costo: Number(totalCostoBase.toFixed(2)),
           porcentaje_ganancia: pctGanancia,
@@ -409,6 +424,7 @@ export const OrdenFormPage = () => {
       id_repuesto: r.id_repuesto,
       nombre: r.nombre_modelo,
       cantidad: cant,
+      cantidad_cubierta_garantia: 0,
       costo_unitario: Number(costoUnit.toFixed(2)),
       monto_total_linea_costo: Number((costoUnit * cant).toFixed(2)),
       porcentaje_ganancia: pctGanancia,
@@ -430,11 +446,26 @@ export const OrdenFormPage = () => {
         if (r.id_repuesto !== idRepuesto) return r;
         const totalCosto = Number((r.costo_unitario * cant).toFixed(2));
         const totalConGanancia = Number((r.costo_unitario_con_ganancia * cant).toFixed(2));
+        const nuevaCantGarantia = Math.min(cant, r.cantidad_cubierta_garantia);
         return {
           ...r,
           cantidad: cant,
+          cantidad_cubierta_garantia: nuevaCantGarantia,
           monto_total_linea_costo: totalCosto,
           monto_total_linea_con_ganancia: totalConGanancia,
+        };
+      })
+    );
+  };
+
+  const handleUpdateRepuestoGarantia = (idRepuesto: number, cantidadGarantia: number) => {
+    setSelectedRepuestos((prev) =>
+      prev.map((r) => {
+        if (r.id_repuesto !== idRepuesto) return r;
+        const validGarantia = Math.min(r.cantidad, Math.max(0, cantidadGarantia || 0));
+        return {
+          ...r,
+          cantidad_cubierta_garantia: validGarantia,
         };
       })
     );
@@ -489,6 +520,7 @@ export const OrdenFormPage = () => {
       id_personal: null,
       personal_nombre: '',
       cantidad: cant,
+      cantidad_cubierta_garantia: 0,
       costo_unitario: Number(costoUnit.toFixed(2)),
       monto_total_linea_costo: Number((costoUnit * cant).toFixed(2)),
       porcentaje_ganancia: pctGanancia,
@@ -510,13 +542,59 @@ export const OrdenFormPage = () => {
         if (s.id_servicio_taller !== idServicio) return s;
         const totalCosto = Number((s.costo_unitario * cant).toFixed(2));
         const totalConGanancia = Number((s.costo_unitario_con_ganancia * cant).toFixed(2));
+        const nuevaCantGarantia = Math.min(cant, s.cantidad_cubierta_garantia);
         return {
           ...s,
           cantidad: cant,
+          cantidad_cubierta_garantia: nuevaCantGarantia,
           monto_total_linea_costo: totalCosto,
           monto_total_linea_con_ganancia: totalConGanancia,
         };
       })
+    );
+  };
+
+  const handleUpdateServicioGarantia = (idServicio: number, cantidadGarantia: number) => {
+    setSelectedServicios((prev) =>
+      prev.map((s) => {
+        if (s.id_servicio_taller !== idServicio) return s;
+        const validGarantia = Math.min(s.cantidad, Math.max(0, cantidadGarantia || 0));
+        return {
+          ...s,
+          cantidad_cubierta_garantia: validGarantia,
+        };
+      })
+    );
+  };
+
+  // Acciones en lote para Garantía (Todos al 100% o Todos a 0)
+  const areAllItemsFullyUnderWarranty = useMemo(() => {
+    const allRepuestosFull =
+      selectedRepuestos.length > 0 &&
+      selectedRepuestos.every((r) => r.cantidad_cubierta_garantia === r.cantidad);
+    const allServiciosFull =
+      selectedServicios.length > 0 &&
+      selectedServicios.every((s) => s.cantidad_cubierta_garantia === s.cantidad);
+
+    if (selectedRepuestos.length === 0 && selectedServicios.length === 0) return false;
+    if (selectedRepuestos.length > 0 && !allRepuestosFull) return false;
+    if (selectedServicios.length > 0 && !allServiciosFull) return false;
+    return true;
+  }, [selectedRepuestos, selectedServicios]);
+
+  const handleToggleAllWarranty = () => {
+    const shouldCoverAll = !areAllItemsFullyUnderWarranty;
+    setSelectedRepuestos((prev) =>
+      prev.map((r) => ({
+        ...r,
+        cantidad_cubierta_garantia: shouldCoverAll ? r.cantidad : 0,
+      }))
+    );
+    setSelectedServicios((prev) =>
+      prev.map((s) => ({
+        ...s,
+        cantidad_cubierta_garantia: shouldCoverAll ? s.cantidad : 0,
+      }))
     );
   };
 
@@ -615,6 +693,7 @@ export const OrdenFormPage = () => {
 
   // Cálculos de Data Económica
   const economicData = useMemo(() => {
+    // Totales brutos
     const totalRepuestos = selectedRepuestos.reduce(
       (sum, r) => sum + r.monto_total_linea_con_ganancia,
       0
@@ -624,18 +703,65 @@ export const OrdenFormPage = () => {
       0
     );
 
-    const monto_subtotal = Number((totalRepuestos + totalServicios).toFixed(2));
+    // Subtotal cubierto por garantía
+    const subtotalGarantiaRepuestos = selectedRepuestos.reduce((sum, r) => {
+      const cantGarantia = Math.min(r.cantidad, Math.max(0, r.cantidad_cubierta_garantia || 0));
+      return sum + cantGarantia * r.costo_unitario_con_ganancia;
+    }, 0);
+
+    const subtotalGarantiaServicios = selectedServicios.reduce((sum, s) => {
+      const cantGarantia = Math.min(s.cantidad, Math.max(0, s.cantidad_cubierta_garantia || 0));
+      return sum + cantGarantia * s.costo_unitario_con_ganancia;
+    }, 0);
+
+    const subtotal_garantia = Number((subtotalGarantiaRepuestos + subtotalGarantiaServicios).toFixed(2));
+
+    // Subtotal cobrable (excluye garantía)
+    const subtotalCobrableRepuestos = selectedRepuestos.reduce((sum, r) => {
+      const cantGarantia = Math.min(r.cantidad, Math.max(0, r.cantidad_cubierta_garantia || 0));
+      const cantCobrable = Math.max(0, r.cantidad - cantGarantia);
+      return sum + cantCobrable * r.costo_unitario_con_ganancia;
+    }, 0);
+
+    const subtotalCobrableServicios = selectedServicios.reduce((sum, s) => {
+      const cantGarantia = Math.min(s.cantidad, Math.max(0, s.cantidad_cubierta_garantia || 0));
+      const cantCobrable = Math.max(0, s.cantidad - cantGarantia);
+      return sum + cantCobrable * s.costo_unitario_con_ganancia;
+    }, 0);
+
+    const subtotal_cobrable = Number((subtotalCobrableRepuestos + subtotalCobrableServicios).toFixed(2));
+    const monto_subtotal_bruto = Number((totalRepuestos + totalServicios).toFixed(2));
+
+    // IVA solo sobre lo NO cubierto por garantía (subtotal_cobrable)
     const porcentaje_iva = ivaPercentage;
-    const monto_iva = Number(((monto_subtotal * porcentaje_iva) / 100).toFixed(2));
-    const monto_total = Number((monto_subtotal + monto_iva).toFixed(2));
+    const monto_iva = Number(((subtotal_cobrable * porcentaje_iva) / 100).toFixed(2));
+
+    // Nueva lógica: monto_total es el reflejo de lo que el cliente debe pagar (subtotal cobrable + IVA)
+    const monto_total = Number((subtotal_cobrable + monto_iva).toFixed(2));
+
+    // Sumar todos los pagos ya registrados a la orden
+    const totalPagado = Array.isArray(ordenData?.pagos)
+      ? ordenData.pagos.reduce((sum, p) => sum + Number(p.monto || 0), 0)
+      : 0;
+
+    // Diferencia entre lo que debe pagar y lo que ya ha pagado
+    const balance = Number((monto_total - totalPagado).toFixed(2));
+    const monto_por_cobrar = balance > 0 ? balance : 0.00;
+    const monto_a_favor = balance < 0 ? Math.abs(balance) : 0.00;
 
     return {
-      monto_subtotal,
+      monto_subtotal_bruto,
+      monto_subtotal: subtotal_cobrable,
+      subtotal_garantia,
+      subtotal_cobrable,
       porcentaje_iva,
       monto_iva,
       monto_total,
+      monto_por_cobrar,
+      monto_a_favor,
+      total_pagado: totalPagado,
     };
-  }, [selectedRepuestos, selectedServicios, ivaPercentage]);
+  }, [selectedRepuestos, selectedServicios, ivaPercentage, ordenData?.pagos]);
 
   // Submit Handler: Crear o Actualizar Orden
   const handleSubmit = (e: React.FormEvent) => {
@@ -657,6 +783,7 @@ export const OrdenFormPage = () => {
       precio_unitario: r.costo_unitario_con_ganancia,
       porcentaje_ganancia: r.porcentaje_ganancia,
       cantidad: r.cantidad,
+      cantidad_cubierta_garantia: r.cantidad_cubierta_garantia,
       monto_total_linea_base: r.monto_total_linea_costo,
       monto_total_linea: r.monto_total_linea_con_ganancia,
     }));
@@ -668,6 +795,7 @@ export const OrdenFormPage = () => {
       precio_unitario: s.costo_unitario_con_ganancia,
       porcentaje_ganancia: s.porcentaje_ganancia,
       cantidad: s.cantidad,
+      cantidad_cubierta_garantia: s.cantidad_cubierta_garantia,
       monto_total_linea_base: s.monto_total_linea_costo,
       monto_total_linea: s.monto_total_linea_con_ganancia,
     }));
@@ -980,9 +1108,22 @@ export const OrdenFormPage = () => {
           <div className="lg:col-span-9 space-y-6">
             {/* SECCIÓN 1: Lista de Repuestos Seleccionados */}
             <div className="space-y-3">
-              <h2 className="text-base sm:text-lg font-bold text-foreground">
-                Lista de Repuestos Seleccionados
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-foreground">
+                  Lista de Repuestos Seleccionados
+                </h2>
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={handleToggleAllWarranty}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-xs shadow-blue-500/20 transition-all cursor-pointer"
+                    title="Alterna garantía completa (100%) o 0 en todos los repuestos y servicios"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5 text-white" />
+                    <span>{areAllItemsFullyUnderWarranty ? 'Quitar Garantía a Todos' : 'Cubrir Todos con Garantía'}</span>
+                  </button>
+                )}
+              </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
                 {/* Tabla de Repuestos Seleccionados */}
@@ -993,6 +1134,7 @@ export const OrdenFormPage = () => {
                         <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
                           <th className="py-2.5 px-3 text-center">nombre</th>
                           <th className="py-2.5 px-3 text-center w-16">cantidad</th>
+                          <th className="py-2.5 px-3 text-center w-20">cant. garantía</th>
                           <th className="py-2.5 px-3 text-center">costo unitario</th>
                           <th className="py-2.5 px-3 text-center">monto total línea</th>
                           <th className="py-2.5 px-3 text-center w-16">% ganancia</th>
@@ -1005,7 +1147,7 @@ export const OrdenFormPage = () => {
                         {selectedRepuestos.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={isReadOnly ? 7 : 8}
+                              colSpan={isReadOnly ? 8 : 9}
                               className="py-6 text-center text-muted-foreground text-xs"
                             >
                               No hay repuestos seleccionados en esta orden.
@@ -1016,6 +1158,11 @@ export const OrdenFormPage = () => {
                             <tr key={r.id_repuesto} className="hover:bg-accent/40 transition-colors">
                               <td className="py-2.5 px-3 font-semibold text-foreground text-center">
                                 {r.nombre}
+                                {r.cantidad_cubierta_garantia > 0 && (
+                                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">
+                                    {r.cantidad_cubierta_garantia >= r.cantidad ? '(Garantía total)' : `(Garantía: ${r.cantidad_cubierta_garantia}/${r.cantidad})`}
+                                  </div>
+                                )}
                               </td>
 
                               {/* Cantidad editable */}
@@ -1035,6 +1182,52 @@ export const OrdenFormPage = () => {
                                     }
                                     className="w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-bold"
                                   />
+                                )}
+                              </td>
+
+                              {/* Cantidad cubierta por garantía editable */}
+                              <td className="py-2.5 px-2 text-center">
+                                {isReadOnly ? (
+                                  <span className={`font-semibold ${r.cantidad_cubierta_garantia > 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-muted-foreground'}`}>
+                                    {r.cantidad_cubierta_garantia || 0}
+                                  </span>
+                                ) : (
+                                  <div className="flex items-center justify-center gap-1">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      max={r.cantidad}
+                                      value={r.cantidad_cubierta_garantia}
+                                      onChange={(e) =>
+                                        handleUpdateRepuestoGarantia(
+                                          r.id_repuesto,
+                                          parseInt(e.target.value) || 0
+                                        )
+                                      }
+                                      className={`w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border ${
+                                        r.cantidad_cubierta_garantia > 0
+                                          ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
+                                          : 'border-border/80 text-foreground'
+                                      }`}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleUpdateRepuestoGarantia(
+                                          r.id_repuesto,
+                                          r.cantidad_cubierta_garantia === r.cantidad ? 0 : r.cantidad
+                                        )
+                                      }
+                                      className={`p-1 rounded text-[10px] font-semibold border transition-colors cursor-pointer ${
+                                        r.cantidad_cubierta_garantia === r.cantidad
+                                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                                          : 'bg-muted/50 text-muted-foreground border-border/60 hover:text-foreground'
+                                      }`}
+                                      title={r.cantidad_cubierta_garantia === r.cantidad ? 'Quitar garantía' : 'Cubrir toda la cantidad'}
+                                    >
+                                      {r.cantidad_cubierta_garantia === r.cantidad ? '100%' : 'Max'}
+                                    </button>
+                                  </div>
                                 )}
                               </td>
 
@@ -1184,6 +1377,7 @@ export const OrdenFormPage = () => {
                         <tr className="border-b border-border/80 bg-muted/30 text-muted-foreground font-semibold">
                           <th className="py-2.5 px-3 text-center">nombre</th>
                           <th className="py-2.5 px-3 text-center w-16">cantidad</th>
+                          <th className="py-2.5 px-3 text-center w-20">cant. garantía</th>
                           <th className="py-2.5 px-3 text-center">costo unitario</th>
                           <th className="py-2.5 px-3 text-center">monto total línea</th>
                           <th className="py-2.5 px-3 text-center w-16">% ganancia</th>
@@ -1204,7 +1398,7 @@ export const OrdenFormPage = () => {
                         {selectedServicios.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={mode === 'view' ? 11 : isReadOnly ? 8 : 9}
+                              colSpan={mode === 'view' ? 12 : isReadOnly ? 9 : 10}
                               className="py-6 text-center text-muted-foreground text-xs"
                             >
                               No hay servicios del taller seleccionados (mínimo requerido 1).
@@ -1243,6 +1437,11 @@ export const OrdenFormPage = () => {
                                       Asignado a: <span className="font-medium text-foreground">{s.personal_nombre}</span>
                                     </div>
                                   )}
+                                  {s.cantidad_cubierta_garantia > 0 && (
+                                    <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">
+                                      {s.cantidad_cubierta_garantia >= s.cantidad ? '(Garantía total)' : `(Garantía: ${s.cantidad_cubierta_garantia}/${s.cantidad})`}
+                                    </div>
+                                  )}
                                 </td>
 
                                 {/* Cantidad editable */}
@@ -1262,6 +1461,52 @@ export const OrdenFormPage = () => {
                                       }
                                       className="w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border border-border/80 text-foreground font-bold"
                                     />
+                                  )}
+                                </td>
+
+                                {/* Cantidad cubierta por garantía editable */}
+                                <td className="py-2.5 px-2 text-center">
+                                  {isReadOnly ? (
+                                    <span className={`font-semibold ${s.cantidad_cubierta_garantia > 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-muted-foreground'}`}>
+                                      {s.cantidad_cubierta_garantia || 0}
+                                    </span>
+                                  ) : (
+                                    <div className="flex items-center justify-center gap-1">
+                                      <input
+                                        type="number"
+                                        min={0}
+                                        max={s.cantidad}
+                                        value={s.cantidad_cubierta_garantia}
+                                        onChange={(e) =>
+                                          handleUpdateServicioGarantia(
+                                            s.id_servicio_taller,
+                                            parseInt(e.target.value) || 0
+                                          )
+                                        }
+                                        className={`w-14 text-center px-1.5 py-1 text-xs rounded-lg bg-background border ${
+                                          s.cantidad_cubierta_garantia > 0
+                                            ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400 font-bold'
+                                            : 'border-border/80 text-foreground'
+                                        }`}
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleUpdateServicioGarantia(
+                                            s.id_servicio_taller,
+                                            s.cantidad_cubierta_garantia === s.cantidad ? 0 : s.cantidad
+                                          )
+                                        }
+                                        className={`p-1 rounded text-[10px] font-semibold border transition-colors cursor-pointer ${
+                                          s.cantidad_cubierta_garantia === s.cantidad
+                                            ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30'
+                                            : 'bg-muted/50 text-muted-foreground border-border/60 hover:text-foreground'
+                                        }`}
+                                        title={s.cantidad_cubierta_garantia === s.cantidad ? 'Quitar garantía' : 'Cubrir toda la cantidad'}
+                                      >
+                                        {s.cantidad_cubierta_garantia === s.cantidad ? '100%' : 'Max'}
+                                      </button>
+                                    </div>
                                   )}
                                 </td>
 
@@ -1477,37 +1722,99 @@ export const OrdenFormPage = () => {
             </div>
 
             {/* SECCIÓN 3: DATA ECONÓMICA DE LA ORDEN Y BOTONES SEGÚN BOCETO */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border/80">
-              {/* Tarjeta de Data Económica */}
-              <div className="w-full sm:w-auto flex-1 bg-card p-3.5 rounded-2xl border border-border/80 shadow-xs flex items-center justify-around gap-4 text-xs sm:text-sm">
-                <div>
+            <div className="space-y-4 pt-4 border-t border-border/80">
+              {/* Tarjeta de Data Económica ocupando todo el ancho disponible */}
+              <div className="w-full bg-card p-4 rounded-2xl border border-border/80 shadow-xs flex items-center justify-between gap-4 text-xs sm:text-sm overflow-x-auto">
+                <div className="min-w-fit">
                   <span className="text-muted-foreground block text-[11px]">
-                    Subtotal:
+                    Subtotal Bruto:
                   </span>
                   <span className="font-bold text-foreground">
-                    ${economicData.monto_subtotal.toFixed(2)}
+                    ${economicData.monto_subtotal_bruto.toFixed(2)}
                   </span>
                 </div>
-                <div>
+
+                {economicData.subtotal_garantia > 0 && (
+                  <div className="min-w-fit">
+                    <span className="text-emerald-600 dark:text-emerald-400 block text-[11px] font-medium">
+                      Cubierto Garantía:
+                    </span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      -${economicData.subtotal_garantia.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+
+                <div className="min-w-fit">
                   <span className="text-muted-foreground block text-[11px]">
-                    IVA ({economicData.porcentaje_iva}%):
+                    Subtotal Cobrable:
+                  </span>
+                  <span className="font-bold text-foreground">
+                    ${economicData.subtotal_cobrable.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="min-w-fit">
+                  <span className="text-muted-foreground block text-[11px]" title="IVA aplicado únicamente sobre los ítems/cantidades no cubiertas por garantía">
+                    IVA ({economicData.porcentaje_iva}% cobrable):
                   </span>
                   <span className="font-bold text-foreground">
                     ${economicData.monto_iva.toFixed(2)}
                   </span>
                 </div>
-                <div>
+
+                <div className="min-w-fit">
                   <span className="text-muted-foreground block text-[11px]">
-                    Monto Total:
+                    Monto Total Orden:
                   </span>
                   <span className="font-extrabold text-blue-600 dark:text-blue-400 text-sm sm:text-base">
                     ${economicData.monto_total.toFixed(2)}
                   </span>
                 </div>
+
+                <div className="min-w-fit border-l pl-4 border-border/60">
+                  <span className="text-muted-foreground block text-[11px] font-semibold text-foreground">
+                    Total Pagado:
+                  </span>
+                  <span className="font-bold text-foreground text-sm sm:text-base">
+                    ${economicData.total_pagado.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="min-w-fit">
+                  <span className="text-muted-foreground block text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                    Monto por Cobrar:
+                  </span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400 text-sm sm:text-base">
+                    ${economicData.monto_por_cobrar.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="min-w-fit">
+                  {economicData.monto_a_favor > 0 ? (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl">
+                      <span className="text-emerald-600 dark:text-emerald-400 block text-[11px] font-semibold">
+                        Monto a Favor:
+                      </span>
+                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm sm:text-base">
+                        ${economicData.monto_a_favor.toFixed(2)}
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="text-muted-foreground block text-[11px]">
+                        Monto a Favor:
+                      </span>
+                      <span className="font-semibold text-muted-foreground">
+                        $0.00
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Botones de Acción según Modo */}
-              <div className="flex items-center gap-3">
+              {/* Fila inferior de Botones de Acción alineados a la derecha */}
+              <div className="flex items-center justify-end gap-3">
                 {mode === 'create' && (
                   <button
                     type="submit"

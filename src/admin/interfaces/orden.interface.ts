@@ -22,6 +22,7 @@ export interface OrdenRepuestoItem {
   precio_unitario: number | string;
   porcentaje_ganancia?: number | string | null;
   cantidad: number | string;
+  cantidad_cubierta_garantia?: number | string;
   monto_total_linea_base?: number | string | null;
   monto_total_linea: number | string;
   repuesto?: RepuestoItem;
@@ -36,6 +37,7 @@ export interface OrdenServicioTallerItem {
   precio_unitario: number | string;
   porcentaje_ganancia?: number | string | null;
   cantidad: number | string;
+  cantidad_cubierta_garantia?: number | string;
   monto_total_linea_base?: number | string | null;
   monto_total_linea: number | string;
   estado?: string;
@@ -63,7 +65,8 @@ export interface OrdenItem {
   porcentaje_iva: number | string;
   monto_iva: number | string;
   monto_total: number | string;
-  monto_pendiente?: number | string;
+  monto_por_cobrar?: number | string;
+  monto_a_favor?: number | string;
   last_update?: string;
   fecha_anulacion?: string | null;
   id_admin_anulacion?: number | null;
@@ -76,6 +79,12 @@ export interface OrdenItem {
   repuestos?: OrdenRepuestoItem[];
   servicios_taller?: OrdenServicioTallerItem[];
   hallazgos_tecnicos?: HallazgoTecnicoItem[];
+  pagos?: Array<{
+    id_pago_cliente: number;
+    monto: number | string;
+    fecha_pago: string;
+    metodo_pago: string;
+  }>;
 }
 
 export interface CreateOrdenPayload {
@@ -93,6 +102,7 @@ export interface CreateOrdenPayload {
     precio_unitario: number;
     porcentaje_ganancia?: number;
     cantidad: number;
+    cantidad_cubierta_garantia?: number;
     monto_total_linea_base?: number;
     monto_total_linea: number;
   }>;
@@ -103,6 +113,7 @@ export interface CreateOrdenPayload {
     precio_unitario: number;
     porcentaje_ganancia?: number;
     cantidad: number;
+    cantidad_cubierta_garantia?: number;
     monto_total_linea_base?: number;
     monto_total_linea: number;
     fecha_inicio?: string | null;
@@ -125,6 +136,7 @@ export interface UpdateOrdenPayload {
     precio_unitario: number;
     porcentaje_ganancia?: number;
     cantidad: number;
+    cantidad_cubierta_garantia?: number;
     monto_total_linea_base?: number;
     monto_total_linea: number;
   }>;
@@ -135,6 +147,7 @@ export interface UpdateOrdenPayload {
     precio_unitario: number;
     porcentaje_ganancia?: number;
     cantidad: number;
+    cantidad_cubierta_garantia?: number;
     monto_total_linea_base?: number;
     monto_total_linea: number;
     fecha_inicio?: string | null;

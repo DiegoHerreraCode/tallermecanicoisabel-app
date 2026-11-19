@@ -81,7 +81,7 @@ export const PagoClienteFormPage = () => {
     }
   };
 
-  // Manejar cambio de orden para cargar automáticamente el monto total o pendiente
+  // Manejar cambio de orden para cargar automáticamente el monto por cobrar o total
   const handleOrdenChange = (selectedId: string) => {
     setIdOrden(selectedId);
     if (!selectedId) {
@@ -91,11 +91,10 @@ export const PagoClienteFormPage = () => {
 
     const selectedOrder = ordenes.find((o) => String(o.id_orden) === selectedId);
     if (selectedOrder) {
-      // Si la orden tiene monto_pendiente, usarlo (que debe coincidir con la validación de pago)
-      // de lo contrario usar monto_total
+      // Si la orden tiene monto_por_cobrar, usarlo; de lo contrario monto_total
       const valorMonto =
-        selectedOrder.monto_pendiente !== undefined && selectedOrder.monto_pendiente !== null
-          ? selectedOrder.monto_pendiente
+        selectedOrder.monto_por_cobrar !== undefined && selectedOrder.monto_por_cobrar !== null
+          ? selectedOrder.monto_por_cobrar
           : selectedOrder.monto_total;
 
       setMonto(valorMonto !== undefined && valorMonto !== null ? String(valorMonto) : '');
@@ -126,13 +125,6 @@ export const PagoClienteFormPage = () => {
 
     if (!idCliente || !idOrden || !monto || Number(monto) <= 0) {
       toast.warning('Por favor completa todos los campos requeridos con un monto válido');
-      return;
-    }
-
-    // validar que el monto sea exactamente igual al monto pendiente de la orden
-    const orden = ordenes.find((o) => o.id_orden === Number(idOrden));
-    if (orden && Number(monto) !== Number(orden.monto_pendiente)) {
-      toast.warning('El monto debe ser exactamente igual al monto pendiente de la orden');
       return;
     }
 
@@ -255,13 +247,24 @@ export const PagoClienteFormPage = () => {
               >
                 <option value="">Selecciona la orden...</option>
                 {ordenes
-                  .filter((o) => o.estado_operativo === 'finalizada' && o.estado_administrativo != 'pagada' && o.monto_pendiente != 0)
+                  .filter((o) => {
+                    // Permitir registrar pagos a órdenes que NO estén anuladas
+                    // y que NO estén finalizadas y pagadas al mismo tiempo
+                    if (o.estado_operativo === 'anulada') return false;
+                    if (o.estado_operativo === 'finalizada' && o.estado_administrativo === 'pagada') return false;
+                    return true;
+                  })
                   .filter((o) => (!idCliente ? true : Number(o.id_cliente) === Number(idCliente)))
-                  .map((o) => (
-                    <option key={o.id_orden} value={o.id_orden}>
-                      Orden #{o.id_orden} - Pendiente: ${Number(o.monto_pendiente || 0).toLocaleString('es-CL')} (Total: ${Number(o.monto_total || 0).toLocaleString('es-CL')})
-                    </option>
-                  ))}
+                  .map((o) => {
+                    const cobrable = Number(o.monto_por_cobrar !== undefined ? o.monto_por_cobrar : o.monto_total || 0);
+                    const favor = Number(o.monto_a_favor || 0);
+                    const extra = favor > 0 ? ` (A favor: $${favor.toLocaleString('es-CL')})` : '';
+                    return (
+                      <option key={o.id_orden} value={o.id_orden}>
+                        Orden #{o.id_orden} - Por Cobrar: ${cobrable.toLocaleString('es-CL')}{extra} (Total: ${Number(o.monto_total || 0).toLocaleString('es-CL')})
+                      </option>
+                    );
+                  })}
               </select>
             </div>
 
