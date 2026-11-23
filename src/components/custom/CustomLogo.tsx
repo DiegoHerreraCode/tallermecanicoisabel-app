@@ -25,13 +25,13 @@ export const CustomLogo = ({ subtitle = 'Portal', showSubtitle = true, size = 'm
     >
       <img
         src={theme === 'dark' ? tallerLogoDark : tallerLogo}
-        alt="Taller Mecánico Isabel Logo"
+        alt="Automotriz Mi Taller P&G Logo"
         className={`${imageSizes[size]} object-contain drop-shadow-sm`}
       />
       {showSubtitle && (
         <div className="flex items-center gap-1.5 leading-none">
           <span className="font-bold tracking-tight text-foreground text-base sm:text-lg">
-            Taller Mecánico Isabel
+            Automotriz Mi Taller P&G
           </span>
           <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-primary/10 text-primary border border-primary/20">
             {subtitle}

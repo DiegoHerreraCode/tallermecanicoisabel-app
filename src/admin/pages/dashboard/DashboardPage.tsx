@@ -409,7 +409,7 @@ export const DashboardPage = () => {
             Dashboard
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Monitoreo en tiempo real de operaciones, finanzas y actividades del Taller Mecánico Isabel
+            Monitoreo en tiempo real de operaciones, finanzas y actividades del Taller Mecánico Automotriz P&G
           </p>
         </div>
 

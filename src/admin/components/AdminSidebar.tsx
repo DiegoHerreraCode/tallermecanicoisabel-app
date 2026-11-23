@@ -95,7 +95,7 @@ export const AdminSidebar = ({ isOpen }: Props) => {
       </nav>
 
       <div className="p-3 border-t border-border/80 text-xs text-center text-muted-foreground font-medium">
-        Taller Mecánico Isabel v1.0
+        Automotriz Mi Taller P&G v1.0
       </div>
     </aside>
   );
