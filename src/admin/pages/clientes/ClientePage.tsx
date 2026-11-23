@@ -10,6 +10,7 @@ import {
   MapPin,
   IdCard,
   Edit2,
+  Eye,
   Filter,
 } from 'lucide-react';
 import { useAppNavigation } from '../../hooks/useAppNavigation';
@@ -192,11 +193,21 @@ export const ClientePage = () => {
                 </div>
               </div>
 
-              {/* Botón de Acción: Únicamente Editar (según la confirmación del usuario) */}
-              <div className="flex items-center justify-end pt-4 border-t border-border/80 mt-4">
+              {/* Botones de Acción: Ver Detalle y Editar */}
+              <div className="flex items-center justify-end gap-2 pt-4 border-t border-border/80 mt-4">
+                <button
+                  onClick={() => navigate(`/admin/clientes/listado/${item.id_cliente}/detalle`)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer shadow-2xs"
+                  title="Ver detalle del cliente y sus vehículos"
+                >
+                  <Eye className="w-3.5 h-3.5 text-blue-500" />
+                  Ver Detalle
+                </button>
+
                 <button
                   onClick={() => navigate(`/admin/clientes/listado/${item.id_cliente}`)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer shadow-2xs"
+                  title="Editar cliente"
                 >
                   <Edit2 className="w-3.5 h-3.5 text-emerald-500" />
                   Editar

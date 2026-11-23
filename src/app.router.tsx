@@ -13,6 +13,7 @@ import { AdministradoresFormPage } from './admin/pages/personal/AdministradoresF
 import { ClienteMenuPage } from './admin/pages/clientes/ClienteMenuPage';
 import { ClientePage } from './admin/pages/clientes/ClientePage';
 import { ClienteFormPage } from './admin/pages/clientes/ClienteFormPage';
+import { ClienteDetallePage } from './admin/pages/clientes/ClienteDetallePage';
 import { PagoClientePage } from './admin/pages/clientes/PagoClientePage';
 import { PagoClienteFormPage } from './admin/pages/clientes/PagoClienteFormPage';
 import { InventarioServiciosMenuPage } from './admin/pages/inventario-servicios/InventarioServiciosMenuPage';
@@ -152,6 +153,10 @@ export const appRouter = createBrowserRouter([
           {
             path: 'listado/:id', // ruta: admin/clientes/listado/:id (crear y editar estilo Fernando Herrera con :id = 'new' o id numérico)
             element: <ClienteFormPage />,
+          },
+          {
+            path: 'listado/:id/detalle', // ruta: admin/clientes/listado/:id/detalle (ver detalle de cliente y sus vehículos asociados)
+            element: <ClienteDetallePage />,
           },
           {
             path: 'pagos-clientes', // ruta: admin/clientes/pagos-clientes (Listado con tabla)
