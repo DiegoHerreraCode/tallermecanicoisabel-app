@@ -429,10 +429,10 @@ export const DashboardPage = () => {
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         {/* CARD 1: Órdenes creadas en el mes seleccionado y tiempo promedio de finalización */}
         <div className="bg-card p-5 rounded-2xl border border-border/80 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Órdenes Creadas
-            </p>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Órdenes de Trabajo
+            </span>
             {/* Selector de mes individual Card 1 */}
             <input
               type="month"
@@ -442,26 +442,40 @@ export const DashboardPage = () => {
             />
           </div>
 
-          <div className="flex items-center justify-between my-auto py-2">
-            <div className="space-y-1">
-              <p className="text-3xl font-extrabold text-foreground tracking-tight">
-                {ordenesCreadasMesCard1}
-              </p>
-              <div className="text-xs text-muted-foreground/80 font-medium">
-                <div className="flex flex-col gap-0.5 mt-0.5">
-                  <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">
-                    {promedioDiasFinalizacion !== null
-                      ? `Tiempo prom. finalización: ${promedioDiasFinalizacion} ${promedioDiasFinalizacion === 1 ? 'día' : 'días'}`
-                      : 'Tiempo prom. finalización: Sin finalizar en este mes'}
+          <div className="flex items-center justify-between">
+            <div className="space-y-3 flex-1 pr-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Órdenes Creadas
+                </p>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+                    {ordenesCreadasMesCard1}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-[11px] text-muted-foreground font-medium">
+                    (en el mes)
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-border/60">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Tiempo Prom. Finalización
+                </p>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight">
+                    {promedioDiasFinalizacion !== null
+                      ? `${promedioDiasFinalizacion} ${promedioDiasFinalizacion === 1 ? 'día' : 'días'}`
+                      : 'N/A'}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground font-medium">
                     ({totalFinalizadasCard1} de {ordenesCreadasMesCard1} finalizadas)
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-500 dark:bg-blue-500/20">
+            <div className="p-3.5 rounded-2xl flex items-center justify-center shrink-0 bg-blue-500/10 text-blue-500 dark:bg-blue-500/20 self-start">
               <ClipboardList size={24} />
             </div>
           </div>

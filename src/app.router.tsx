@@ -33,6 +33,7 @@ import { ModeloVehiculoPage } from './admin/pages/vehiculos/ModeloVehiculoPage';
 import { ModeloVehiculoFormPage } from './admin/pages/vehiculos/ModeloVehiculoFormPage';
 import { VehiculoPage } from './admin/pages/vehiculos/VehiculoPage';
 import { VehiculoFormPage } from './admin/pages/vehiculos/VehiculoFormPage';
+import { VehiculoDetallePage } from './admin/pages/vehiculos/VehiculoDetallePage';
 import { TallerMenuPage } from './admin/pages/taller/TallerMenuPage';
 import { IngresoPage } from './admin/pages/taller/IngresoPage';
 import { IngresoFormPage } from './admin/pages/taller/IngresoFormPage';
@@ -217,6 +218,10 @@ export const appRouter = createBrowserRouter([
           {
             path: 'listado/:id', // ruta: admin/vehiculos/listado/:id
             element: <VehiculoFormPage />
+          },
+          {
+            path: 'listado/:id/detalle', // ruta: admin/vehiculos/listado/:id/detalle (ver detalle con órdenes asociadas)
+            element: <VehiculoDetallePage />
           },
           {
             path: 'marcas', // ruta: admin/vehiculos/marcas

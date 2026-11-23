@@ -6,6 +6,7 @@ import {
   Filter,
   Car,
   Pencil,
+  Eye,
   User,
   Tag,
 } from 'lucide-react';
@@ -354,17 +355,31 @@ export const VehiculoPage = () => {
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            navigate(`/admin/vehiculos/listado/${v.id_vehiculo}`)
-                          }
-                          className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer shadow-2xs"
-                          title="Editar vehículo"
-                        >
-                          <Pencil className="w-3.5 h-3.5 text-blue-500" />
-                          Editar
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              navigate(`/admin/vehiculos/listado/${v.id_vehiculo}/detalle`)
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer shadow-2xs"
+                            title="Ver Detalle del vehículo y órdenes asociadas"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-blue-500" />
+                            Ver Detalle
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              navigate(`/admin/vehiculos/listado/${v.id_vehiculo}`)
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-card border border-border/80 text-foreground hover:bg-accent transition-colors cursor-pointer shadow-2xs"
+                            title="Editar vehículo"
+                          >
+                            <Pencil className="w-3.5 h-3.5 text-blue-500" />
+                            Editar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
