@@ -18,6 +18,7 @@ export const VehiculoPage = () => {
   const { goBack, navigate } = useAppNavigation();
   const {
     vehiculos,
+    ordenes,
     clientes,
     tiposVehiculos,
     modelosVehiculos,
@@ -48,6 +49,20 @@ export const VehiculoPage = () => {
     marcasVehiculos.forEach((m) => map.set(m.id_marca_vehiculo, m.nombre));
     return map;
   }, [marcasVehiculos]);
+
+  // Mapa para contar órdenes no anuladas por id_vehiculo
+  const ordenesPorVehiculoMap = useMemo(() => {
+    const map = new Map<number, number>();
+    ordenes.forEach((orden) => {
+      // Para el conteo NO deben tomarse en cuenta órdenes anuladas
+      if (orden.estado_operativo === 'anulada') return;
+      const vId = orden.ingreso?.id_vehiculo;
+      if (vId) {
+        map.set(vId, (map.get(vId) || 0) + 1);
+      }
+    });
+    return map;
+  }, [ordenes]);
 
   const modelosMap = useMemo(() => {
     const map = new Map<number, { nombre: string; marca: string }>();
@@ -262,6 +277,9 @@ export const VehiculoPage = () => {
                   Modelo / Marca
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
+                  Num Órdenes
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
                   Acciones
                 </th>
               </tr>
@@ -269,7 +287,7 @@ export const VehiculoPage = () => {
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       Cargando listado de vehículos...
@@ -278,7 +296,7 @@ export const VehiculoPage = () => {
                 </tr>
               ) : paginatedVehiculos.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-8 text-center text-muted-foreground">
                     <Car className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-foreground">
                       No se encontraron vehículos
@@ -352,6 +370,13 @@ export const VehiculoPage = () => {
                             {marcaNombre}
                           </span>
                         </div>
+                      </td>
+
+                      {/* Num Órdenes (no anuladas) */}
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                          {ordenesPorVehiculoMap.get(v.id_vehiculo) || 0}
+                        </span>
                       </td>
 
                       <td className="py-3.5 px-4 text-center">

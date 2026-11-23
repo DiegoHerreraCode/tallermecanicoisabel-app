@@ -4,6 +4,7 @@ import { getClientesAction } from '../actions/get-clientes.action';
 import { getTiposVehiculosAction } from '../actions/get-tipos-vehiculos.action';
 import { getModelosVehiculosAction } from '../actions/get-modelos-vehiculos.action';
 import { getMarcasVehiculosAction } from '../actions/get-marcas-vehiculos.action';
+import { getOrdenesAction } from '../actions/get-ordenes.action';
 
 export const useVehiculos = () => {
   const {
@@ -13,6 +14,14 @@ export const useVehiculos = () => {
   } = useQuery({
     queryKey: ['vehiculos-listado'],
     queryFn: getVehiculosAction,
+  });
+
+  const {
+    data: ordenes = [],
+    isLoading: isLoadingOrdenes,
+  } = useQuery({
+    queryKey: ['ordenes-listado'],
+    queryFn: getOrdenesAction,
   });
 
   const {
@@ -49,12 +58,14 @@ export const useVehiculos = () => {
 
   return {
     vehiculos,
+    ordenes,
     clientes,
     tiposVehiculos,
     modelosVehiculos,
     marcasVehiculos,
     isLoading:
       isLoadingVehiculos ||
+      isLoadingOrdenes ||
       isLoadingClientes ||
       isLoadingTipos ||
       isLoadingModelos ||

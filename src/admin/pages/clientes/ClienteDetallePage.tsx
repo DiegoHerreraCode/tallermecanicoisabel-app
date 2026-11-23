@@ -18,6 +18,7 @@ import { getClienteByIdAction } from '../../actions/get-cliente-by-id.action';
 import { getVehiculosAction } from '../../actions/get-vehiculos.action';
 import { getModelosVehiculosAction } from '../../actions/get-modelos-vehiculos.action';
 import { getTiposVehiculosAction } from '../../actions/get-tipos-vehiculos.action';
+import { getOrdenesAction } from '../../actions/get-ordenes.action';
 import type { VehiculoItem } from '../../interfaces/vehiculo.interface';
 
 export const ClienteDetallePage = () => {
@@ -36,6 +37,25 @@ export const ClienteDetallePage = () => {
     queryKey: ['vehiculos-listado'],
     queryFn: getVehiculosAction,
   });
+
+  // 2.1 Consultar listado de órdenes para conteo de órdenes asociadas (excluyendo anuladas)
+  const { data: ordenes = [] } = useQuery({
+    queryKey: ['ordenes-listado'],
+    queryFn: getOrdenesAction,
+  });
+
+  // Mapa de órdenes válidas (no anuladas) por id_vehiculo
+  const ordenesPorVehiculoMap = useMemo(() => {
+    const map = new Map<number, number>();
+    ordenes.forEach((orden) => {
+      if (orden.estado_operativo === 'anulada') return;
+      const vId = orden.ingreso?.id_vehiculo;
+      if (vId) {
+        map.set(vId, (map.get(vId) || 0) + 1);
+      }
+    });
+    return map;
+  }, [ordenes]);
 
   // 3. Catálogos para resolver modelo, marca y tipo si no viniesen anidados
   const { data: modelosVehiculos = [] } = useQuery({
@@ -237,6 +257,9 @@ export const ClienteDetallePage = () => {
                   Modelo / Marca
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
+                  Num Órdenes
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
                   Acciones
                 </th>
               </tr>
@@ -244,7 +267,7 @@ export const ClienteDetallePage = () => {
             <tbody className="divide-y divide-border/60">
               {isLoadingVehiculos ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600" />
                       Cargando vehículos del cliente...
@@ -253,7 +276,7 @@ export const ClienteDetallePage = () => {
                 </tr>
               ) : paginatedVehiculos.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
                     <Car className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-foreground">
                       No hay vehículos asociados
@@ -306,6 +329,13 @@ export const ClienteDetallePage = () => {
                             {marcaNombre}
                           </span>
                         </div>
+                      </td>
+
+                      {/* Num Órdenes (excluyendo anuladas) */}
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                          {ordenesPorVehiculoMap.get(v.id_vehiculo) || 0}
+                        </span>
                       </td>
 
                       {/* Acciones: Ver Detalle del Vehículo */}

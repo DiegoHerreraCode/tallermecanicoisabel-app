@@ -53,7 +53,7 @@ export const VehiculoDetallePage = () => {
     const vehiculoIdNum = Number(id);
 
     const filtradas = ordenes.filter(
-      (orden) => orden.ingreso && Number(orden.ingreso.id_vehiculo) === vehiculoIdNum
+      (orden) => orden.ingreso && Number(orden.ingreso.id_vehiculo) === vehiculoIdNum && orden.estado_operativo !== 'anulada'
     );
 
     return filtradas.sort((a, b) => {
@@ -64,6 +64,11 @@ export const VehiculoDetallePage = () => {
       return 0;
     });
   }, [ordenes, id]);
+
+  // Conteo de órdenes no anuladas en las que ha sido atendido el vehículo
+  const numOrdenesValidas = useMemo(() => {
+    return ordenesVehiculo.filter((o) => o.estado_operativo !== 'anulada').length;
+  }, [ordenesVehiculo]);
 
   // Paginación para la tabla de órdenes del vehículo (máximo 7 por página)
   const [currentPage, setCurrentPage] = useState(1);
@@ -172,7 +177,7 @@ export const VehiculoDetallePage = () => {
           Datos del Vehículo
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {/* Placa */}
           <div className="p-3.5 rounded-xl bg-background border border-border/80">
             <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block mb-1">
@@ -212,6 +217,16 @@ export const VehiculoDetallePage = () => {
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
               <Tag className="w-3 h-3" />
               {tipoNombre}
+            </span>
+          </div>
+
+          {/* Num Órdenes Atendidas (no anuladas) */}
+          <div className="p-3.5 rounded-xl bg-background border border-border/80">
+            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block mb-1">
+              Num Órdenes
+            </span>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+              {numOrdenesValidas} {numOrdenesValidas === 1 ? 'orden' : 'órdenes'}
             </span>
           </div>
 
@@ -407,8 +422,8 @@ export const VehiculoDetallePage = () => {
                 key={pageNum}
                 onClick={() => setCurrentPage(pageNum)}
                 className={`w-8 h-8 text-xs font-semibold rounded-lg transition-all cursor-pointer ${validCurrentPage === pageNum
-                    ? 'bg-blue-600 text-white shadow-sm font-bold'
-                    : 'bg-card border border-border/80 text-foreground hover:bg-accent'
+                  ? 'bg-blue-600 text-white shadow-sm font-bold'
+                  : 'bg-card border border-border/80 text-foreground hover:bg-accent'
                   }`}
               >
                 {pageNum}
