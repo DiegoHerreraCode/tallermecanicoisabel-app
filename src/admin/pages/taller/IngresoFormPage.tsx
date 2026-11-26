@@ -9,6 +9,7 @@ import { getModelosVehiculosAction } from '../../actions/get-modelos-vehiculos.a
 import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.action';
 import { getTiposOrdenesAction } from '../../actions/get-tipos-ordenes.action';
 import { getTiposVehiculosAction } from '../../actions/get-tipos-vehiculos.action';
+import { getPersonalAction } from '../../actions/get-personal.action';
 import { createUpdateIngresoAction } from '../../actions/create-update-ingreso.action';
 import { uploadImageChecklistAction } from '../../actions/upload-pdf-checklist.action';
 import { useIngresoMutation } from '../../hooks/useIngresoMutation';
@@ -62,6 +63,26 @@ export const IngresoFormPage = () => {
     queryFn: getTiposVehiculosAction,
   });
 
+  // 4. Personal (Mecánicos disponibles)
+  const { data: personalList = [], isLoading: isLoadingPersonal } = useQuery({
+    queryKey: ['personal-listado'],
+    queryFn: getPersonalAction,
+  });
+
+  const mecanicosDisponibles = useMemo(() => {
+    return personalList.filter((p) => !p.is_deleted);
+  }, [personalList]);
+
+  // Opciones de mecánicos para SearchableSelect con búsqueda por nombre y cédula
+  const personalOptions = useMemo(() => {
+    return mecanicosDisponibles.map((m) => ({
+      value: m.id_personal,
+      label: `${m.nombre} (C.I. ${m.cedula})`,
+      description: m.disponible ? 'Disponible' : 'No disponible',
+      searchText: `${m.nombre} ${m.cedula} ${m.correo || ''} ${m.num_tlf || ''}`,
+    }));
+  }, [mecanicosDisponibles]);
+
   // Mapas
   const clientesMap = useMemo(() => {
     const map = new Map<number, { nombre: string; cedula: string }>();
@@ -113,6 +134,7 @@ export const IngresoFormPage = () => {
   const [formData, setFormData] = useState<CreateIngresoPayload>({
     id_tipo_orden: 0,
     id_vehiculo: 0,
+    id_personal: 0,
     observaciones_cliente: '',
   });
 
@@ -126,7 +148,7 @@ export const IngresoFormPage = () => {
     >
   ) => {
     const { name, value } = e.target;
-    if (name === 'id_tipo_orden' || name === 'id_vehiculo') {
+    if (name === 'id_tipo_orden' || name === 'id_vehiculo' || name === 'id_personal') {
       setFormData((prev) => ({
         ...prev,
         [name]: value ? Number(value) : 0,
@@ -151,6 +173,11 @@ export const IngresoFormPage = () => {
       return false;
     }
 
+    if (!formData.id_personal || formData.id_personal <= 0) {
+      toast.warning('Por favor selecciona el mecánico que recibe el vehículo');
+      return false;
+    }
+
     return true;
   };
 
@@ -162,6 +189,7 @@ export const IngresoFormPage = () => {
     createIngreso({
       id_tipo_orden: Number(formData.id_tipo_orden),
       id_vehiculo: Number(formData.id_vehiculo),
+      id_personal: Number(formData.id_personal),
       observaciones_cliente: formData.observaciones_cliente?.trim() || null,
       reingreso_por_falla: Boolean(formData.reingreso_por_falla),
     });
@@ -187,6 +215,7 @@ export const IngresoFormPage = () => {
       const nuevoIngreso = await createUpdateIngresoAction({
         id_tipo_orden: Number(formData.id_tipo_orden),
         id_vehiculo: Number(formData.id_vehiculo),
+        id_personal: Number(formData.id_personal),
         observaciones_cliente: formData.observaciones_cliente?.trim() || null,
         reingreso_por_falla: Boolean(formData.reingreso_por_falla),
       });
@@ -301,6 +330,32 @@ export const IngresoFormPage = () => {
             searchPlaceholder="Buscar por placa, cliente o cédula..."
             emptyMessage="No se encontraron vehículos registrados"
             disabled={isLoadingVehiculos}
+            required
+          />
+        </div>
+
+        {/* Mecánico Receptor */}
+        <div>
+          <label className="block text-xs font-bold text-foreground mb-1.5">
+            Mecánico Receptor <span className="text-rose-500">*</span>
+          </label>
+          <SearchableSelect
+            options={personalOptions}
+            value={formData.id_personal}
+            onChange={(val) =>
+              setFormData((prev) => ({
+                ...prev,
+                id_personal: val ? Number(val) : 0,
+              }))
+            }
+            placeholder={
+              isLoadingPersonal
+                ? 'Cargando mecánicos...'
+                : 'Seleccione el mecánico receptor...'
+            }
+            searchPlaceholder="Buscar por nombre o cédula..."
+            emptyMessage="No se encontraron mecánicos registrados"
+            disabled={isLoadingPersonal}
             required
           />
         </div>

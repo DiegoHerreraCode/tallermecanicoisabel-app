@@ -26,6 +26,7 @@ export const IngresoPage = () => {
     modelosVehiculos,
     marcasVehiculos,
     tiposOrdenes,
+    personal,
     isLoading,
   } = useIngresos();
 
@@ -40,6 +41,7 @@ export const IngresoPage = () => {
   const [modeloMarcaFilter, setModeloMarcaFilter] = useState('');
   const [placaFilter, setPlacaFilter] = useState('');
   const [clienteFilter, setClienteFilter] = useState('');
+  const [mecanicoFilter, setMecanicoFilter] = useState('');
   const [estadoFilter, setEstadoFilter] = useState('');
   const [reingresoFilter, setReingresoFilter] = useState<'all' | 'si' | 'no'>('all');
   const [fechaDesdeFilter, setFechaDesdeFilter] = useState('');
@@ -118,6 +120,12 @@ export const IngresoPage = () => {
     return map;
   }, [tiposOrdenes]);
 
+  const personalMap = useMemo(() => {
+    const map = new Map<number, string>();
+    personal.forEach((p) => map.set(p.id_personal, p.nombre));
+    return map;
+  }, [personal]);
+
   // Helper para resolver los datos completos de un ingreso
   const getIngresoResolvedData = (ingreso: IngresoItem) => {
     const vehiculoData =
@@ -161,6 +169,11 @@ export const IngresoPage = () => {
       tiposOrdenesMap.get(ingreso.id_tipo_orden) ||
       `Tipo #${ingreso.id_tipo_orden}`;
 
+    const mecanicoNombre =
+      ingreso.personal?.nombre ||
+      (ingreso.id_personal ? personalMap.get(ingreso.id_personal) : '') ||
+      'No asignado';
+
     const fechaIngresoSolo = ingreso.fecha_ingreso
       ? ingreso.fecha_ingreso.substring(0, 10)
       : '';
@@ -172,6 +185,7 @@ export const IngresoPage = () => {
       modeloNombre,
       marcaNombre,
       tipoOrdenNombre,
+      mecanicoNombre,
       fechaIngresoSolo,
     };
   };
@@ -223,6 +237,14 @@ export const IngresoPage = () => {
           !resolved.clienteNombre.toLowerCase().includes(queryCli) &&
           !resolved.clienteCedula.toLowerCase().includes(queryCli)
         ) {
+          return false;
+        }
+      }
+
+      // 5.1 Filtro por mecánico
+      if (mecanicoFilter.trim()) {
+        const queryMec = mecanicoFilter.trim().toLowerCase();
+        if (!resolved.mecanicoNombre.toLowerCase().includes(queryMec)) {
           return false;
         }
       }
@@ -476,6 +498,23 @@ export const IngresoPage = () => {
             />
           </div>
 
+          {/* Mecánico Receptor */}
+          <div>
+            <label className="block text-xs font-bold text-foreground mb-1">
+              Mecánico Receptor
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: Joaquin, Carlos..."
+              value={mecanicoFilter}
+              onChange={(e) => {
+                setMecanicoFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+            />
+          </div>
+
           {/* Estado */}
           <div>
             <label className="block text-xs font-bold text-foreground mb-1">
@@ -573,6 +612,9 @@ export const IngresoPage = () => {
                   Nombre (cliente)
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
+                  Mecánico
+                </th>
+                <th scope="col" className="py-3 px-4 text-center">
                   Fecha de Ingreso
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
@@ -589,7 +631,7 @@ export const IngresoPage = () => {
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={10} className="py-8 text-center text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                       Cargando listado de ingresos...
@@ -598,7 +640,7 @@ export const IngresoPage = () => {
                 </tr>
               ) : paginatedIngresos.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-muted-foreground">
+                  <td colSpan={10} className="py-8 text-center text-muted-foreground">
                     <Car className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm font-medium text-foreground">
                       No se encontraron ingresos
@@ -663,6 +705,13 @@ export const IngresoPage = () => {
                             </span>
                           )}
                         </div>
+                      </td>
+
+                      {/* Mecánico Receptor */}
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-muted text-foreground border border-border/70">
+                          {resolved.mecanicoNombre}
+                        </span>
                       </td>
 
                       {/* Fecha de ingreso */}

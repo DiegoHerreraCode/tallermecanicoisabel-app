@@ -23,6 +23,7 @@ import { getModelosVehiculosAction } from '../../actions/get-modelos-vehiculos.a
 import { getMarcasVehiculosAction } from '../../actions/get-marcas-vehiculos.action';
 import { getTiposOrdenesAction } from '../../actions/get-tipos-ordenes.action';
 import { getHallazgosTecnicosAction } from '../../actions/get-hallazgos-tecnicos.action';
+import { getPersonalAction } from '../../actions/get-personal.action';
 import { useOrdenMutation } from '../../hooks/useOrdenMutation';
 
 export const IngresoDetallePage = () => {
@@ -67,6 +68,11 @@ export const IngresoDetallePage = () => {
   const { data: tiposOrdenes = [] } = useQuery({
     queryKey: ['tipos-ordenes-listado'],
     queryFn: getTiposOrdenesAction,
+  });
+
+  const { data: personalList = [] } = useQuery({
+    queryKey: ['personal-listado'],
+    queryFn: getPersonalAction,
   });
 
   // 3. Hallazgos técnicos vinculados al ingreso
@@ -121,6 +127,12 @@ export const IngresoDetallePage = () => {
     return map;
   }, [tiposOrdenes]);
 
+  const personalMap = useMemo(() => {
+    const map = new Map<number, string>();
+    personalList.forEach((p) => map.set(p.id_personal, p.nombre));
+    return map;
+  }, [personalList]);
+
   // Datos resueltos del ingreso
   const resolved = useMemo(() => {
     if (!ingreso) return null;
@@ -132,6 +144,11 @@ export const IngresoDetallePage = () => {
       tiposOrdenesMap.get(ingreso.id_tipo_orden) ||
       '—';
 
+    const mecanicoNombre =
+      ingreso.personal?.nombre ||
+      (ingreso.id_personal ? personalMap.get(ingreso.id_personal) : '') ||
+      'No asignado';
+
     return {
       placa: v?.placa || '—',
       annio: v?.annio || '',
@@ -140,8 +157,9 @@ export const IngresoDetallePage = () => {
       clienteNombre: cliente?.nombre || '—',
       clienteCedula: cliente?.cedula || '',
       tipoOrdenNombre,
+      mecanicoNombre,
     };
-  }, [ingreso, vehiculosMap, clientesMap, modelosMap, tiposOrdenesMap]);
+  }, [ingreso, vehiculosMap, clientesMap, modelosMap, tiposOrdenesMap, personalMap]);
 
   const getEstadoBadgeClass = (estado?: string) => {
     switch (estado) {
@@ -287,6 +305,11 @@ export const IngresoDetallePage = () => {
               <div className="p-3 bg-muted/30 rounded-xl border border-border/60">
                 <span className="text-muted-foreground block text-xs">Tipo de Orden</span>
                 <span className="font-bold text-foreground capitalize">{resolved.tipoOrdenNombre}</span>
+              </div>
+
+              <div className="p-3 bg-muted/30 rounded-xl border border-border/60">
+                <span className="text-muted-foreground block text-xs">Mecánico Receptor</span>
+                <span className="font-bold text-foreground">{resolved.mecanicoNombre}</span>
               </div>
 
               <div className="p-3 bg-muted/30 rounded-xl border border-border/60">

@@ -5,6 +5,7 @@ import { getClientesAction } from '../actions/get-clientes.action';
 import { getModelosVehiculosAction } from '../actions/get-modelos-vehiculos.action';
 import { getMarcasVehiculosAction } from '../actions/get-marcas-vehiculos.action';
 import { getTiposOrdenesAction } from '../actions/get-tipos-ordenes.action';
+import { getPersonalAction } from '../actions/get-personal.action';
 
 export const useIngresos = () => {
   const {
@@ -56,6 +57,14 @@ export const useIngresos = () => {
     queryFn: getTiposOrdenesAction,
   });
 
+  const {
+    data: personal = [],
+    isLoading: isLoadingPersonal,
+  } = useQuery({
+    queryKey: ['personal-listado'],
+    queryFn: getPersonalAction,
+  });
+
   return {
     ingresos,
     vehiculos,
@@ -63,13 +72,15 @@ export const useIngresos = () => {
     modelosVehiculos,
     marcasVehiculos,
     tiposOrdenes,
+    personal,
     isLoading:
       isLoadingIngresos ||
       isLoadingVehiculos ||
       isLoadingClientes ||
       isLoadingModelos ||
       isLoadingMarcas ||
-      isLoadingTiposOrdenes,
+      isLoadingTiposOrdenes ||
+      isLoadingPersonal,
     error: errorIngresos,
   };
 };

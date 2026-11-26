@@ -1,6 +1,7 @@
 import type { VehiculoItem } from './vehiculo.interface';
 import type { TipoOrdenItem } from './tipo-orden.interface';
 import type { HallazgoTecnicoItem } from './orden.interface';
+import type { PersonalItem } from './personal.interface';
 
 export type IngresoEstadoType =
   | 'checklist_pendiente'
@@ -14,6 +15,7 @@ export interface IngresoItem {
   id_tipo_orden: number;
   id_vehiculo: number;
   id_admin?: number;
+  id_personal?: number | null;
   fecha_ingreso: string;
   estado: IngresoEstadoType;
   observaciones_cliente?: string | null;
@@ -28,12 +30,14 @@ export interface IngresoItem {
   // Relaciones
   vehiculo?: VehiculoItem;
   tipo_orden?: TipoOrdenItem;
+  personal?: PersonalItem | null;
   hallazgos_tecnicos?: HallazgoTecnicoItem[];
 }
 
 export interface CreateIngresoPayload {
   id_tipo_orden: number;
   id_vehiculo: number;
+  id_personal: number;
   observaciones_cliente?: string | null;
   reingreso_por_falla?: boolean;
 }
