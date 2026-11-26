@@ -184,7 +184,7 @@ export const IngresoDetallePage = () => {
       return pathOrName;
     }
     const cleanPath = pathOrName.startsWith('/') ? pathOrName.substring(1) : pathOrName;
-    return `https://vnfwolviqsmkotbeydzg.supabase.co/storage/v1/object/public/checklists/${cleanPath}`;
+    return `https://vnfwolviqsmkotbeydzg.supabase.co/storage/v1/object/public/tallermecanicoisabel/${cleanPath}`;
   };
 
   const handleSaveHallazgo = (e: React.FormEvent) => {
