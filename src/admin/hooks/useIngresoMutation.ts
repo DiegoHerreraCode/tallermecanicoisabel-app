@@ -30,6 +30,8 @@ export const useIngresoMutation = () => {
           : 'Ingreso actualizado correctamente'
       );
       queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
+      // Marcar como stale las queries del dashboard para que siempre se muestren actualizadas
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       if (variables.id && variables.id !== 'new') {
         queryClient.invalidateQueries({ queryKey: ['ingreso-item', String(variables.id)] });
       }
@@ -66,6 +68,7 @@ export const useIngresoMutation = () => {
     onSuccess: () => {
       toast.success('Imagen de checklist subida correctamente');
       queryClient.invalidateQueries({ queryKey: ['ingresos-listado'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: (error: any) => {
       const message =
