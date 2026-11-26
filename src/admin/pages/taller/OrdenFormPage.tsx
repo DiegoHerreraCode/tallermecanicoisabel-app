@@ -2128,31 +2128,31 @@ export const OrdenFormPage = () => {
       {/* MODAL: ASIGNAR PERSONAL AL SERVICIO DEL TALLER */}
       {assignModalService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fadeIn">
-          <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                <UserCheck className="w-5 h-5 text-blue-500" />
-                Asignar Personal
+          <div className="bg-card border border-border/80 rounded-2xl p-6 sm:p-7 max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3.5 border-b border-border/80 shrink-0">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-2.5">
+                <UserCheck className="w-6 h-6 text-blue-500" />
+                Asignar Personal al Servicio
               </h3>
               <button
                 type="button"
                 onClick={() => setAssignModalService(null)}
-                className="p-1 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer"
+                className="p-1.5 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground cursor-pointer transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-3 rounded-xl bg-muted/40 border border-border/60 shrink-0">
-              <p className="text-xs text-muted-foreground">Servicio seleccionado:</p>
-              <p className="text-sm font-bold text-foreground mt-0.5">
+            <div className="p-4 rounded-xl bg-muted/40 border border-border/60 shrink-0">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Servicio seleccionado</p>
+              <p className="text-base font-bold text-foreground mt-1">
                 {assignModalService.nombre}
               </p>
             </div>
 
-            <form onSubmit={handleSaveAssignPersonal} className="flex flex-col flex-1 min-h-0 space-y-4">
-              <div className="overflow-y-auto pr-1 flex-1">
-                <label className="block text-xs font-bold text-foreground mb-1.5">
+            <form onSubmit={handleSaveAssignPersonal} className="flex flex-col flex-1 min-h-[220px] space-y-5">
+              <div className="pr-1 flex-1">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Seleccionar Empleado / Mecánico <span className="text-rose-500">*</span>
                 </label>
                 <SearchableSelect
@@ -2164,23 +2164,23 @@ export const OrdenFormPage = () => {
                   emptyMessage="No se encontraron empleados registrados"
                   required
                 />
-                <p className="text-[11px] text-muted-foreground mt-1.5">
+                <p className="text-xs text-muted-foreground mt-2">
                   Al asignar personal, el estado del servicio cambiará automáticamente a <span className="font-semibold text-blue-500">En Espera</span>.
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-border/80 shrink-0">
+              <div className="flex justify-end gap-3 pt-4 border-t border-border/80 shrink-0">
                 <button
                   type="button"
                   onClick={() => setAssignModalService(null)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent cursor-pointer"
+                  className="px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-card border border-border/80 text-foreground hover:bg-accent cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdatingServicio || !selectedPersonalId}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition-all cursor-pointer disabled:opacity-50"
                 >
                   {isUpdatingServicio ? 'Asignando...' : 'Confirmar Asignación'}
                 </button>
