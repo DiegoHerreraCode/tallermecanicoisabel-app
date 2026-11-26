@@ -31,6 +31,7 @@ import { getVariablesAction } from '../../actions/get-variables.action';
 import { getHallazgosTecnicosAction } from '../../actions/get-hallazgos-tecnicos.action';
 import { getPersonalAction } from '../../actions/get-personal.action';
 import { useOrdenMutation } from '../../hooks/useOrdenMutation';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 import type { RepuestoItem } from '../../interfaces/repuesto.interface';
 import type { ServicioTallerItem } from '../../interfaces/servicio-taller.interface';
@@ -142,6 +143,18 @@ export const OrdenFormPage = () => {
     queryKey: ['personal-listado'],
     queryFn: getPersonalAction,
   });
+
+  // Opciones para SearchableSelect al asignar personal a un servicio
+  const personalOptions = useMemo(() => {
+    return allPersonal
+      .filter((p) => !p.is_deleted)
+      .map((p) => ({
+        value: p.id_personal,
+        label: `${p.nombre} (C.I. ${p.cedula})`,
+        description: p.disponible ? 'Disponible' : 'En servicio',
+        searchText: `${p.nombre} ${p.cedula} ${p.correo || ''} ${p.num_tlf || ''}`,
+      }));
+  }, [allPersonal]);
 
   // 5. Variables (para modo de cálculo de ganancia y porcentaje IVA)
   const { data: variables = [] } = useQuery({
@@ -2142,21 +2155,15 @@ export const OrdenFormPage = () => {
                 <label className="block text-xs font-bold text-foreground mb-1.5">
                   Seleccionar Empleado / Mecánico <span className="text-rose-500">*</span>
                 </label>
-                <select
-                  value={selectedPersonalId}
-                  onChange={(e) => setSelectedPersonalId(e.target.value)}
+                <SearchableSelect
+                  options={personalOptions}
+                  value={selectedPersonalId ? Number(selectedPersonalId) : ''}
+                  onChange={(val) => setSelectedPersonalId(val ? String(val) : '')}
+                  placeholder="Seleccione un empleado o mecánico..."
+                  searchPlaceholder="Buscar por nombre o cédula..."
+                  emptyMessage="No se encontraron empleados registrados"
                   required
-                  className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-background border border-border/80 text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                >
-                  <option value="">-- Seleccione un empleado --</option>
-                  {allPersonal
-                    .filter((p) => !p.is_deleted)
-                    .map((p) => (
-                      <option key={p.id_personal} value={p.id_personal}>
-                        {p.nombre} {p.cedula ? `(C.I: ${p.cedula})` : ''}
-                      </option>
-                    ))}
-                </select>
+                />
                 <p className="text-[11px] text-muted-foreground mt-1.5">
                   Al asignar personal, el estado del servicio cambiará automáticamente a <span className="font-semibold text-blue-500">En Espera</span>.
                 </p>
