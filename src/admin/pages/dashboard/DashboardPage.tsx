@@ -67,9 +67,9 @@ export const DashboardPage = () => {
       }
     }
 
-    // Órdenes creadas en el mes seleccionado
+    // Órdenes creadas en el mes seleccionado (excluyendo anuladas para reflejar el volumen operativo real)
     const creadas = ordenes.filter((ord) => {
-      if (!ord.fecha_creacion) return false;
+      if (!ord.fecha_creacion || ord.estado_operativo === 'anulada') return false;
       const d = new Date(ord.fecha_creacion);
       return d.getMonth() === m && d.getFullYear() === y;
     });
@@ -121,9 +121,9 @@ export const DashboardPage = () => {
       }
     }
 
-    // 2.1 Órdenes creadas en el mes seleccionado que se encuentren finalizadas
+    // 2.1 Órdenes creadas en el mes seleccionado que se encuentren finalizadas (excluye anuladas)
     const ordenesCreadasMes = ordenes.filter((ord) => {
-      if (!ord.fecha_creacion) return false;
+      if (!ord.fecha_creacion || ord.estado_operativo === 'anulada') return false;
       const d = new Date(ord.fecha_creacion);
       return d.getMonth() === m && d.getFullYear() === y;
     });
@@ -148,9 +148,9 @@ export const DashboardPage = () => {
       cumplimientoPct = Number(rawPct.toFixed(2));
     }
 
-    // 2.2 Porcentaje de reingreso por falla: ingresos registrados en el mes seleccionado con reingreso_por_falla = true
+    // 2.2 Porcentaje de reingreso por falla: ingresos registrados en el mes seleccionado con reingreso_por_falla = true (excluye anulados)
     const ingresosMes = ingresos.filter((ing) => {
-      if (!ing.fecha_ingreso) return false;
+      if (!ing.fecha_ingreso || ing.estado === 'anulado') return false;
       const di = new Date(ing.fecha_ingreso);
       return di.getMonth() === m && di.getFullYear() === y;
     });
@@ -216,7 +216,7 @@ export const DashboardPage = () => {
     const yVal = d.getFullYear();
 
     const count = ordenes.filter((ord) => {
-      if (!ord.fecha_creacion) return false;
+      if (!ord.fecha_creacion || ord.estado_operativo === 'anulada') return false;
       const od = new Date(ord.fecha_creacion);
       return od.getMonth() === mIndex && od.getFullYear() === yVal;
     }).length;
@@ -262,17 +262,17 @@ export const DashboardPage = () => {
   ];
 
   const tiposServiciosData: GenericPieItem[] = useMemo(() => {
-    // Filtrar órdenes por período
+    // Filtrar órdenes por período (excluyendo órdenes anuladas)
     const ordenesPeriodo =
       tiposServiciosFilterMode === 'mes_actual'
         ? ordenes.filter((ord) => {
-          if (!ord.fecha_creacion) return false;
+          if (!ord.fecha_creacion || ord.estado_operativo === 'anulada') return false;
           const d = new Date(ord.fecha_creacion);
           return (
             d.getMonth() === currentMonth && d.getFullYear() === currentYear
           );
         })
-        : ordenes;
+        : ordenes.filter((ord) => ord.estado_operativo !== 'anulada');
 
     // Contar servicios por tipo_servicio_taller
     const countsMap = new Map<string, number>();
@@ -330,16 +330,17 @@ export const DashboardPage = () => {
   ];
 
   const tiposOrdenesData: GenericPieItem[] = useMemo(() => {
+    // Filtrar órdenes por período (excluyendo órdenes anuladas)
     const ordenesPeriodo =
       tiposOrdenesFilterMode === 'mes_actual'
         ? ordenes.filter((ord) => {
-          if (!ord.fecha_creacion) return false;
+          if (!ord.fecha_creacion || ord.estado_operativo === 'anulada') return false;
           const d = new Date(ord.fecha_creacion);
           return (
             d.getMonth() === currentMonth && d.getFullYear() === currentYear
           );
         })
-        : ordenes;
+        : ordenes.filter((ord) => ord.estado_operativo !== 'anulada');
 
     const countsMap = new Map<string, number>();
 

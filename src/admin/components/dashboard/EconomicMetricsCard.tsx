@@ -48,6 +48,10 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
       if (strDesde && pagoDateStr < strDesde) return;
       if (strHasta && pagoDateStr > strHasta) return;
 
+      // Buscar orden asociada y excluir si la orden fue anulada
+      const orden = ordenesMap.get(pago.id_orden);
+      if (orden && orden.estado_operativo === 'anulada') return;
+
       const monto = Number(pago.monto || 0);
       total += monto;
       if (pago.id_orden) {
@@ -55,7 +59,6 @@ export const EconomicMetricsCard = ({ pagos, ordenes }: Props) => {
       }
 
       // Buscar tipo de orden asociada
-      const orden = ordenesMap.get(pago.id_orden);
       const tipoOrden = orden?.tipo_orden?.id_tipo_orden;
 
       if (tipoOrden == 1) {
