@@ -1446,6 +1446,7 @@ export const OrdenFormPage = () => {
                           <th className="py-2.5 px-3 text-center">estado</th>
                           {mode === 'view' && (
                             <>
+                              <th className="py-2.5 px-3 text-center">mecánico</th>
                               <th className="py-2.5 px-3 text-center">fecha inicio</th>
                               <th className="py-2.5 px-3 text-center">fecha fin</th>
                               <th className="py-2.5 px-3 text-center">acciones</th>
@@ -1458,7 +1459,7 @@ export const OrdenFormPage = () => {
                         {selectedServicios.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={mode === 'view' ? 12 : isReadOnly ? 9 : 10}
+                              colSpan={mode === 'view' ? 13 : isReadOnly ? 9 : 10}
                               className="py-6 text-center text-muted-foreground text-xs"
                             >
                               No hay servicios del taller seleccionados (mínimo requerido 1).
@@ -1492,11 +1493,6 @@ export const OrdenFormPage = () => {
                               <tr key={s.id_servicio_taller} className="hover:bg-accent/40 transition-colors">
                                 <td className="py-2.5 px-3 font-semibold text-foreground text-center">
                                   {s.nombre}
-                                  {s.personal_nombre && (
-                                    <div className="text-[10px] text-muted-foreground font-normal mt-0.5">
-                                      Asignado a: <span className="font-medium text-foreground">{s.personal_nombre}</span>
-                                    </div>
-                                  )}
                                   {s.cantidad_cubierta_garantia > 0 && (
                                     <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">
                                       {s.cantidad_cubierta_garantia >= s.cantidad ? '(Garantía total)' : `(Garantía: ${s.cantidad_cubierta_garantia}/${s.cantidad})`}
@@ -1635,9 +1631,20 @@ export const OrdenFormPage = () => {
                                   </span>
                                 </td>
 
-                                {/* Columnas de Fechas (Únicamente cuando se está viendo el detalle de la orden: mode === 'view') */}
+                                {/* Columnas exclusivas de modo 'view' (Detalle de la orden) */}
                                 {mode === 'view' && (
                                   <>
+                                    {/* Columna Mecánico Asignado */}
+                                    <td className="py-2.5 px-3 text-center text-xs">
+                                      {s.personal_nombre ? (
+                                        <span className="font-semibold text-foreground">
+                                          {s.personal_nombre}
+                                        </span>
+                                      ) : (
+                                        <span className="text-muted-foreground font-semibold">-</span>
+                                      )}
+                                    </td>
+
                                     <td className="py-2.5 px-3 text-center text-muted-foreground whitespace-nowrap text-xs">
                                       {s.fecha_inicio ? s.fecha_inicio.substring(0, 10) : '—'}
                                     </td>
