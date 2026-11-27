@@ -482,7 +482,7 @@ export const OrdenPage = () => {
                   Id Orden
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
-                  Nombre / Cedula
+                  Cliente
                 </th>
                 <th scope="col" className="py-3 px-4 text-center">
                   Tipo de Orden
